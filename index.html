@@ -33,10 +33,10 @@
         /* Sélection verte */
         .item.selected { border-left: 8px solid #2d5a27; }
         
-        /* Couleurs de fond pour les alertes */
-        .item.urgent { background-color: #ffcccc; } /* Rose/Saumon pour Urgent */
-        .item.expired-yesterday { background-color: #ff9999; } /* Orange-Rouge pour Hier */
-        .item.expired-long { background-color: #c9302c; } /* Rouge profond pour périmé */
+        /* Couleurs de fond pour les alertes (Nouveaux contrastes) */
+        .item.urgent { background-color: #fff3cd; } 
+        .item.expired-yesterday { background-color: #ffcc99; } 
+        .item.expired-long { background-color: #c9302c; } 
         
         /* Ajustement du texte pour le contraste */
         .item.expired-long .item-name, 
@@ -55,8 +55,10 @@
         .item-meta { font-size: 0.75rem; color: #666; }
         .item.expired-long .item-meta { color: #ffe5e5; }
         
-        .alert-text { color: #d9534f; font-weight: bold; font-size: 0.7rem; display: block; }
+        .alert-text { font-weight: bold; font-size: 0.7rem; display: block; color: #d9534f; }
         .item.expired-long .alert-text { color: #fff; }
+        .item.urgent .alert-text { color: #856404; }
+        .item.expired-yesterday .alert-text { color: #856404; }
         
         .del-btn { background: #fee2e2; color: #991b1b; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; flex-shrink: 0; width: 55px; }
         
@@ -72,7 +74,6 @@
 </head>
 <body>
     <header>
-        <!-- Remplacer 'logo.png' par votre chemin d'image -->
         <img src="logo.png" alt="Zero Gachi" class="header-logo">
     </header>
     
