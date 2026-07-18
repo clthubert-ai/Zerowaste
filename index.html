@@ -12,24 +12,24 @@
         .btn-add { background: #2d5a27; color: white; border: none; font-weight: bold; cursor: pointer; }
         .btn-search { background: #7fb069; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 20px; }
         
-        /* Mise en page des éléments de la liste */
-        .item { background: white; padding: 12px; margin-bottom: 10px; border-radius: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 2px solid transparent; }
+        /* Liste optimisée */
+        .item { background: white; padding: 10px; margin-bottom: 10px; border-radius: 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 2px solid transparent; }
         .item.urgent { border-color: #d9534f; }
-        .item input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; transform: scale(1.2); }
-        .visual { font-size: 1.4rem; min-width: 30px; text-align: center; }
-        .item-info { flex-grow: 1; overflow: hidden; }
-        .item-name { font-weight: bold; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .item-meta { font-size: 0.8rem; color: #666; }
-        .alert-text { color: #d9534f; font-weight: bold; font-size: 0.75rem; display: block; }
+        .item input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; flex-shrink: 0; }
+        .visual { font-size: 1.4rem; width: 30px; text-align: center; flex-shrink: 0; }
         
-        /* Bouton Suppr compact */
-        .del-btn { background: #fee2e2; color: #991b1b; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; white-space: nowrap; }
+        /* Flex grow pour que le texte occupe tout l'espace restant */
+        .item-info { flex-grow: 1; min-width: 0; overflow: hidden; }
+        .item-name { font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .item-meta { font-size: 0.75rem; color: #666; }
+        .alert-text { color: #d9534f; font-weight: bold; font-size: 0.7rem; display: block; }
+        
+        /* Bouton Suppr : taille fixe, ne grandit plus */
+        .del-btn { background: #fee2e2; color: #991b1b; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; flex-shrink: 0; width: 55px; }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Zero Gachi</h1>
-    </header>
+    <header><h1>Zero Gachi</h1></header>
     <div class="container">
         <input type="text" id="foodName" placeholder="Nom de l'aliment">
         <input type="date" id="expiryDate">
@@ -54,7 +54,6 @@
                 'poireau': '🥦', 'tomate': '🍅', 'carotte': '🥕', 'pain': '🍞', 'semoule': '🍞', 'farine': '🍞'
             };
             if (exactMatches[n]) return exactMatches[n];
-
             const categories = [
                 { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'jambon', 'volaille'] },
                 { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette'] },
@@ -63,9 +62,7 @@
                 { emoji: '🍞', keys: ['pâtes', 'riz', 'céréale'] },
                 { emoji: '🥛', keys: ['yaourt', 'lait', 'fromage', 'beurre', 'crème', 'oeuf'] }
             ];
-            for (let cat of categories) {
-                if (cat.keys.some(key => n.includes(key))) return cat.emoji;
-            }
+            for (let cat of categories) { if (cat.keys.some(key => n.includes(key))) return cat.emoji; }
             return '🍽️';
         }
 
