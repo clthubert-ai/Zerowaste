@@ -16,21 +16,36 @@
         .btn-search { background: #7fb069; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
         
         /* Cartes d'aliments */
-        .item { background: white; padding: 10px; margin-bottom: 10px; border-radius: 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 3px solid transparent; transition: all 0.2s ease; }
+        .item { 
+            background: white; 
+            padding: 10px; 
+            margin-bottom: 10px; 
+            border-radius: 14px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+            border: none; /* Pas de bordure par défaut */
+            transition: background-color 0.2s ease;
+        }
         
-        /* État sélectionné : Bordure épaisse + Ombre portée pour un contraste fort */
-        .item.selected { border: 3px solid #007bff; box-shadow: 0 0 10px rgba(0, 123, 255, 0.4); }
+        /* État sélectionné : Fond bleu clair, pas de bordure */
+        .item.selected { background-color: #e3f2fd; }
         
-        /* Couleurs de fond pour les états */
+        /* Couleurs de fond pour les états (Alertes) */
         .item.urgent { background-color: #fff0f0; }
         .item.expired-one { background-color: #ffcccc; }
-        .item.expired-long { background-color: #d9534f; }
         
-        /* Texte blanc pour le périmé longue durée pour contraster avec le fond rouge */
+        /* État périmé longue durée : Fond rouge vif et texte blanc */
+        .item.expired-long { background-color: #d9534f; }
         .item.expired-long .item-name, 
         .item.expired-long .item-meta, 
         .item.expired-long .alert-text { color: white; }
         
+        /* Ajustement si un élément est sélectionné ET en alerte (pour garder un contraste) */
+        .item.selected.urgent { background-color: #ffe0e0; } /* Teinte légèrement plus rouge */
+        .item.selected.expired-long { background-color: #b71c1c; } /* Rouge un peu plus foncé */
+
         .item input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; flex-shrink: 0; }
         .visual { font-size: 1.4rem; width: 30px; text-align: center; flex-shrink: 0; }
         .item-info { flex-grow: 1; min-width: 0; overflow: hidden; }
