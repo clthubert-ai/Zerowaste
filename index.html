@@ -41,13 +41,20 @@
     <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
 
-        function getEmoji(name, loc) {
+        function getEmoji(name) {
             const n = name.toLowerCase();
+            
+            // 1. Liste précise
             const map = { 'pomme': '🍎', 'banane': '🍌', 'raisin': '🍇', 'fraise': '🍓', 'citron': '🍋', 'orange': '🍊', 'carotte': '🥕', 'tomate': '🍅', 'salade': '🥗', 'oignon': '🧅', 'ail': '🧄', 'brocoli': '🥦', 'poulet': '🍗', 'viande': '🥩', 'poisson': '🐟', 'oeuf': '🥚', 'lait': '🥛', 'pain': '🍞', 'pâtes': '🍝', 'riz': '🍚', 'fromage': '🧀', 'yaourt': '🍦', 'beurre': '🧈', 'chocolat': '🍫', 'steak': '🥩', 'avocat': '🥑', 'concombre': '🥒', 'pomme de terre': '🥔', 'champignon': '🍄' };
             if (map[n]) return map[n];
-            if (loc.includes('Réfrigérateur')) return '❄️';
-            if (loc.includes('Congélateur')) return '🧊';
-            return '📦';
+
+            // 2. Catégorisation logique (si non trouvé dans la liste)
+            if (n.includes('steak') || n.includes('viande') || n.includes('poulet') || n.includes('boeuf') || n.includes('porc')) return '🥩';
+            if (n.includes('poisson') || n.includes('saumon') || n.includes('thon')) return '🐟';
+            if (n.includes('légume') || n.includes('carotte') || n.includes('poireau') || n.includes('salade') || n.includes('courgette')) return '🥦';
+            if (n.includes('fruit') || n.includes('pomme') || n.includes('poire')) return '🍎';
+            
+            return '🍽️'; // Emoji générique par défaut
         }
 
         function render() {
@@ -65,7 +72,7 @@
                 div.className = `item ${isUrgent ? 'urgent' : ''}`;
                 div.innerHTML = `
                     <input type="checkbox" onchange="inventory[${index}].selected = this.checked" ${item.selected ? 'checked' : ''}>
-                    <div class="visual">${getEmoji(item.name, item.loc)}</div>
+                    <div class="visual">${getEmoji(item.name)}</div>
                     <div class="item-info">
                         <strong>${item.name}</strong><br>
                         <small>${item.date} • ${item.loc}</small>
