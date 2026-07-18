@@ -6,20 +6,26 @@
     <title>Zero Gachi</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; }
+        
         header { background: #2d5a27; padding: 0; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; overflow: hidden; line-height: 0; }
         .header-logo { width: 100%; height: auto; display: block; }
+        
         .container { max-width: 500px; margin: 10px auto; padding: 15px; }
-        input[type="text"], input[type="date"], select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        .button-group { display: flex; gap: 10px; }
-        .button-group button { margin: 8px 0; flex: 1; }
-        .btn-add { background: #2d5a27; color: white; border: none; font-weight: bold; cursor: pointer; }
-        .btn-del-selected { background: #d9534f; color: white; border: none; font-weight: bold; cursor: pointer; }
-        .btn-search { background: #7fb069; color: white; border: none; font-weight: bold; cursor: pointer; }
+        
+        /* Styles des boutons */
+        .button-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        .button-group button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-add { background: #2d5a27; color: white; }
+        .btn-del-selected { background: #d9534f; color: white; }
+        .btn-search { background: #7fb069; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+        /* Styles des éléments */
         .item { background: white; padding: 10px; margin-bottom: 10px; border-radius: 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 2px solid transparent; }
         .item.urgent { border-color: #d9534f; }
         .item.expired-one { background-color: #ffcccc; border-color: #ff4d4d; }
         .item.expired-long { background-color: black; border-color: #990000; }
         .item.expired-long .item-name, .item.expired-long .item-meta, .item.expired-long .alert-text { color: #ff0000; }
+        
         .item input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; flex-shrink: 0; }
         .visual { font-size: 1.4rem; width: 30px; text-align: center; flex-shrink: 0; }
         .item-info { flex-grow: 1; min-width: 0; overflow: hidden; }
@@ -27,30 +33,25 @@
         .item-meta { font-size: 0.75rem; color: #666; }
         .alert-text { color: #d9534f; font-weight: bold; font-size: 0.7rem; display: block; }
         .del-btn { background: #fee2e2; color: #991b1b; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; flex-shrink: 0; width: 55px; }
-        #customModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-box { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; max-height: 80vh; overflow-y: auto; }
-        .modal-text { margin-bottom: 20px; font-weight: 500; text-align: left; }
+
+        /* Modals */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-box { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
+        .modal-input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; }
         .modal-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .btn-no { background: #eee; }
-        .btn-yes { background: #d9534f; color: white; }
+        .btn-cancel { background: #eee; }
+        .btn-confirm { background: #2d5a27; color: white; }
     </style>
 </head>
 <body>
     <header>
         <img src="logo.png" alt="Zero Gachi" class="header-logo">
     </header>
+    
     <div class="container">
-        <input type="text" id="foodName" placeholder="Nom de l'aliment">
-        <input type="date" id="expiryDate">
-        <select id="storageLocation">
-            <option value="❄️ Réfrigérateur">❄️ Réfrigérateur</option>
-            <option value="🧊 Congélateur">🧊 Congélateur</option>
-            <option value="📦 Placard">📦 Placard</option>
-        </select>
-        
         <div class="button-group">
-            <button class="btn-add" onclick="addFood()">Ajout de l'aliment</button>
+            <button class="btn-add" onclick="openAddModal()">Ajout de l'aliment</button>
             <button class="btn-del-selected" onclick="handleBulkDelete()">Suppression multiple</button>
         </div>
         
@@ -58,37 +59,59 @@
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
 
-    <div id="customModal">
+    <!-- Modal d'ajout -->
+    <div id="addModal" class="modal-overlay">
         <div class="modal-box">
-            <div id="modalText" class="modal-text"></div>
+            <h3>Nouvel aliment</h3>
+            <input type="text" id="foodName" class="modal-input" placeholder="Nom de l'aliment">
+            <input type="date" id="expiryDate" class="modal-input">
+            <select id="storageLocation" class="modal-input">
+                <option value="❄️ Réfrigérateur">❄️ Réfrigérateur</option>
+                <option value="🧊 Congélateur">🧊 Congélateur</option>
+                <option value="📦 Placard">📦 Placard</option>
+            </select>
             <div class="modal-btns">
-                <button class="modal-btn btn-no" id="btnCancel" onclick="closeModal()">Annuler</button>
-                <button class="modal-btn btn-yes" id="btnOk">OK</button>
+                <button class="modal-btn btn-cancel" onclick="closeModal('addModal')">Annuler</button>
+                <button class="modal-btn btn-confirm" onclick="processAddFood()">Ajouter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-box">
+            <div id="confirmText"></div>
+            <div class="modal-btns">
+                <button class="modal-btn btn-cancel" onclick="closeModal('confirmModal')">Annuler</button>
+                <button class="modal-btn btn-confirm" id="confirmOk">OK</button>
             </div>
         </div>
     </div>
 
     <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
-
-        // Assure que chaque item possède un ID unique pour éviter les bugs
         inventory.forEach(item => { if(!item.id) item.id = Date.now() + Math.random(); });
 
-        function showAlert(message) {
-            document.getElementById('modalText').innerText = message;
-            document.getElementById('btnCancel').style.display = 'none';
-            document.getElementById('btnOk').onclick = closeModal;
-            document.getElementById('customModal').style.display = 'flex';
-        }
+        function openAddModal() { document.getElementById('addModal').style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
         function showConfirm(message, callback) {
-            document.getElementById('modalText').innerHTML = message;
-            document.getElementById('btnCancel').style.display = 'block';
-            document.getElementById('btnOk').onclick = () => { callback(); closeModal(); };
-            document.getElementById('customModal').style.display = 'flex';
+            document.getElementById('confirmText').innerHTML = message;
+            document.getElementById('confirmOk').onclick = () => { callback(); closeModal('confirmModal'); };
+            document.getElementById('confirmModal').style.display = 'flex';
         }
 
-        function closeModal() { document.getElementById('customModal').style.display = 'none'; }
+        function processAddFood() {
+            const name = document.getElementById('foodName').value;
+            const date = document.getElementById('expiryDate').value;
+            const loc = document.getElementById('storageLocation').value;
+            if(!name || !date) return alert("Remplissez le nom et la date !");
+            inventory.push({ id: Date.now() + Math.random(), name, date, loc, selected: false });
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            document.getElementById('foodName').value = '';
+            closeModal('addModal');
+            render();
+        }
 
         function toggleSelect(id, isChecked) {
             const item = inventory.find(i => i.id === id);
@@ -142,7 +165,7 @@
 
         function handleBulkDelete() {
             const selected = inventory.filter(i => i.selected);
-            if (selected.length === 0) return showAlert("Cochez au moins un élément à supprimer !");
+            if (selected.length === 0) return alert("Cochez au moins un élément !");
             showConfirm("Supprimer les éléments sélectionnés ?", () => {
                 inventory = inventory.filter(i => !i.selected);
                 localStorage.setItem('inventory', JSON.stringify(inventory));
@@ -150,20 +173,9 @@
             });
         }
 
-        function addFood() {
-            const name = document.getElementById('foodName').value;
-            const date = document.getElementById('expiryDate').value;
-            const loc = document.getElementById('storageLocation').value;
-            if(!name || !date) return showAlert("Remplissez le nom et la date !");
-            inventory.push({ id: Date.now() + Math.random(), name, date, loc, selected: false });
-            localStorage.setItem('inventory', JSON.stringify(inventory));
-            document.getElementById('foodName').value = '';
-            render();
-        }
-
         function searchRecipes() {
             const selected = inventory.filter(i => i.selected).map(i => i.name).join(" ");
-            if(!selected) return showAlert("Cochez au moins un ingrédient !");
+            if(!selected) return alert("Cochez au moins un ingrédient !");
             window.open(`https://www.google.com/search?q=recette+anti-gaspi+${encodeURIComponent(selected)}`, '_blank');
         }
 
