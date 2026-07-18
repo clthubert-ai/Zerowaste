@@ -7,7 +7,6 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; }
         
-        /* Header ajusté */
         header { background: #2d5a27; color: white; padding: 18px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
         header h1 { margin: 0; font-size: 1.4rem; }
         
@@ -17,7 +16,6 @@
         .btn-add { background: #2d5a27; color: white; border: none; font-weight: bold; cursor: pointer; }
         .btn-search { background: #7fb069; color: white; border: none; font-weight: bold; cursor: pointer; }
 
-        /* Style des items */
         .item { background: white; padding: 10px; margin-bottom: 10px; border-radius: 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 2px solid transparent; }
         .item.urgent { border-color: #d9534f; }
         
@@ -32,6 +30,15 @@
         .item-meta { font-size: 0.75rem; color: #666; }
         .alert-text { color: #d9534f; font-weight: bold; font-size: 0.7rem; display: block; }
         .del-btn { background: #fee2e2; color: #991b1b; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; flex-shrink: 0; width: 55px; }
+
+        /* Style du nouveau Modal */
+        #customModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-box { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
+        .modal-text { margin-bottom: 20px; font-weight: 500; }
+        .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+        .modal-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .btn-no { background: #eee; }
+        .btn-yes { background: #d9534f; color: white; }
     </style>
 </head>
 <body>
@@ -49,22 +56,30 @@
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
 
+    <!-- Fenêtre modale personnalisée -->
+    <div id="customModal">
+        <div class="modal-box">
+            <div id="modalText" class="modal-text"></div>
+            <div class="modal-btns">
+                <button class="modal-btn btn-no" onclick="closeModal()">Annuler</button>
+                <button class="modal-btn btn-yes" id="confirmYesBtn">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
+        let itemToDeleteIndex = null;
 
         function getEmoji(name) {
             const n = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-            
             const exactMatches = {
-                // Fruits
                 'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐',
                 'orange': '🍊', 'oranges': '🍊', 'citron': '🍋', 'citrons': '🍋', 'fraise': '🍓', 'fraises': '🍓',
                 'framboise': '🍓', 'framboises': '🍓', 'myrtille': '🫐', 'myrtilles': '🫐', 'cerise': '🍒', 'cerises': '🍒',
                 'peche': '🍑', 'peches': '🍑', 'mangue': '🥭', 'mangues': '🥭', 'raisin': '🍇', 'raisins': '🍇',
                 'ananas': '🍍', 'kiwi': '🥝', 'kiwis': '🥝', 'melon': '🍈', 'melons': '🍈', 'pasteque': '🍉',
                 'pasteques': '🍉', 'abricot': '🍑', 'abricots': '🍑', 'prune': '🍑', 'prunes': '🍑',
-
-                // Légumes
                 'concombre': '🥒', 'concombres': '🥒', 'carotte': '🥕', 'carottes': '🥕', 'brocoli': '🥦', 'brocolis': '🥦',
                 'oignon': '🧅', 'oignons': '🧅', 'ail': '🧄', 'champignon': '🍄', 'champignons': '🍄', 'poivron': '🫑',
                 'poivrons': '🫑', 'salade': '🥬', 'tomate': '🍅', 'tomates': '🍅', 'patate': '🥔', 'patates': '🥔',
@@ -72,31 +87,21 @@
                 'epinards': '🍃', 'courgette': '🥒', 'courgettes': '🥒', 'aubergine': '🍆', 'aubergines': '🍆',
                 'chou': '🥬', 'choux': '🥬', 'asperge': '🥬', 'asperges': '🥬', 'poireau': '🥬', 'poireaux': '🥬',
                 'radis': '🥗', 'mais': '🌽', 'avocat': '🥑', 'avocats': '🥑',
-
-                // Viandes / Poissons / Protéines
                 'steak': '🥩', 'steaks': '🥩', 'gigot': '🥩', 'jambon': '🍖', 'poulet': '🍗', 'poulets': '🍗',
                 'saumon': '🐟', 'saumons': '🐟', 'thon': '🐟', 'thons': '🐟', 'crevette': '🍤', 'crevettes': '🍤',
                 'saucisse': '🌭', 'saucisses': '🌭', 'cote de porc': '🥩', 'cotes de porc': '🥩', 'cote de boeuf': '🥩',
                 'cotes de boeuf': '🥩', 'cote de mouton': '🥩', 'cotes de mouton': '🥩', 'lard': '🥓', 'bacon': '🥓',
                 'oeuf': '🥚', 'oeufs': '🥚', 'poisson': '🐟', 'poissons': '🐟',
-
-                // Boulangerie / Céréales
                 'pain': '🍞', 'baguette': '🥖', 'baguettes': '🥖', 'croissant': '🥐', 'croissants': '🥐',
                 'brioche': '🍞', 'brioches': '🍞', 'biscuit': '🍪', 'biscuits': '🍪', 'gateau': '🍰', 'gateaux': '🍰',
                 'riz': '🍚', 'pate': '🍝', 'pates': '🍝', 'nouille': '🍜', 'nouilles': '🍜', 'pizza': '🍕',
                 'pizzas': '🍕', 'taco': '🌮', 'tacos': '🌮', 'burger': '🍔', 'burgers': '🍔', 'sushi': '🍣',
                 'sushis': '🍣',
-
-                // Produits Laitiers
                 'lait': '🥛', 'fromage': '🧀', 'fromages': '🧀', 'beurre': '🧈', 'yaourt': '🍦', 'yaourts': '🍦',
                 'creme': '🥛', 'cremes': '🥛',
-
-                // Divers / Plats
                 'soupe': '🥣', 'soupes': '🥣'
             };
-            
             if (exactMatches[n]) return exactMatches[n];
-
             const categories = [
                 { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'dinde', 'canard', 'volaille', 'saucisse', 'charcuterie', 'escalope'] },
                 { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette', 'dorade', 'bar', 'sardine', 'sole', 'merlu', 'colin'] },
@@ -106,10 +111,7 @@
                 { emoji: '🥛', keys: ['creme', 'beurre', 'brie', 'camembert', 'emmental', 'laitage', 'yaourt', 'lait', 'fromage', 'oeuf', 'fromage blanc', 'ricotta', 'mozzarella'] },
                 { emoji: '🍲', keys: ['potage', 'veloute', 'bouillon', 'soupe'] }
             ];
-            
-            for (let cat of categories) { 
-                if (cat.keys.some(key => n.includes(key))) return cat.emoji; 
-            }
+            for (let cat of categories) { if (cat.keys.some(key => n.includes(key))) return cat.emoji; }
             return '🍽️';
         }
 
@@ -118,25 +120,14 @@
             list.innerHTML = "";
             inventory.sort((a, b) => new Date(a.date) - new Date(b.date));
             const today = new Date(); today.setHours(0,0,0,0);
-
             inventory.forEach((item, index) => {
                 const expiry = new Date(item.date);
                 const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
-                
                 let cssClass = '';
                 let alertText = '';
-
-                if (diffDays === -1) {
-                    cssClass = 'expired-one';
-                    alertText = '⚠️ Dépassé (Hier)';
-                } else if (diffDays < -1) {
-                    cssClass = 'expired-long';
-                    alertText = '❌ Périmé depuis ' + Math.abs(diffDays) + ' jours';
-                } else if (diffDays >= 0 && diffDays <= 2) {
-                    cssClass = 'urgent';
-                    alertText = diffDays === 0 ? '⚠️ Urgent (Aujourd\'hui)' : `⚠️ Urgent (J-${diffDays})`;
-                }
-                
+                if (diffDays === -1) { cssClass = 'expired-one'; alertText = '⚠️ Dépassé (Hier)'; }
+                else if (diffDays < -1) { cssClass = 'expired-long'; alertText = '❌ Périmé depuis ' + Math.abs(diffDays) + ' jours'; }
+                else if (diffDays >= 0 && diffDays <= 2) { cssClass = 'urgent'; alertText = diffDays === 0 ? '⚠️ Urgent (Aujourd\'hui)' : `⚠️ Urgent (J-${diffDays})`; }
                 const div = document.createElement('div');
                 div.className = `item ${cssClass}`;
                 div.innerHTML = `
@@ -147,11 +138,32 @@
                         <span class="item-meta">${item.date} • ${item.loc}</span>
                         ${alertText ? `<span class="alert-text">${alertText}</span>` : ''}
                     </div>
-                    <button class="del-btn" onclick="deleteFood(${index})">Suppr</button>
+                    <button class="del-btn" onclick="openDeleteModal(${index})">Suppr</button>
                 `;
                 list.appendChild(div);
             });
         }
+
+        // Nouvelles fonctions pour le modal
+        function openDeleteModal(index) {
+            itemToDeleteIndex = index;
+            const item = inventory[index];
+            document.getElementById('modalText').innerText = "Confirmer la suppression de l'élément " + item.name + " (" + item.date + " - " + item.loc + ") ?";
+            document.getElementById('customModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').style.display = 'none';
+        }
+
+        document.getElementById('confirmYesBtn').onclick = function() {
+            if (itemToDeleteIndex !== null) {
+                inventory.splice(itemToDeleteIndex, 1);
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+                render();
+            }
+            closeModal();
+        };
 
         function addFood() {
             const name = document.getElementById('foodName').value;
@@ -162,15 +174,6 @@
             localStorage.setItem('inventory', JSON.stringify(inventory));
             document.getElementById('foodName').value = '';
             render();
-        }
-
-        function deleteFood(index) {
-            const item = inventory[index];
-            if (confirm("Confirmer la suppression de l'élément " + item.name + " (" + item.date + " - " + item.loc + ") ?")) {
-                inventory.splice(index, 1);
-                localStorage.setItem('inventory', JSON.stringify(inventory));
-                render();
-            }
         }
 
         function searchRecipes() {
