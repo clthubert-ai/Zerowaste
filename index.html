@@ -7,7 +7,7 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; }
         
-        /* Header ajusté en hauteur */
+        /* Header ajusté */
         header { background: #2d5a27; color: white; padding: 18px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
         header h1 { margin: 0; font-size: 1.4rem; }
         
@@ -55,21 +55,21 @@
 
         function getEmoji(name) {
             const n = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+            
+            // Dictionnaire réduit aux exceptions (pas besoin de mettre les pluriels ici)
             const exactMatches = {
-                'banane': '🍌', 'pomme': '🍎', 'poire': '🍐', 'raisin': '🍇', 'fraise': '🍓', 
-                'framboise': '🍓', 'myrtille': '🫐', 'cerise': '🍒', 'peche': '🍑', 'kiwi': '🥝', 
-                'ananas': '🍍', 'citron': '🍋', 'orange': '🍊', 'mangue': '🥭',
-                'steak': '🥩', 'rumsteck': '🥩', 'gigot': '🥩', 'cote de porc': '🥩', 
-                'cote de boeuf': '🥩', 'jambon': '🥩', 'lard': '🥓', 'poulet': '🍗', 
+                'steak': '🥩', 'rumsteck': '🥩', 'gigot': '🥩', 'jambon': '🥩', 'lard': '🥓', 'poulet': '🍗', 
                 'pain': '🍞', 'baguette': '🥖', 'croissant': '🥐', 'soupe': '🍲'
             };
             if (exactMatches[n]) return exactMatches[n];
 
+            // Les catégories contiennent la racine du mot. 
+            // "poires" inclura "poire", "fraises" inclura "fraise", etc.
             const categories = [
                 { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'dinde', 'canard', 'volaille', 'cote', 'saucisse', 'charcuterie', 'escalope'] },
                 { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette', 'dorade', 'bar', 'sardine', 'sole', 'merlu', 'colin'] },
                 { emoji: '🥦', keys: ['legume', 'poireau', 'tomate', 'carotte', 'concombre', 'courgette', 'brocoli', 'oignon', 'ail', 'champignon', 'poivron', 'aubergine', 'patate', 'pomme de terre', 'salade', 'haricot', 'epinard', 'chou', 'asperge', 'celeri', 'navet', 'radis', 'artichaut', 'betterave', 'fenouil', 'citrouille', 'potiron', 'topinambour'] },
-                { emoji: '🍎', keys: ['fruit', 'abricot', 'prune', 'figue', 'melon', 'pasteque', 'pamplemousse', 'clementine', 'mandarine', 'grenade', 'goyave', 'litchi', 'nectarine', 'mirabelle'] },
+                { emoji: '🍎', keys: ['fruit', 'pomme', 'poire', 'fraise', 'framboise', 'myrtille', 'cerise', 'peche', 'kiwi', 'ananas', 'citron', 'orange', 'mangue', 'banane', 'abricot', 'prune', 'figue', 'melon', 'pasteque', 'pamplemousse', 'clementine', 'mandarine', 'grenade', 'goyave', 'litchi', 'nectarine', 'mirabelle'] },
                 { emoji: '🌾', keys: ['cereale', 'brioche', 'biscuit', 'galette', 'semoule', 'farine', 'riz', 'pate', 'nouille', 'ble', 'avoine', 'mais', 'quinoa', 'boulgour', 'pain', 'pain de mie'] },
                 { emoji: '🥛', keys: ['creme', 'beurre', 'brie', 'camembert', 'emmental', 'laitage', 'yaourt', 'lait', 'fromage', 'oeuf', 'fromage blanc', 'ricotta', 'mozzarella'] },
                 { emoji: '🍲', keys: ['potage', 'veloute', 'bouillon', 'soupe'] }
