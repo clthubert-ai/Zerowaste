@@ -165,7 +165,8 @@
         }
 
         function deleteFood(index) {
-            if (confirm("Voulez-vous vraiment supprimer cet aliment ?")) {
+            const item = inventory[index];
+            if (confirm("Confirmer la suppression de l'élément " + item.name + " (" + item.date + " - " + item.loc + ") ?")) {
                 inventory.splice(index, 1);
                 localStorage.setItem('inventory', JSON.stringify(inventory));
                 render();
