@@ -9,19 +9,17 @@
         
         .container { max-width: 500px; margin: 0 auto; padding: 15px; }
         
-        /* HEADER CORRIGÉ : Fond transparent, pas de padding, coins arrondis */
         header { 
             background: transparent; 
             padding: 0; 
             margin-bottom: 15px; 
             border-radius: 14px; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-            overflow: hidden; /* Important pour que l'image respecte les bords arrondis */
+            overflow: hidden; 
             display: flex;
             justify-content: center;
         }
         
-        /* L'image définit maintenant la taille du header */
         .header-logo { 
             width: 100%; 
             height: auto; 
@@ -30,11 +28,13 @@
         
         .button-group { display: flex; gap: 10px; margin-bottom: 20px; }
         .button-group button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-        .btn-add { background: #2d5a27; color: white; }
+        
+        /* Bouton Ajouter modifié */
+        .btn-add { background: #3e7b37; color: white; } 
+        
         .btn-del-selected { background: #d9534f; color: white; }
         .btn-search { background: #7fb069; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
         
-        /* Cartes d'aliments */
         .item { 
             background: white; 
             padding: 12px 15px; 
@@ -49,19 +49,17 @@
             cursor: pointer;
         }
         
-        .item.selected { border-left: 8px solid #2d5a27; background-color: #f0f7ef; }
+        .item.selected { border-left: 8px solid #3e7b37; background-color: #f0f7ef; }
         
-        /* Couleurs d'alerte */
         .item.urgent { background-color: #fff3cd; } 
-        .item.urgent.selected { background-color: #fceec5; border-left: 8px solid #2d5a27; }
+        .item.urgent.selected { background-color: #fceec5; border-left: 8px solid #3e7b37; }
         
         .item.expired-yesterday { background-color: #ffcc99; } 
-        .item.expired-yesterday.selected { background-color: #f9c088; border-left: 8px solid #2d5a27; }
+        .item.expired-yesterday.selected { background-color: #f9c088; border-left: 8px solid #3e7b37; }
         
         .item.expired-long { background-color: #c9302c; } 
-        .item.expired-long.selected { background-color: #b02a26; border-left: 8px solid #2d5a27; }
+        .item.expired-long.selected { background-color: #b02a26; border-left: 8px solid #3e7b37; }
         
-        /* Texte blanc pour périmé */
         .item.expired-long .item-name, 
         .item.expired-long .item-meta { color: white; }
         
@@ -71,13 +69,11 @@
         .item-meta { font-size: 0.75rem; color: #666; }
         .item.expired-long .item-meta { color: #ffe5e5; }
         
-        /* Alertes à droite */
         .item-alert { text-align: right; flex-shrink: 0; font-weight: bold; font-size: 0.7rem; }
         .item.urgent .item-alert { color: #856404; }
         .item.expired-yesterday .item-alert { color: #856404; }
         .item.expired-long .item-alert { color: #fff; }
         
-        /* Modales */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; overflow-y: auto; }
         .modal-overlay.top-aligned { align-items: flex-start; padding-top: 50px; }
         
@@ -86,7 +82,7 @@
         .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; }
         .modal-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .btn-cancel { background: #eee; }
-        .btn-confirm { background: #2d5a27; color: white; }
+        .btn-confirm { background: #3e7b37; color: white; }
     </style>
 </head>
 <body>
