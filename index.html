@@ -55,7 +55,7 @@
         function getEmoji(name) {
             const n = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
             
-            // 1. Dictionnaire "Exact" très largement enrichi (Priorité absolue, singulier et pluriel)
+            // 1. Dictionnaire "Exact" enrichi (Priorité absolue, singulier et pluriel)
             const exactMatches = {
                 // Fruits
                 'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐',
@@ -71,7 +71,7 @@
                 'poivrons': '🫑', 'salade': '🥬', 'tomate': '🍅', 'tomates': '🍅', 'patate': '🥔', 'patates': '🥔',
                 'pomme de terre': '🥔', 'pommes de terre': '🥔', 'haricot': '🫘', 'haricots': '🫘', 'epinard': '🍃',
                 'epinards': '🍃', 'courgette': '🥒', 'courgettes': '🥒', 'aubergine': '🍆', 'aubergines': '🍆',
-                'chou': '🥬', 'choux': '🥬', 'asperge': '🥬', 'asperges': '🥬', 'poireau': '🥦', 'poireaux': '🥦',
+                'chou': '🥬', 'choux': '🥬', 'asperge': '🥬', 'asperges': '🥬', 'poireau': '🥬', 'poireaux': '🥬',
                 'radis': '🥗', 'mais': '🌽', 'avocat': '🥑', 'avocats': '🥑',
 
                 // Viandes / Poissons / Protéines
@@ -98,7 +98,7 @@
             
             if (exactMatches[n]) return exactMatches[n];
 
-            // 2. Fallback aux catégories (Seulement si l'aliment exact n'est pas répertorié)
+            // 2. Fallback aux catégories
             const categories = [
                 { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'dinde', 'canard', 'volaille', 'saucisse', 'charcuterie', 'escalope'] },
                 { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette', 'dorade', 'bar', 'sardine', 'sole', 'merlu', 'colin'] },
@@ -147,7 +147,7 @@
                     <div class="item-info">
                         <span class="item-name">${item.name}</span>
                         <span class="item-meta">${item.date} • ${item.loc}</span>
-                        ${alertText ? `<span class="alert-text">${alertText}</span>` : ''}
+                        ${alertText ? `<span class="alert-text">${alertText}</span>' : ''}
                     </div>
                     <button class="del-btn" onclick="deleteFood(${index})">Suppr</button>
                 `;
