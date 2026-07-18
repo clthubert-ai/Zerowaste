@@ -7,16 +7,17 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; }
         
-        /* Header réduit */
-        header { background: #2d5a27; color: white; padding: 15px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+        /* Header réduit de moitié */
+        header { background: #2d5a27; color: white; padding: 8px; text-align: center; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; }
+        header h1 { margin: 0; font-size: 1.2rem; }
         
-        .container { max-width: 500px; margin: 20px auto; padding: 15px; }
+        .container { max-width: 500px; margin: 10px auto; padding: 15px; }
         input[type="text"], input[type="date"], select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         
         .btn-add { background: #2d5a27; color: white; border: none; font-weight: bold; cursor: pointer; }
         .btn-search { background: #7fb069; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 20px; }
 
-        /* Structure de l'item (version stable) */
+        /* Structure de l'item */
         .item { background: white; padding: 10px; margin-bottom: 10px; border-radius: 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 2px solid transparent; }
         .item.urgent { border-color: #d9534f; }
         
