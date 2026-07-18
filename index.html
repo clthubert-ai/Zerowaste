@@ -29,7 +29,7 @@
         .button-group { display: flex; gap: 10px; margin-bottom: 20px; }
         .button-group button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
         
-        /* Bouton Ajouter modifié */
+        /* Bouton Ajouter */
         .btn-add { background: #3e7b37; color: white; } 
         
         .btn-del-selected { background: #d9534f; color: white; }
@@ -94,7 +94,8 @@
 
         <div class="button-group">
             <button class="btn-add" onclick="openAddModal()">Ajout d'un aliment</button>
-            <button class="btn-del-selected" onclick="handleBulkDelete()">Supprimer sélectionnés</button>
+            <!-- Texte modifié ici -->
+            <button class="btn-del-selected" onclick="handleBulkDelete()">Suppression d'aliment(s)</button>
         </div>
         
         <button class="btn-search" onclick="searchRecipes()">Rechercher des recettes</button>
