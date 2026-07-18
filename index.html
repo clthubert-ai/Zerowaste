@@ -26,23 +26,29 @@
             align-items: center; 
             gap: 10px; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-            border-left: 8px solid transparent; /* Bordure transparente par défaut */
+            border-left: 8px solid transparent; 
             transition: border-left 0.2s ease;
         }
         
-        /* État sélectionné : Bande verte alignée avec le header */
+        /* Sélection verte */
         .item.selected { border-left: 8px solid #2d5a27; }
         
         /* Couleurs de fond pour les alertes */
-        .item.urgent { background-color: #ffcccc; } 
-        .item.expired-long { background-color: #c9302c; } 
+        .item.urgent { background-color: #ffcccc; } /* Rose/Saumon pour Urgent */
+        .item.expired-yesterday { background-color: #ff9999; } /* Orange-Rouge pour Hier */
+        .item.expired-long { background-color: #c9302c; } /* Rouge profond pour périmé */
         
         /* Ajustement du texte pour le contraste */
         .item.expired-long .item-name, 
         .item.expired-long .item-meta, 
         .item.expired-long .alert-text { color: white; }
         
-        .item input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; flex-shrink: 0; }
+        /* Case à cocher verte */
+        .item input[type="checkbox"] { 
+            width: 20px; height: 20px; cursor: pointer; flex-shrink: 0; 
+            accent-color: #2d5a27; 
+        }
+        
         .visual { font-size: 1.4rem; width: 30px; text-align: center; flex-shrink: 0; }
         .item-info { flex-grow: 1; min-width: 0; overflow: hidden; }
         .item-name { font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -66,6 +72,7 @@
 </head>
 <body>
     <header>
+        <!-- Remplacer 'logo.png' par votre chemin d'image -->
         <img src="logo.png" alt="Zero Gachi" class="header-logo">
     </header>
     
@@ -211,8 +218,8 @@
                 const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
                 let cssClass = '', alertText = '';
                 
-                if (diffDays === -1) { cssClass = 'urgent'; alertText = '⚠️ Dépassé (Hier)'; }
-                else if (diffDays < -1) { cssClass = 'expired-long'; alertText = '❌ Périmé depuis ' + Math.abs(diffDays) + ' jours'; }
+                if (diffDays < -1) { cssClass = 'expired-long'; alertText = '❌ Périmé depuis ' + Math.abs(diffDays) + ' jours'; }
+                else if (diffDays === -1) { cssClass = 'expired-yesterday'; alertText = '⚠️ Dépassé (Hier)'; }
                 else if (diffDays >= 0 && diffDays <= 2) { cssClass = 'urgent'; alertText = diffDays === 0 ? '⚠️ Urgent (Aujourd\'hui)' : `⚠️ Urgent (J-${diffDays})`; }
                 
                 const div = document.createElement('div');
