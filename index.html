@@ -14,6 +14,7 @@
         input[type="text"], input[type="date"], select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         
         .btn-add { background: #2d5a27; color: white; border: none; font-weight: bold; cursor: pointer; }
+        .btn-del-selected { background: #d9534f; color: white; border: none; font-weight: bold; cursor: pointer; }
         .btn-search { background: #7fb069; color: white; border: none; font-weight: bold; cursor: pointer; }
 
         .item { background: white; padding: 10px; margin-bottom: 10px; border-radius: 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 2px solid transparent; }
@@ -31,7 +32,7 @@
         .alert-text { color: #d9534f; font-weight: bold; font-size: 0.7rem; display: block; }
         .del-btn { background: #fee2e2; color: #991b1b; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; flex-shrink: 0; width: 55px; }
 
-        /* Style du nouveau Modal */
+        /* Style du Modal */
         #customModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
         .modal-box { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
         .modal-text { margin-bottom: 20px; font-weight: 500; }
@@ -52,11 +53,13 @@
             <option value="📦 Placard">📦 Placard</option>
         </select>
         <button class="btn-add" onclick="addFood()">Ajouter à l'inventaire</button>
+        <!-- Nouveau bouton -->
+        <button class="btn-del-selected" onclick="handleBulkDelete()">Supprimer la sélection</button>
         <button class="btn-search" onclick="searchRecipes()">Rechercher des recettes anti-gaspi</button>
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
 
-    <!-- Fenêtre modale personnalisée -->
+    <!-- Fenêtre modale -->
     <div id="customModal">
         <div class="modal-box">
             <div id="modalText" class="modal-text"></div>
@@ -69,7 +72,7 @@
 
     <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
-        let itemToDeleteIndex = null;
+        let itemToDeleteTarget = null; // Peut être un index ou 'bulk'
 
         function getEmoji(name) {
             const n = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
@@ -144,11 +147,15 @@
             });
         }
 
-        // Nouvelles fonctions pour le modal
-        function openDeleteModal(index) {
-            itemToDeleteIndex = index;
-            const item = inventory[index];
-            document.getElementById('modalText').innerText = "Confirmer la suppression de l'élément " + item.name + " (" + item.date + " - " + item.loc + ") ?";
+        // Gestion de la modale
+        function openDeleteModal(target) {
+            itemToDeleteTarget = target;
+            if (target === 'bulk') {
+                document.getElementById('modalText').innerText = "Confirmer la suppression des éléments sélectionnés ?";
+            } else {
+                const item = inventory[target];
+                document.getElementById('modalText').innerText = "Confirmer la suppression de l'élément " + item.name + " (" + item.date + " - " + item.loc + ") ?";
+            }
             document.getElementById('customModal').style.display = 'flex';
         }
 
@@ -157,13 +164,22 @@
         }
 
         document.getElementById('confirmYesBtn').onclick = function() {
-            if (itemToDeleteIndex !== null) {
-                inventory.splice(itemToDeleteIndex, 1);
-                localStorage.setItem('inventory', JSON.stringify(inventory));
-                render();
+            if (itemToDeleteTarget === 'bulk') {
+                inventory = inventory.filter(i => !i.selected);
+            } else if (itemToDeleteTarget !== null) {
+                inventory.splice(itemToDeleteTarget, 1);
             }
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            render();
             closeModal();
         };
+
+        // Nouvelle fonction pour la suppression multiple
+        function handleBulkDelete() {
+            const hasSelected = inventory.some(i => i.selected);
+            if (!hasSelected) return alert("Cochez au moins un élément à supprimer !");
+            openDeleteModal('bulk');
+        }
 
         function addFood() {
             const name = document.getElementById('foodName').value;
