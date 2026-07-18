@@ -7,8 +7,20 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; }
         
-        header { background: #2d5a27; color: white; padding: 18px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
-        .header-logo { height: 40px; width: auto; display: block; margin: 0 auto; }
+        /* Modification du Header */
+        header { 
+            background: #2d5a27; 
+            padding: 0; /* Suppression du padding */
+            text-align: center; 
+            border-bottom-left-radius: 20px; 
+            border-bottom-right-radius: 20px;
+            overflow: hidden; /* Pour respecter les bords arrondis */
+        }
+        .header-logo { 
+            width: 100%; /* Prend toute la largeur */
+            height: auto; 
+            display: block; 
+        }
         
         .container { max-width: 500px; margin: 10px auto; padding: 15px; }
         input[type="text"], input[type="date"], select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
