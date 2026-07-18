@@ -13,6 +13,10 @@
         .container { max-width: 500px; margin: 10px auto; padding: 15px; }
         input[type="text"], input[type="date"], select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         
+        /* Conteneur pour aligner les boutons */
+        .button-group { display: flex; gap: 10px; }
+        .button-group button { margin: 8px 0; flex: 1; }
+
         .btn-add { background: #2d5a27; color: white; border: none; font-weight: bold; cursor: pointer; }
         .btn-del-selected { background: #d9534f; color: white; border: none; font-weight: bold; cursor: pointer; }
         .btn-search { background: #7fb069; color: white; border: none; font-weight: bold; cursor: pointer; }
@@ -52,9 +56,13 @@
             <option value="🧊 Congélateur">🧊 Congélateur</option>
             <option value="📦 Placard">📦 Placard</option>
         </select>
-        <button class="btn-add" onclick="addFood()">Ajouter à l'inventaire</button>
-        <!-- Nouveau bouton -->
-        <button class="btn-del-selected" onclick="handleBulkDelete()">Supprimer la sélection</button>
+        
+        <!-- Conteneur pour aligner les boutons -->
+        <div class="button-group">
+            <button class="btn-add" onclick="addFood()">Ajouter</button>
+            <button class="btn-del-selected" onclick="handleBulkDelete()">Supprimer</button>
+        </div>
+        
         <button class="btn-search" onclick="searchRecipes()">Rechercher des recettes anti-gaspi</button>
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
@@ -72,7 +80,7 @@
 
     <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
-        let itemToDeleteTarget = null; // Peut être un index ou 'bulk'
+        let itemToDeleteTarget = null;
 
         function getEmoji(name) {
             const n = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
@@ -147,7 +155,6 @@
             });
         }
 
-        // Gestion de la modale
         function openDeleteModal(target) {
             itemToDeleteTarget = target;
             if (target === 'bulk') {
@@ -174,7 +181,6 @@
             closeModal();
         };
 
-        // Nouvelle fonction pour la suppression multiple
         function handleBulkDelete() {
             const hasSelected = inventory.some(i => i.selected);
             if (!hasSelected) return alert("Cochez au moins un élément à supprimer !");
