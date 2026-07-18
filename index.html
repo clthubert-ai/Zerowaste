@@ -8,15 +8,22 @@
         body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; }
         header { background: #2d5a27; color: white; padding: 25px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
         .container { max-width: 500px; margin: 20px auto; padding: 15px; }
-        input, select, button { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #ddd; border-radius: 12px; box-sizing: border-box; }
+        input[type="text"], input[type="date"], select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         .btn-add { background: #2d5a27; color: white; border: none; font-weight: bold; cursor: pointer; }
         .btn-search { background: #7fb069; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        .item { background: white; padding: 15px; margin-bottom: 12px; border-radius: 16px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 2px solid transparent; }
+        
+        /* Mise en page des éléments de la liste */
+        .item { background: white; padding: 12px; margin-bottom: 10px; border-radius: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 2px solid transparent; }
         .item.urgent { border-color: #d9534f; }
-        .visual { font-size: 1.5rem; }
-        .item-info { flex-grow: 1; }
-        .alert-text { color: #d9534f; font-weight: bold; font-size: 0.75rem; }
-        .del-btn { background: #fee2e2; color: #991b1b; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
+        .item input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; transform: scale(1.2); }
+        .visual { font-size: 1.4rem; min-width: 30px; text-align: center; }
+        .item-info { flex-grow: 1; overflow: hidden; }
+        .item-name { font-weight: bold; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-meta { font-size: 0.8rem; color: #666; }
+        .alert-text { color: #d9534f; font-weight: bold; font-size: 0.75rem; display: block; }
+        
+        /* Bouton Suppr compact */
+        .del-btn { background: #fee2e2; color: #991b1b; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -41,8 +48,6 @@
 
         function getEmoji(name) {
             const n = name.toLowerCase().trim();
-            
-            // 1. Correspondances exactes (Priorité)
             const exactMatches = {
                 'pomme': '🍎', 'banane': '🍌', 'raisin': '🍇', 'fraise': '🍓', 
                 'steak': '🥩', 'rumsteck': '🥩', 'gigot': '🥩', 'poulet': '🍗',
@@ -50,7 +55,6 @@
             };
             if (exactMatches[n]) return exactMatches[n];
 
-            // 2. Catégories génériques (si aucune correspondance exacte trouvée)
             const categories = [
                 { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'jambon', 'volaille'] },
                 { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette'] },
@@ -59,12 +63,10 @@
                 { emoji: '🍞', keys: ['pâtes', 'riz', 'céréale'] },
                 { emoji: '🥛', keys: ['yaourt', 'lait', 'fromage', 'beurre', 'crème', 'oeuf'] }
             ];
-
             for (let cat of categories) {
                 if (cat.keys.some(key => n.includes(key))) return cat.emoji;
             }
-            
-            return '🍽️'; // Emoji générique par défaut
+            return '🍽️';
         }
 
         function render() {
@@ -84,9 +86,9 @@
                     <input type="checkbox" onchange="inventory[${index}].selected = this.checked" ${item.selected ? 'checked' : ''}>
                     <div class="visual">${getEmoji(item.name)}</div>
                     <div class="item-info">
-                        <strong>${item.name}</strong><br>
-                        <small>${item.date} • ${item.loc}</small>
-                        ${isUrgent ? `<br><span class="alert-text">⚠️ Urgent (J-${diffDays})</span>` : ''}
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-meta">${item.date} • ${item.loc.split(' ')[1]}</span>
+                        ${isUrgent ? `<span class="alert-text">⚠️ Urgent (J-${diffDays})</span>` : ''}
                     </div>
                     <button class="del-btn" onclick="deleteFood(${index})">Suppr</button>
                 `;
