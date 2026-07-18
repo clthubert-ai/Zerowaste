@@ -165,35 +165,11 @@
         }
 
         function deleteFood(index) {
-            inventory.splice(index, 1);
-            localStorage.setItem('inventory', JSON.stringify(inventory));
-            render();
-        }
-
-        function searchRecipes() {
-            const selected = inventory.filter(i => i.selected).map(i => i.name).join(" ");
-            if(!selected) return alert("Cochez au moins un ingrédient !");
-            window.open(`https://www.google.com/search?q=recette+anti-gaspi+${encodeURIComponent(selected)}`, '_blank');
-        }
-
-        render();
-    </script>
-</body>
-</html>
-).value;
-            const date = document.getElementById('expiryDate').value;
-            const loc = document.getElementById('storageLocation').value;
-            if(!name || !date) return alert("Remplissez le nom et la date !");
-            inventory.push({ name, date, loc, selected: false });
-            localStorage.setItem('inventory', JSON.stringify(inventory));
-            document.getElementById('foodName').value = '';
-            render();
-        }
-
-        function deleteFood(index) {
-            inventory.splice(index, 1);
-            localStorage.setItem('inventory', JSON.stringify(inventory));
-            render();
+            if (confirm("Voulez-vous vraiment supprimer cet aliment ?")) {
+                inventory.splice(index, 1);
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+                render();
+            }
         }
 
         function searchRecipes() {
