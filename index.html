@@ -7,6 +7,7 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; }
         
+        /* Correction Header : suppression du padding et largeur 100% */
         header { 
             background: #2d5a27; 
             padding: 0; 
@@ -14,6 +15,7 @@
             border-bottom-left-radius: 20px; 
             border-bottom-right-radius: 20px;
             overflow: hidden;
+            line-height: 0; /* Important pour supprimer l'espace sous l'image */
         }
         .header-logo { 
             width: 100%; 
@@ -134,7 +136,7 @@
                     <div class="item-info">
                         <span class="item-name">${item.name}</span>
                         <span class="item-meta">${item.date} • ${item.loc}</span>
-                        ${alertText ? `<span class="alert-text">${alertText}</span>' : ''}
+                        ${alertText ? `<span class="alert-text">${alertText}</span>` : ''}
                     </div>
                     <button class="del-btn" onclick="confirmDelete(${index})">Suppr</button>
                 `;
