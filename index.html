@@ -113,7 +113,7 @@
             const name = document.getElementById('foodName').value;
             const date = document.getElementById('expiryDate').value;
             const loc = document.getElementById('storageLocation').value;
-            if(!name || !date) return alert("Remplissez le nom et la date !");
+            if(!name || !date) return showAlert("Remplissez le nom et la date !");
             
             inventory.push({ id: Date.now().toString(), name, date, loc, selected: false });
             localStorage.setItem('inventory', JSON.stringify(inventory));
@@ -206,7 +206,7 @@
         function confirmDelete(id) {
             const item = inventory.find(i => String(i.id) === String(id));
             if(!item) return;
-            showConfirm(`<strong>Confirmer la suppression de :</strong><br>${item.name} (${item.date})`, () => {
+            showConfirm(`<strong>Confirmer la suppression :</strong><ul style='text-align:left; font-size:0.9rem; margin-top:10px; padding-left:20px;'><li><strong>${item.name}</strong> - ${item.date} (${item.loc})</li></ul>`, () => {
                 inventory = inventory.filter(i => String(i.id) !== String(id));
                 localStorage.setItem('inventory', JSON.stringify(inventory));
                 render();
