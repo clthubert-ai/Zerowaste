@@ -42,22 +42,29 @@
         function getEmoji(name) {
             const n = name.toLowerCase().trim();
             
-            // Dictionnaire de classification dynamique
+            // 1. Correspondances exactes (Priorité)
+            const exactMatches = {
+                'pomme': '🍎', 'banane': '🍌', 'raisin': '🍇', 'fraise': '🍓', 
+                'steak': '🥩', 'rumsteck': '🥩', 'gigot': '🥩', 'poulet': '🍗',
+                'poireau': '🥦', 'tomate': '🍅', 'carotte': '🥕', 'pain': '🍞', 'semoule': '🍞', 'farine': '🍞'
+            };
+            if (exactMatches[n]) return exactMatches[n];
+
+            // 2. Catégories génériques (si aucune correspondance exacte trouvée)
             const categories = [
-                { emoji: '🥩', keys: ['steak', 'viande', 'poulet', 'boeuf', 'porc', 'agneau', 'rumsteck', 'gigot', 'jambon', 'volaille', 'bœuf'] },
-                { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette', 'merlu'] },
-                { emoji: '🥦', keys: ['légume', 'carotte', 'poireau', 'salade', 'courgette', 'brocoli', 'tomate', 'oignon', 'ail', 'haricot', 'champignon'] },
-                { emoji: '🍎', keys: ['fruit', 'pomme', 'banane', 'raisin', 'fraise', 'citron', 'orange', 'poire', 'abricot'] },
-                { emoji: '🍞', keys: ['pain', 'pâtes', 'riz', 'semoule', 'farine', 'boulangerie', 'céréale'] },
+                { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'jambon', 'volaille'] },
+                { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette'] },
+                { emoji: '🥦', keys: ['légume', 'salade', 'courgette', 'brocoli', 'oignon', 'ail', 'haricot', 'champignon'] },
+                { emoji: '🍎', keys: ['fruit', 'poire', 'abricot', 'citron', 'orange'] },
+                { emoji: '🍞', keys: ['pâtes', 'riz', 'céréale'] },
                 { emoji: '🥛', keys: ['yaourt', 'lait', 'fromage', 'beurre', 'crème', 'oeuf'] }
             ];
 
-            // Cherche une correspondance dans les mots-clés
             for (let cat of categories) {
                 if (cat.keys.some(key => n.includes(key))) return cat.emoji;
             }
             
-            return '🍽️';
+            return '🍽️'; // Emoji générique par défaut
         }
 
         function render() {
