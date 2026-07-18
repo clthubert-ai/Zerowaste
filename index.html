@@ -46,8 +46,12 @@
         .btn-cancel { background: #eee; }
         .btn-confirm { background: #3e7b37; color: white; }
         
-        .slider-group { margin: 15px 0; text-align: left; }
-        .slider-group label { font-size: 0.9rem; font-weight: bold; }
+        /* Stars */
+        .rating-group { margin: 15px 0; text-align: center; }
+        .rating-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+        .stars { display: flex; justify-content: center; gap: 10px; cursor: pointer; }
+        .star { font-size: 2rem; color: #ddd; transition: color 0.2s; }
+        .star.active { color: #f1c40f; }
     </style>
 </head>
 <body>
@@ -95,15 +99,26 @@
     <!-- Modale Recettes -->
     <div id="recipeModal" class="modal-overlay">
         <div class="modal-box">
-            <h3>Préférences de recherche</h3>
-            <div class="slider-group">
+            <h3>Préférences</h3>
+            
+            <div class="rating-group">
                 <label>Rapidité</label>
-                <input type="range" id="speedRange" min="1" max="3" value="2" class="modal-input">
+                <div class="stars" id="speedStars">
+                    <span class="star" onclick="setRating('speed', 1)">★</span>
+                    <span class="star" onclick="setRating('speed', 2)">★</span>
+                    <span class="star" onclick="setRating('speed', 3)">★</span>
+                </div>
             </div>
-            <div class="slider-group">
-                <label>Facilité</label>
-                <input type="range" id="easeRange" min="1" max="3" value="2" class="modal-input">
+
+            <div class="rating-group">
+                <label>Difficulté</label>
+                <div class="stars" id="easeStars">
+                    <span class="star" onclick="setRating('ease', 1)">★</span>
+                    <span class="star" onclick="setRating('ease', 2)">★</span>
+                    <span class="star" onclick="setRating('ease', 3)">★</span>
+                </div>
             </div>
+
             <div class="modal-btns">
                 <button class="modal-btn btn-cancel" onclick="closeModal('recipeModal')">Annuler</button>
                 <button class="modal-btn btn-confirm" onclick="runRecipeSearch()">Rechercher</button>
@@ -120,10 +135,31 @@
         let editingId = null;
         let html5QrCode = null;
         let isScannerActive = false;
+        
+        // État des étoiles
+        let currentSpeed = 1;
+        let currentEase = 1;
 
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         function showAlert(msg) { document.getElementById('alertText').innerText = msg; document.getElementById('alertModal').style.display = 'flex'; }
         
+        // Gestion des étoiles
+        function setRating(type, val) {
+            if(type === 'speed') { currentSpeed = val; updateStars('speedStars', val); }
+            else { currentEase = val; updateStars('easeStars', val); }
+        }
+
+        function updateStars(containerId, val) {
+            const stars = document.querySelectorAll(`#${containerId} .star`);
+            stars.forEach((s, i) => {
+                s.classList.toggle('active', i < val);
+            });
+        }
+
+        // Initialisation étoiles
+        setRating('speed', 1);
+        setRating('ease', 1);
+
         async function fetchProductName(barcode) {
             try {
                 const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}.json`);
@@ -207,13 +243,14 @@
         }
 
         function runRecipeSearch() {
-            const speed = document.getElementById('speedRange').value;
-            const ease = document.getElementById('easeRange').value;
             const selectedNames = inventory.filter(i => i.selected).map(i => i.name).join(" ");
             
-            let query = `recette anti-gaspi ${selectedNames}`;
-            if (speed == 1) query += " rapide";
-            if (ease == 1) query += " facile";
+            // Mapping Rapidité
+            const speedMap = ["express", "30-60 min", "plus d'une heure"];
+            // Mapping Difficulté
+            const easeMap = ["facile", "moyenne", "difficile"];
+            
+            const query = `recette anti-gaspi ${selectedNames} ${speedMap[currentSpeed - 1]} ${easeMap[currentEase - 1]}`;
             
             window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
             closeModal('recipeModal');
@@ -296,22 +333,4 @@
             if (selected.length === 0) return showAlert("Sélectionnez au moins un aliment !");
             
             let htmlList = "<strong>Supprimer ces éléments ?</strong><ul style='padding-left: 20px; margin-top: 10px;'>";
-            selected.forEach(item => {
-                htmlList += `<li><strong>${item.name}</strong> - ${item.loc} (${item.date})</li>`;
-            });
-            htmlList += "</ul>";
-            
-            document.getElementById('confirmText').innerHTML = htmlList;
-            document.getElementById('confirmOk').onclick = () => { 
-                inventory = inventory.filter(i => !i.selected); 
-                localStorage.setItem('inventory', JSON.stringify(inventory)); 
-                render(); 
-                closeModal('confirmModal'); 
-            };
-            document.getElementById('confirmModal').style.display = 'flex';
-        }
-
-        render();
-    </script>
-</body>
-</html>
+      
