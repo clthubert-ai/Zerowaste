@@ -7,7 +7,7 @@
     <!-- Bibliothèque pour le scanner -->
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; min-height: 100vh; position: relative; padding-bottom: 30px; }
         .container { max-width: 500px; margin: 0 auto; padding: 15px; }
         header { background: transparent; padding: 0; margin-bottom: 15px; border-radius: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow: hidden; display: flex; justify-content: center; }
         .header-logo { width: 100%; height: auto; display: block; }
@@ -49,6 +49,9 @@
         .modal-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .btn-cancel { background: #eee; }
         .btn-confirm { background: #3e7b37; color: white; }
+        
+        /* Footer date */
+        .footer-date { position: fixed; bottom: 5px; right: 8px; font-size: 0.65rem; color: #aaa; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -70,6 +73,9 @@
         
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
+
+    <!-- Date et Heure de génération -->
+    <div id="genDate" class="footer-date"></div>
 
     <!-- Modale Ajout/Édition -->
     <div id="itemModal" class="modal-overlay top-aligned">
@@ -110,6 +116,10 @@
     </div>
 
     <script>
+        // Affichage de la date de génération
+        const now = new Date();
+        document.getElementById('genDate').innerText = "Généré le " + now.toLocaleDateString('fr-FR') + " à " + now.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
         let editingId = null;
         let html5QrCode = null; 
@@ -126,7 +136,7 @@
                 if (data.status === 1) {
                     return data.product.product_name_fr || data.product.product_name || barcode;
                 }
-                return barcode; // Retourne le code si rien trouvé
+                return barcode;
             } catch (error) {
                 console.error("Erreur API:", error);
                 return barcode;
@@ -175,7 +185,6 @@
         function openAddModal() {
             editingId = null;
             document.getElementById('modalTitle').innerText = "Nouvel aliment";
-            // Si foodName est vide, on réinitialise. Sinon on laisse le nom (ex: celui du scan)
             if(!document.getElementById('foodName').value) document.getElementById('foodName').value = '';
             document.getElementById('expiryDate').value = '';
             document.getElementById('foodEmoji').value = '';
@@ -335,7 +344,4 @@
             window.open(`https://www.google.com/search?q=recette+anti-gaspi+${encodeURIComponent(selected)}`, '_blank');
         }
 
-        render();
-    </script>
-</body>
-</html>
+ 
