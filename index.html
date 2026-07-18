@@ -21,20 +21,27 @@
         /* État sélectionné (bordure bleue légère) */
         .item.selected { border: 2px solid #87ceeb; }
         
-        /* Couleurs de fond pour les états (pas de bordure d'urgence) */
+        /* Couleurs de fond pour les états */
         .item.urgent { background-color: #fff0f0; }
         .item.expired-one { background-color: #ffcccc; }
-        .item.expired-long { background-color: black; }
         
-        /* Texte rouge pour le périmé longue durée */
-        .item.expired-long .item-name, .item.expired-long .item-meta, .item.expired-long .alert-text { color: red; }
+        /* État périmé longue durée : Fond rouge vif et texte blanc */
+        .item.expired-long { background-color: #d9534f; }
+        .item.expired-long .item-name, 
+        .item.expired-long .item-meta, 
+        .item.expired-long .alert-text { color: white; }
         
         .item input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; flex-shrink: 0; }
         .visual { font-size: 1.4rem; width: 30px; text-align: center; flex-shrink: 0; }
         .item-info { flex-grow: 1; min-width: 0; overflow: hidden; }
         .item-name { font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .item-meta { font-size: 0.75rem; color: #666; }
+        /* Ajustement couleur méta pour périmé */
+        .item.expired-long .item-meta { color: #ffe5e5; }
+        
         .alert-text { color: #d9534f; font-weight: bold; font-size: 0.7rem; display: block; }
+        .item.expired-long .alert-text { color: #fff; }
+        
         .del-btn { background: #fee2e2; color: #991b1b; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; flex-shrink: 0; width: 55px; }
         
         /* Modales */
