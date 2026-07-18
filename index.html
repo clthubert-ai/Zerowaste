@@ -6,38 +6,45 @@
     <title>Zero Gachi</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; min-height: 100vh; position: relative; padding-bottom: 40px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; }
         .container { max-width: 500px; margin: 0 auto; padding: 15px; }
         header { background: transparent; padding: 0; margin-bottom: 15px; border-radius: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow: hidden; display: flex; justify-content: center; }
         .header-logo { width: 100%; height: auto; display: block; }
-        .button-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        
+        .button-group { display: flex; gap: 10px; margin-bottom: 10px; }
         .button-group button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
         .btn-add { background: #3e7b37; color: white; } 
         .btn-del-selected { background: #d9534f; color: white; }
-        .btn-search { background: #7fb069; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .btn-search { background: #7fb069; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
+        .btn-scan { background: #555; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
         
+        /* Tuiles */
         .item { 
             background: white; padding: 12px 15px; margin-bottom: 10px; border-radius: 14px; 
             display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-            border-left: 8px solid transparent; border-right: 8px solid transparent;
-            transition: all 0.2s ease; cursor: pointer;
+            border: 2px solid transparent; transition: all 0.2s ease; cursor: pointer;
         }
-        .item.selected { border-left: 8px solid #3e7b37; border-right: 8px solid #3e7b37; background-color: #f0f7ef; }
+        .item.selected { border: 2px solid #3e7b37; background-color: #f0f7ef; }
         
-        .visual { font-size: 1.4rem; width: 30px; text-align: center; flex-shrink: 0; }
-        .item-info { flex-grow: 1; min-width: 0; overflow: hidden; }
-        .item-name { font-weight: bold; display: block; }
+        .item.urgent { background-color: #fff3cd; } 
+        .item.expired-yesterday { background-color: #ffcc99; } 
+        .item.expired-long { background-color: #c9302c; color: white; }
+        
+        .visual { font-size: 1.6rem; width: 40px; text-align: center; flex-shrink: 0; }
+        .item-info { flex-grow: 1; min-width: 0; }
+        .item-name { font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .item-meta { font-size: 0.75rem; color: #666; }
+        .item.expired-long .item-meta { color: #ffe5e5; }
+        .item-alert { flex-shrink: 0; font-weight: bold; font-size: 0.75rem; text-align: right; margin-left: 5px; }
         
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-box { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
+        /* Modales */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; overflow-y: auto; }
+        .modal-box { background: white; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; box-sizing: border-box; }
         .modal-input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; }
         .modal-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .btn-cancel { background: #eee; }
         .btn-confirm { background: #3e7b37; color: white; }
-        
-        .footer-date { position: fixed; bottom: 5px; right: 8px; font-size: 0.65rem; color: #aaa; }
     </style>
 </head>
 <body>
@@ -52,21 +59,20 @@
             <button class="btn-del-selected" onclick="handleBulkDelete()">Suppression</button>
         </div>
         
-        <button class="btn-search" onclick="searchRecipes()">Rechercher</button>
-        <button class="btn-search" id="scanBtn" style="background:#555; margin-top:10px;" onclick="toggleScanner()">Scanner 📷</button>
+        <button class="btn-search" onclick="searchRecipes()">Rechercher des recettes</button>
+        <button id="scanBtn" class="btn-scan" onclick="toggleScanner()">Scanner un produit 📷</button>
         
         <div id="reader" style="width: 100%; display:none; margin-top:10px;"></div>
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
 
-    <div id="genDate" class="footer-date"></div>
-
+    <!-- Modale Ajout/Édition -->
     <div id="itemModal" class="modal-overlay">
         <div class="modal-box">
             <h3 id="modalTitle">Aliment</h3>
-            <input type="text" id="foodName" class="modal-input" placeholder="Nom">
+            <input type="text" id="foodName" class="modal-input" placeholder="Nom de l'aliment">
             <input type="date" id="expiryDate" class="modal-input">
-            <input type="text" id="foodEmoji" class="modal-input" placeholder="Emoji personnalisé (ex: 🍎)">
+            <input type="text" id="foodEmoji" class="modal-input" placeholder="Emoji personnalisé">
             <select id="storageLocation" class="modal-input">
                 <option value="❄️ Réfrigérateur">❄️ Réfrigérateur</option>
                 <option value="🧊 Congélateur">🧊 Congélateur</option>
@@ -79,157 +85,175 @@
         </div>
     </div>
 
+    <!-- Autres Modales -->
+    <div id="confirmModal" class="modal-overlay"><div class="modal-box"><div id="confirmText"></div><div class="modal-btns"><button class="modal-btn btn-cancel" onclick="closeModal('confirmModal')">Annuler</button><button class="modal-btn btn-confirm" id="confirmOk">OK</button></div></div></div>
+    <div id="alertModal" class="modal-overlay"><div class="modal-box"><div id="alertText"></div><div class="modal-btns" style="justify-content:center;"><button class="modal-btn btn-confirm" onclick="closeModal('alertModal')">OK</button></div></div></div>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Date de génération
-            const now = new Date();
-            document.getElementById('genDate').innerText = "Généré le " + now.toLocaleDateString('fr-FR') + " à " + now.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+        let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
+        let editingId = null;
+        let html5QrCode = null;
+        let isScannerActive = false;
 
-            let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
-            let editingId = null;
-            let html5QrCode = null; 
-            let isScannerActive = false;
+        // --- Fonctions utilitaires ---
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function showAlert(msg) { document.getElementById('alertText').innerText = msg; document.getElementById('alertModal').style.display = 'flex'; }
+        
+        // --- Logique Scanner ---
+        async function fetchProductName(barcode) {
+            try {
+                const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}.json`);
+                const data = await res.json();
+                return data.status === 1 ? (data.product.product_name_fr || data.product.product_name) : "Produit inconnu";
+            } catch(e) { return "Erreur API"; }
+        }
 
-            window.closeModal = (id) => document.getElementById(id).style.display = 'none';
-            window.toggleScanner = () => isScannerActive ? stopScanner() : startScanner();
-            
-            function getEmoji(item) {
-                if (item.customEmoji && item.customEmoji.trim() !== '') return item.customEmoji;
-                const n = item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-                const exactMatches = {
-                    'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐',
-                    'orange': '🍊', 'oranges': '🍊', 'citron': '🍋', 'citrons': '🍋', 'fraise': '🍓', 'fraises': '🍓',
-                    'framboise': '🍓', 'framboises': '🍓', 'myrtille': '🫐', 'myrtilles': '🫐', 'cerise': '🍒', 'cerises': '🍒',
-                    'peche': '🍑', 'peches': '🍑', 'mangue': '🥭', 'mangues': '🥭', 'raisin': '🍇', 'raisins': '🍇',
-                    'ananas': '🍍', 'kiwi': '🥝', 'kiwis': '🥝', 'melon': '🍈', 'melons': '🍈', 'pasteque': '🍉',
-                    'pasteques': '🍉', 'abricot': '🍑', 'abricots': '🍑', 'prune': '🍑', 'prunes': '🍑',
-                    'concombre': '🥒', 'concombres': '🥒', 'carotte': '🥕', 'carottes': '🥕', 'brocoli': '🥦', 'brocolis': '🥦',
-                    'oignon': '🧅', 'oignons': '🧅', 'ail': '🧄', 'champignon': '🍄', 'champignons': '🍄', 'poivron': '🫑',
-                    'poivrons': '🫑', 'salade': '🥬', 'tomate': '🍅', 'tomates': '🍅', 'patate': '🥔', 'patates': '🥔',
-                    'pomme de terre': '🥔', 'pommes de terre': '🥔', 'haricot': '🫘', 'haricots': '🫘', 'epinard': '🍃',
-                    'epinards': '🍃', 'courgette': '🥒', 'courgettes': '🥒', 'aubergine': '🍆', 'aubergines': '🍆',
-                    'chou': '🥬', 'choux': '🥬', 'asperge': '🥬', 'asperges': '🥬', 'poireau': '🥬', 'poireaux': '🥬',
-                    'radis': '🥗', 'mais': '🌽', 'avocat': '🥑', 'avocats': '🥑',
-                    'steak': '🥩', 'steaks': '🥩', 'gigot': '🥩', 'jambon': '🍖', 'chorizo': '🌶️', 'poulet': '🍗', 'poulets': '🍗',
-                    'saumon': '🐟', 'saumons': '🐟', 'thon': '🐟', 'thons': '🐟', 'crevette': '🍤', 'crevettes': '🍤',
-                    'saucisse': '🌭', 'saucisses': '🌭', 'cote de porc': '🥩', 'cotes de porc': '🥩', 'cote de boeuf': '🥩',
-                    'cotes de boeuf': '🥩', 'cote de mouton': '🥩', 'cotes de mouton': '🥩', 'lard': '🥓', 'bacon': '🥓',
-                    'oeuf': '🥚', 'oeufs': '🥚', 'œuf': '🥚', 'œufs': '🥚', 'poisson': '🐟', 'poissons': '🐟',
-                    'pain': '🍞', 'baguette': '🥖', 'baguettes': '🥖', 'croissant': '🥐', 'croissants': '🥐',
-                    'brioche': '🍞', 'brioches': '🍞', 'biscuit': '🍪', 'biscuits': '🍪', 'gateau': '🍰', 'gateaux': '🍰',
-                    'riz': '🍚', 'pate': '🍝', 'pates': '🍝', 'nouille': '🍜', 'nouilles': '🍜', 'pizza': '🍕',
-                    'pizzas': '🍕', 'taco': '🌮', 'tacos': '🌮', 'burger': '🍔', 'burgers': '🍔', 'sushi': '🍣',
-                    'sushis': '🍣',
-                    'lait': '🥛', 'fromage': '🧀', 'fromages': '🧀', 'beurre': '🧈', 'yaourt': '🥣', 'yaourts': '🥣',
-                    'creme': '🥛', 'cremes': '🥛',
-                    'soupe': '🥣', 'soupes': '🥣'
-                };
-                if (exactMatches[n]) return exactMatches[n];
-                const categories = [
-                    { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'dinde', 'canard', 'volaille', 'saucisse', 'charcuterie', 'escalope'] },
-                    { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette', 'dorade', 'bar', 'sardine', 'sole', 'merlu', 'colin'] },
-                    { emoji: '🧀', keys: ['fromage', 'comte', 'cancoillotte', 'emmental', 'gruyere', 'camembert', 'brie', 'bleu', 'roquefort', 'vache qui rit', 'chevre', 'morbier', 'abondance', 'ricotta', 'mozzarella'] },
-                    { emoji: '🥦', keys: ['legume', 'tomate', 'carotte', 'courgette', 'brocoli', 'oignon', 'ail', 'champignon', 'poivron', 'aubergine', 'patate', 'pomme de terre', 'salade', 'haricot', 'epinard', 'chou', 'asperge', 'celeri', 'navet', 'radis', 'artichaut', 'betterave', 'fenouil', 'citrouille', 'potiron', 'topinambour'] },
-                    { emoji: '🍎', keys: ['fruit', 'abricot', 'prune', 'figue', 'melon', 'pasteque', 'pamplemousse', 'clementine', 'mandarine', 'grenade', 'goyave', 'litchi', 'nectarine', 'mirabelle'] },
-                    { emoji: '🌾', keys: ['cereale', 'brioche', 'biscuit', 'galette', 'semoule', 'farine', 'riz', 'pate', 'nouille', 'ble', 'avoine', 'mais', 'quinoa', 'boulgour', 'pain', 'pain de mie'] },
-                    { emoji: '🥛', keys: ['creme', 'beurre', 'brie', 'camembert', 'emmental', 'laitage', 'yaourt', 'lait', 'fromage blanc'] },
-                    { emoji: '🍲', keys: ['potage', 'veloute', 'bouillon', 'soupe'] }
-                ];
-                for (let cat of categories) { if (cat.keys.some(key => n.includes(key))) return cat.emoji; }
-                return '🍽️';
-            }
-
-            async function fetchProductName(barcode) {
-                const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json`;
-                try {
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    return data.status === 1 ? (data.product.product_name_fr || data.product.product_name || barcode) : barcode;
-                } catch (e) { return barcode; }
-            }
-
-            function startScanner() {
-                isScannerActive = true;
+        function toggleScanner() {
+            if(isScannerActive) {
+                if(html5QrCode) html5QrCode.stop();
+                document.getElementById('reader').style.display = 'none';
+                document.getElementById('scanBtn').innerText = "Scanner un produit 📷";
+                isScannerActive = false;
+            } else {
                 document.getElementById('reader').style.display = 'block';
-                document.getElementById('scanBtn').innerText = "Fermer le scanner ❌";
+                document.getElementById('scanBtn').innerText = "Arrêter le scanner";
                 html5QrCode = new Html5Qrcode("reader");
                 html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, async (decodedText) => {
-                    stopScanner();
+                    toggleScanner();
                     openAddModal();
-                    document.getElementById('foodName').value = await fetchProductName(decodedText);
+                    document.getElementById('foodName').value = "Recherche...";
+                    const name = await fetchProductName(decodedText);
+                    document.getElementById('foodName').value = name;
                 });
+                isScannerActive = true;
             }
+        }
 
-            function stopScanner() {
-                if (html5QrCode) {
-                    html5QrCode.stop().then(() => {
-                        document.getElementById('reader').style.display = 'none';
-                        document.getElementById('scanBtn').innerText = "Scanner 📷";
-                        isScannerActive = false;
-                        html5QrCode = null;
-                    }).catch(console.error);
-                }
-            }
+        // --- Gestion Inventaire ---
+        function openAddModal() {
+            editingId = null;
+            document.getElementById('modalTitle').innerText = "Nouvel aliment";
+            document.getElementById('foodName').value = '';
+            document.getElementById('expiryDate').value = '';
+            document.getElementById('foodEmoji').value = '';
+            document.getElementById('itemModal').style.display = 'flex';
+        }
+
+        function openEditModal(id) {
+            const item = inventory.find(i => String(i.id) === String(id));
+            if (!item) return;
+            editingId = id;
+            document.getElementById('modalTitle').innerText = "Modifier";
+            document.getElementById('foodName').value = item.name;
+            document.getElementById('expiryDate').value = item.date;
+            document.getElementById('foodEmoji').value = item.customEmoji || '';
+            document.getElementById('storageLocation').value = item.loc;
+            document.getElementById('itemModal').style.display = 'flex';
+        }
+
+        function saveFood() {
+            const name = document.getElementById('foodName').value;
+            const date = document.getElementById('expiryDate').value;
+            const loc = document.getElementById('storageLocation').value;
+            const customEmoji = document.getElementById('foodEmoji').value;
+            if(!name || !date) return showAlert("Remplissez le nom et la date !");
             
-            window.openAddModal = () => {
-                editingId = null;
-                document.getElementById('modalTitle').innerText = "Nouvel aliment";
-                document.getElementById('foodName').value = '';
-                document.getElementById('expiryDate').value = '';
-                document.getElementById('foodEmoji').value = '';
-                document.getElementById('itemModal').style.display = 'flex';
-            };
-
-            window.saveFood = () => {
-                const name = document.getElementById('foodName').value;
-                const date = document.getElementById('expiryDate').value;
-                const customEmoji = document.getElementById('foodEmoji').value;
-                const loc = document.getElementById('storageLocation').value;
-                
-                if(!name || !date) return alert("Remplissez le nom et la date !");
-                
-                if (editingId) {
-                    const item = inventory.find(i => i.id === editingId);
-                    Object.assign(item, { name, date, loc, customEmoji });
-                } else {
-                    inventory.push({ id: Date.now().toString(), name, date, loc, customEmoji, selected: false });
-                }
-                localStorage.setItem('inventory', JSON.stringify(inventory));
-                closeModal('itemModal');
-                render();
-            };
-
-            window.render = () => {
-                const list = document.getElementById('productList');
-                list.innerHTML = "";
-                inventory.sort((a,b) => new Date(a.date) - new Date(b.date));
-                inventory.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = `item ${item.selected ? 'selected' : ''}`;
-                    div.innerHTML = `
-                        <div class="visual">${getEmoji(item)}</div>
-                        <div class="item-info">
-                            <span class="item-name">${item.name}</span>
-                            <span class="item-meta">${item.date} • ${item.loc}</span>
-                        </div>`;
-                    div.onclick = () => { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); };
-                    list.appendChild(div);
-                });
-            };
-
-            window.handleBulkDelete = () => {
-                inventory = inventory.filter(i => !i.selected);
-                localStorage.setItem('inventory', JSON.stringify(inventory));
-                render();
-            };
-
-            window.searchRecipes = () => {
-                const query = inventory.filter(i => i.selected).map(i => i.name).join(" ");
-                if(query) window.open(`https://www.google.com/search?q=recette+anti-gaspi+${encodeURIComponent(query)}`, '_blank');
-            };
-
+            if (editingId) {
+                const item = inventory.find(i => String(i.id) === String(editingId));
+                Object.assign(item, { name, date, loc, customEmoji });
+            } else {
+                inventory.push({ id: Date.now().toString(), name, date, loc, customEmoji, selected: false });
+            }
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            closeModal('itemModal');
             render();
-        });
+        }
+
+        // --- Logique Emojis (Votre version) ---
+        function getEmoji(item) {
+            if (item.customEmoji && item.customEmoji.trim() !== '') return item.customEmoji;
+            const n = item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+            const exactMatches = {
+                'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐',
+                'orange': '🍊', 'oranges': '🍊', 'citron': '🍋', 'citrons': '🍋', 'fraise': '🍓', 'fraises': '🍓',
+                'framboise': '🍓', 'framboises': '🍓', 'myrtille': '🫐', 'myrtilles': '🫐', 'cerise': '🍒', 'cerises': '🍒',
+                'peche': '🍑', 'peches': '🍑', 'mangue': '🥭', 'mangues': '🥭', 'raisin': '🍇', 'raisins': '🍇',
+                'ananas': '🍍', 'kiwi': '🥝', 'kiwis': '🥝', 'melon': '🍈', 'melons': '🍈', 'pasteque': '🍉',
+                'pasteques': '🍉', 'abricot': '🍑', 'abricots': '🍑', 'prune': '🍑', 'prunes': '🍑',
+                'concombre': '🥒', 'concombres': '🥒', 'carotte': '🥕', 'carottes': '🥕', 'brocoli': '🥦', 'brocolis': '🥦',
+                'oignon': '🧅', 'oignons': '🧅', 'ail': '🧄', 'champignon': '🍄', 'champignons': '🍄', 'poivron': '🫑',
+                'poivrons': '🫑', 'salade': '🥬', 'tomate': '🍅', 'tomates': '🍅', 'patate': '🥔', 'patates': '🥔',
+                'pomme de terre': '🥔', 'pommes de terre': '🥔', 'haricot': '🫘', 'haricots': '🫘', 'epinard': '🍃',
+                'epinards': '🍃', 'courgette': '🥒', 'courgettes': '🥒', 'aubergine': '🍆', 'aubergines': '🍆',
+                'chou': '🥬', 'choux': '🥬', 'asperge': '🥬', 'asperges': '🥬', 'poireau': '🥬', 'poireaux': '🥬',
+                'radis': '🥗', 'mais': '🌽', 'avocat': '🥑', 'avocats': '🥑',
+                'steak': '🥩', 'steaks': '🥩', 'gigot': '🥩', 'jambon': '🍖', 'chorizo': '🍖', 'poulet': '🍗', 'poulets': '🍗',
+                'saumon': '🐟', 'saumons': '🐟', 'thon': '🐟', 'thons': '🐟', 'crevette': '🍤', 'crevettes': '🍤',
+                'saucisse': '🌭', 'saucisses': '🌭', 'cote de porc': '🥩', 'cotes de porc': '🥩', 'cote de boeuf': '🥩',
+                'cotes de boeuf': '🥩', 'cote de mouton': '🥩', 'cotes de mouton': '🥩', 'lard': '🥓', 'bacon': '🥓',
+                'oeuf': '🥚', 'oeufs': '🥚', 'œuf': '🥚', 'œufs': '🥚', 'poisson': '🐟', 'poissons': '🐟',
+                'pain': '🍞', 'baguette': '🥖', 'baguettes': '🥖', 'croissant': '🥐', 'croissants': '🥐',
+                'brioche': '🍞', 'brioches': '🍞', 'biscuit': '🍪', 'biscuits': '🍪', 'gateau': '🍰', 'gateaux': '🍰',
+                'riz': '🍚', 'pate': '🍝', 'pates': '🍝', 'nouille': '🍜', 'nouilles': '🍜', 'pizza': '🍕',
+                'pizzas': '🍕', 'taco': '🌮', 'tacos': '🌮', 'burger': '🍔', 'burgers': '🍔', 'sushi': '🍣',
+                'sushis': '🍣',
+                'lait': '🥛', 'fromage': '🧀', 'fromages': '🧀', 'beurre': '🧈', 'yaourt': '🥣', 'yaourts': '🥣',
+                'creme': '🥛', 'cremes': '🥛',
+                'soupe': '🥣', 'soupes': '🥣'
+            };
+            if (exactMatches[n]) return exactMatches[n];
+            const categories = [
+                { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'dinde', 'canard', 'volaille', 'saucisse', 'charcuterie', 'escalope'] },
+                { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette', 'dorade', 'bar', 'sardine', 'sole', 'merlu', 'colin'] },
+                { emoji: '🧀', keys: ['fromage', 'comte', 'cancoillotte', 'emmental', 'gruyere', 'camembert', 'brie', 'bleu', 'roquefort', 'vache qui rit', 'chevre', 'morbier', 'abondance', 'ricotta', 'mozzarella'] },
+                { emoji: '🥦', keys: ['legume', 'tomate', 'carotte', 'courgette', 'brocoli', 'oignon', 'ail', 'champignon', 'poivron', 'aubergine', 'patate', 'pomme de terre', 'salade', 'haricot', 'epinard', 'chou', 'asperge', 'celeri', 'navet', 'radis', 'artichaut', 'betterave', 'fenouil', 'citrouille', 'potiron', 'topinambour'] },
+                { emoji: '🍎', keys: ['fruit', 'abricot', 'prune', 'figue', 'melon', 'pasteque', 'pamplemousse', 'clementine', 'mandarine', 'grenade', 'goyave', 'litchi', 'nectarine', 'mirabelle'] },
+                { emoji: '🌾', keys: ['cereale', 'brioche', 'biscuit', 'galette', 'semoule', 'farine', 'riz', 'pate', 'nouille', 'ble', 'avoine', 'mais', 'quinoa', 'boulgour', 'pain', 'pain de mie'] },
+                { emoji: '🥛', keys: ['creme', 'beurre', 'brie', 'camembert', 'emmental', 'laitage', 'yaourt', 'lait', 'fromage blanc'] },
+                { emoji: '🍲', keys: ['potage', 'veloute', 'bouillon', 'soupe'] }
+            ];
+            for (let cat of categories) { if (cat.keys.some(key => n.includes(key))) return cat.emoji; }
+            return '🍽️';
+        }
+
+        function render() {
+            const list = document.getElementById('productList');
+            list.innerHTML = "";
+            inventory.sort((a, b) => new Date(a.date) - new Date(b.date));
+            const today = new Date(); today.setHours(0,0,0,0);
+            
+            inventory.forEach((item) => {
+                const expiry = new Date(item.date);
+                const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
+                let cssClass = '', alertText = '';
+                if (diffDays < -1) { cssClass = 'expired-long'; alertText = 'Périmé ' + Math.abs(diffDays) + 'j ❌'; }
+                else if (diffDays === -1) { cssClass = 'expired-yesterday'; alertText = 'Périmé 1j ⚠️'; }
+                else if (diffDays >= 0 && diffDays <= 2) { cssClass = 'urgent'; alertText = 'Date proche ⏳'; }
+                
+                const div = document.createElement('div');
+                div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
+                div.onclick = () => { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); };
+                div.oncontextmenu = (e) => { e.preventDefault(); openEditModal(item.id); };
+                div.innerHTML = `<div class="visual">${getEmoji(item)}</div><div class="item-info"><span class="item-name">${item.name}</span><span class="item-meta">${item.date} • ${item.loc}</span></div><div class="item-alert">${alertText}</div>`;
+                list.appendChild(div);
+            });
+        }
+
+        function handleBulkDelete() {
+            const selected = inventory.filter(i => i.selected);
+            if (selected.length === 0) return showAlert("Sélectionnez au moins un aliment !");
+            document.getElementById('confirmText').innerHTML = "Supprimer les éléments sélectionnés ?";
+            document.getElementById('confirmOk').onclick = () => { inventory = inventory.filter(i => !i.selected); localStorage.setItem('inventory', JSON.stringify(inventory)); render(); closeModal('confirmModal'); };
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function searchRecipes() {
+            const selected = inventory.filter(i => i.selected).map(i => i.name).join(" ");
+            if(!selected) return showAlert("Cochez au moins un ingrédient !");
+            window.open(`https://www.google.com/search?q=recette+anti-gaspi+${encodeURIComponent(selected)}`, '_blank');
+        }
+
+        render();
     </script>
 </body>
 </html>
