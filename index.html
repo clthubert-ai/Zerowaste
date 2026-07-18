@@ -45,7 +45,7 @@
     
     <div class="container">
         <div class="button-group">
-            <button class="btn-add" onclick="openAddModal()">Ajout de l'aliment</button>
+            <button class="btn-add" onclick="openAddModal()">Ajout d'un aliment dans l'inventaire</button>
             <button class="btn-del-selected" onclick="handleBulkDelete()">Suppression multiple</button>
         </div>
         
@@ -53,7 +53,7 @@
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
 
-    <!-- Modales -->
+    <!-- Modale d'ajout -->
     <div id="addModal" class="modal-overlay">
         <div class="modal-box">
             <h3>Nouvel aliment</h3>
@@ -71,12 +71,23 @@
         </div>
     </div>
 
+    <!-- Modale de confirmation -->
     <div id="confirmModal" class="modal-overlay">
         <div class="modal-box">
             <div id="confirmText" style="text-align: left;"></div>
             <div class="modal-btns">
                 <button class="modal-btn btn-cancel" onclick="closeModal('confirmModal')">Annuler</button>
                 <button class="modal-btn btn-confirm" id="confirmOk">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale d'alerte -->
+    <div id="alertModal" class="modal-overlay">
+        <div class="modal-box">
+            <div id="alertText"></div>
+            <div class="modal-btns" style="justify-content: center;">
+                <button class="modal-btn btn-confirm" onclick="closeModal('alertModal')">OK</button>
             </div>
         </div>
     </div>
@@ -91,6 +102,11 @@
             document.getElementById('confirmText').innerHTML = message;
             document.getElementById('confirmOk').onclick = () => { callback(); closeModal('confirmModal'); };
             document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function showAlert(message) {
+            document.getElementById('alertText').innerHTML = message;
+            document.getElementById('alertModal').style.display = 'flex';
         }
 
         function processAddFood() {
@@ -179,10 +195,13 @@
                     <div class="item-info">
                         <span class="item-name">${item.name}</span>
                         <span class="item-meta">${item.date} • ${item.loc}</span>
-                        ${alertText ? `<span class="alert-text">${alertText}</span>` : ''}
+                        ${alertText ? `<span class="alert-text">${alertText}</span>' : ''}
                     </div>
                     <button class="del-btn" onclick="confirmDelete('${item.id}')">Suppr</button>
                 `;
+                // Correction du bug d'affichage des alertes
+                div.innerHTML = div.innerHTML.replace("' : ''", "' : '</span>'");
+                
                 list.appendChild(div);
             });
         }
@@ -199,7 +218,7 @@
 
         function handleBulkDelete() {
             const selected = inventory.filter(i => i.selected);
-            if (selected.length === 0) return alert("Cochez au moins un élément !");
+            if (selected.length === 0) return showAlert("Cochez au moins un élément !");
             
             let listHtml = "<strong>Supprimer les éléments suivants ?</strong><ul style='text-align:left; font-size:0.9rem; margin-top:10px; padding-left:20px;'>";
             selected.forEach(item => {
@@ -216,7 +235,7 @@
 
         function searchRecipes() {
             const selected = inventory.filter(i => i.selected).map(i => i.name).join(" ");
-            if(!selected) return alert("Cochez au moins un ingrédient !");
+            if(!selected) return showAlert("Cochez au moins un ingrédient !");
             window.open(`https://www.google.com/search?q=recette+anti-gaspi+${encodeURIComponent(selected)}`, '_blank');
         }
 
