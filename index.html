@@ -60,8 +60,11 @@
         .item.expired-long .item-alert { color: #fff; }
         
         /* Modales */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: flex-start; padding-top: 50px; overflow-y: auto; }
-        .modal-box { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; margin-bottom: 50px; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; overflow-y: auto; }
+        /* Classe spécifique pour maintenir le comportement de l'ajout */
+        .modal-overlay.top-aligned { align-items: flex-start; padding-top: 50px; }
+        
+        .modal-box { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; margin-bottom: 20px; }
         .modal-input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; }
         .modal-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
@@ -85,7 +88,7 @@
     </div>
 
     <!-- Modales -->
-    <div id="addModal" class="modal-overlay">
+    <div id="addModal" class="modal-overlay top-aligned">
         <div class="modal-box">
             <h3>Nouvel aliment</h3>
             <input type="text" id="foodName" class="modal-input" placeholder="Nom de l'aliment">
