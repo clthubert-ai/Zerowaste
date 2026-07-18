@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zero Gachi</title>
-    <!-- Bibliothèque pour le scanner -->
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; min-height: 100vh; position: relative; padding-bottom: 40px; }
@@ -25,17 +24,10 @@
         }
         .item.selected { border-left: 8px solid #3e7b37; border-right: 8px solid #3e7b37; background-color: #f0f7ef; }
         
-        /* États */
-        .item.urgent { background-color: #fff3cd; } 
-        .item.expired-yesterday { background-color: #ffcc99; } 
-        .item.expired-long { background-color: #c9302c; color: white; }
-        
         .visual { font-size: 1.4rem; width: 30px; text-align: center; flex-shrink: 0; }
         .item-info { flex-grow: 1; min-width: 0; overflow: hidden; }
         .item-name { font-weight: bold; display: block; }
         .item-meta { font-size: 0.75rem; color: #666; }
-        .item.expired-long .item-meta { color: #ffe5e5; }
-        .item-alert { flex-shrink: 0; font-weight: bold; font-size: 0.75rem; margin-left: 10px; text-align: right; }
         
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
         .modal-box { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
@@ -56,12 +48,12 @@
         </header>
 
         <div class="button-group">
-            <button class="btn-add" onclick="openAddModal()">Ajout d'un aliment</button>
+            <button class="btn-add" onclick="openAddModal()">Ajout</button>
             <button class="btn-del-selected" onclick="handleBulkDelete()">Suppression</button>
         </div>
         
-        <button class="btn-search" onclick="searchRecipes()">Rechercher des recettes</button>
-        <button class="btn-search" id="scanBtn" style="background:#555; margin-top:10px;" onclick="toggleScanner()">Scanner un code-barres 📷</button>
+        <button class="btn-search" onclick="searchRecipes()">Rechercher</button>
+        <button class="btn-search" id="scanBtn" style="background:#555; margin-top:10px;" onclick="toggleScanner()">Scanner 📷</button>
         
         <div id="reader" style="width: 100%; display:none; margin-top:10px;"></div>
         <div id="productList" style="margin-top: 20px;"></div>
@@ -69,13 +61,12 @@
 
     <div id="genDate" class="footer-date"></div>
 
-    <!-- Modales -->
     <div id="itemModal" class="modal-overlay">
         <div class="modal-box">
             <h3 id="modalTitle">Aliment</h3>
             <input type="text" id="foodName" class="modal-input" placeholder="Nom">
             <input type="date" id="expiryDate" class="modal-input">
-            <input type="text" id="foodEmoji" class="modal-input" placeholder="Emoji (optionnel)">
+            <input type="text" id="foodEmoji" class="modal-input" placeholder="Emoji personnalisé (ex: 🍎)">
             <select id="storageLocation" class="modal-input">
                 <option value="❄️ Réfrigérateur">❄️ Réfrigérateur</option>
                 <option value="🧊 Congélateur">🧊 Congélateur</option>
@@ -94,17 +85,60 @@
             const now = new Date();
             document.getElementById('genDate').innerText = "Généré le " + now.toLocaleDateString('fr-FR') + " à " + now.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
 
-            // Variables globales
             let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
             let editingId = null;
             let html5QrCode = null; 
             let isScannerActive = false;
 
-            // Fonctions globales accessibles depuis HTML
             window.closeModal = (id) => document.getElementById(id).style.display = 'none';
             window.toggleScanner = () => isScannerActive ? stopScanner() : startScanner();
             
-            // --- API & Scanner ---
+            function getEmoji(item) {
+                if (item.customEmoji && item.customEmoji.trim() !== '') return item.customEmoji;
+                const n = item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                const exactMatches = {
+                    'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐',
+                    'orange': '🍊', 'oranges': '🍊', 'citron': '🍋', 'citrons': '🍋', 'fraise': '🍓', 'fraises': '🍓',
+                    'framboise': '🍓', 'framboises': '🍓', 'myrtille': '🫐', 'myrtilles': '🫐', 'cerise': '🍒', 'cerises': '🍒',
+                    'peche': '🍑', 'peches': '🍑', 'mangue': '🥭', 'mangues': '🥭', 'raisin': '🍇', 'raisins': '🍇',
+                    'ananas': '🍍', 'kiwi': '🥝', 'kiwis': '🥝', 'melon': '🍈', 'melons': '🍈', 'pasteque': '🍉',
+                    'pasteques': '🍉', 'abricot': '🍑', 'abricots': '🍑', 'prune': '🍑', 'prunes': '🍑',
+                    'concombre': '🥒', 'concombres': '🥒', 'carotte': '🥕', 'carottes': '🥕', 'brocoli': '🥦', 'brocolis': '🥦',
+                    'oignon': '🧅', 'oignons': '🧅', 'ail': '🧄', 'champignon': '🍄', 'champignons': '🍄', 'poivron': '🫑',
+                    'poivrons': '🫑', 'salade': '🥬', 'tomate': '🍅', 'tomates': '🍅', 'patate': '🥔', 'patates': '🥔',
+                    'pomme de terre': '🥔', 'pommes de terre': '🥔', 'haricot': '🫘', 'haricots': '🫘', 'epinard': '🍃',
+                    'epinards': '🍃', 'courgette': '🥒', 'courgettes': '🥒', 'aubergine': '🍆', 'aubergines': '🍆',
+                    'chou': '🥬', 'choux': '🥬', 'asperge': '🥬', 'asperges': '🥬', 'poireau': '🥬', 'poireaux': '🥬',
+                    'radis': '🥗', 'mais': '🌽', 'avocat': '🥑', 'avocats': '🥑',
+                    'steak': '🥩', 'steaks': '🥩', 'gigot': '🥩', 'jambon': '🍖', 'chorizo': '🌶️', 'poulet': '🍗', 'poulets': '🍗',
+                    'saumon': '🐟', 'saumons': '🐟', 'thon': '🐟', 'thons': '🐟', 'crevette': '🍤', 'crevettes': '🍤',
+                    'saucisse': '🌭', 'saucisses': '🌭', 'cote de porc': '🥩', 'cotes de porc': '🥩', 'cote de boeuf': '🥩',
+                    'cotes de boeuf': '🥩', 'cote de mouton': '🥩', 'cotes de mouton': '🥩', 'lard': '🥓', 'bacon': '🥓',
+                    'oeuf': '🥚', 'oeufs': '🥚', 'œuf': '🥚', 'œufs': '🥚', 'poisson': '🐟', 'poissons': '🐟',
+                    'pain': '🍞', 'baguette': '🥖', 'baguettes': '🥖', 'croissant': '🥐', 'croissants': '🥐',
+                    'brioche': '🍞', 'brioches': '🍞', 'biscuit': '🍪', 'biscuits': '🍪', 'gateau': '🍰', 'gateaux': '🍰',
+                    'riz': '🍚', 'pate': '🍝', 'pates': '🍝', 'nouille': '🍜', 'nouilles': '🍜', 'pizza': '🍕',
+                    'pizzas': '🍕', 'taco': '🌮', 'tacos': '🌮', 'burger': '🍔', 'burgers': '🍔', 'sushi': '🍣',
+                    'sushis': '🍣',
+                    'lait': '🥛', 'fromage': '🧀', 'fromages': '🧀', 'beurre': '🧈', 'yaourt': '🥣', 'yaourts': '🥣',
+                    'creme': '🥛', 'cremes': '🥛',
+                    'soupe': '🥣', 'soupes': '🥣'
+                };
+                if (exactMatches[n]) return exactMatches[n];
+                const categories = [
+                    { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'dinde', 'canard', 'volaille', 'saucisse', 'charcuterie', 'escalope'] },
+                    { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette', 'dorade', 'bar', 'sardine', 'sole', 'merlu', 'colin'] },
+                    { emoji: '🧀', keys: ['fromage', 'comte', 'cancoillotte', 'emmental', 'gruyere', 'camembert', 'brie', 'bleu', 'roquefort', 'vache qui rit', 'chevre', 'morbier', 'abondance', 'ricotta', 'mozzarella'] },
+                    { emoji: '🥦', keys: ['legume', 'tomate', 'carotte', 'courgette', 'brocoli', 'oignon', 'ail', 'champignon', 'poivron', 'aubergine', 'patate', 'pomme de terre', 'salade', 'haricot', 'epinard', 'chou', 'asperge', 'celeri', 'navet', 'radis', 'artichaut', 'betterave', 'fenouil', 'citrouille', 'potiron', 'topinambour'] },
+                    { emoji: '🍎', keys: ['fruit', 'abricot', 'prune', 'figue', 'melon', 'pasteque', 'pamplemousse', 'clementine', 'mandarine', 'grenade', 'goyave', 'litchi', 'nectarine', 'mirabelle'] },
+                    { emoji: '🌾', keys: ['cereale', 'brioche', 'biscuit', 'galette', 'semoule', 'farine', 'riz', 'pate', 'nouille', 'ble', 'avoine', 'mais', 'quinoa', 'boulgour', 'pain', 'pain de mie'] },
+                    { emoji: '🥛', keys: ['creme', 'beurre', 'brie', 'camembert', 'emmental', 'laitage', 'yaourt', 'lait', 'fromage blanc'] },
+                    { emoji: '🍲', keys: ['potage', 'veloute', 'bouillon', 'soupe'] }
+                ];
+                for (let cat of categories) { if (cat.keys.some(key => n.includes(key))) return cat.emoji; }
+                return '🍽️';
+            }
+
             async function fetchProductName(barcode) {
                 const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json`;
                 try {
@@ -122,7 +156,6 @@
                 html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, async (decodedText) => {
                     stopScanner();
                     openAddModal();
-                    document.getElementById('foodName').value = "Recherche...";
                     document.getElementById('foodName').value = await fetchProductName(decodedText);
                 });
             }
@@ -131,32 +164,35 @@
                 if (html5QrCode) {
                     html5QrCode.stop().then(() => {
                         document.getElementById('reader').style.display = 'none';
-                        document.getElementById('scanBtn').innerText = "Scanner un code-barres 📷";
+                        document.getElementById('scanBtn').innerText = "Scanner 📷";
                         isScannerActive = false;
                         html5QrCode = null;
                     }).catch(console.error);
                 }
             }
             
-            // --- Logique inventaire ---
             window.openAddModal = () => {
                 editingId = null;
                 document.getElementById('modalTitle').innerText = "Nouvel aliment";
                 document.getElementById('foodName').value = '';
                 document.getElementById('expiryDate').value = '';
+                document.getElementById('foodEmoji').value = '';
                 document.getElementById('itemModal').style.display = 'flex';
             };
 
             window.saveFood = () => {
                 const name = document.getElementById('foodName').value;
                 const date = document.getElementById('expiryDate').value;
-                if(!name || !date) return alert("Remplissez tout !");
+                const customEmoji = document.getElementById('foodEmoji').value;
+                const loc = document.getElementById('storageLocation').value;
+                
+                if(!name || !date) return alert("Remplissez le nom et la date !");
                 
                 if (editingId) {
                     const item = inventory.find(i => i.id === editingId);
-                    Object.assign(item, { name, date, loc: document.getElementById('storageLocation').value });
+                    Object.assign(item, { name, date, loc, customEmoji });
                 } else {
-                    inventory.push({ id: Date.now().toString(), name, date, loc: document.getElementById('storageLocation').value, selected: false });
+                    inventory.push({ id: Date.now().toString(), name, date, loc, customEmoji, selected: false });
                 }
                 localStorage.setItem('inventory', JSON.stringify(inventory));
                 closeModal('itemModal');
@@ -170,7 +206,12 @@
                 inventory.forEach(item => {
                     const div = document.createElement('div');
                     div.className = `item ${item.selected ? 'selected' : ''}`;
-                    div.innerHTML = `<div class="visual">🍽️</div><div class="item-info"><span class="item-name">${item.name}</span><span class="item-meta">${item.date}</span></div>`;
+                    div.innerHTML = `
+                        <div class="visual">${getEmoji(item)}</div>
+                        <div class="item-info">
+                            <span class="item-name">${item.name}</span>
+                            <span class="item-meta">${item.date} • ${item.loc}</span>
+                        </div>`;
                     div.onclick = () => { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); };
                     list.appendChild(div);
                 });
@@ -192,4 +233,3 @@
     </script>
 </body>
 </html>
-
