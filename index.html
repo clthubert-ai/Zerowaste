@@ -195,13 +195,10 @@
                     <div class="item-info">
                         <span class="item-name">${item.name}</span>
                         <span class="item-meta">${item.date} • ${item.loc}</span>
-                        ${alertText ? `<span class="alert-text">${alertText}</span>' : ''}
+                        ${alertText ? `<span class="alert-text">${alertText}</span>` : ''}
                     </div>
                     <button class="del-btn" onclick="confirmDelete('${item.id}')">Suppr</button>
                 `;
-                // Correction du bug d'affichage des alertes
-                div.innerHTML = div.innerHTML.replace("' : ''", "' : '</span>'");
-                
                 list.appendChild(div);
             });
         }
