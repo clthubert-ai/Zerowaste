@@ -55,7 +55,6 @@
         function getEmoji(name) {
             const n = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
             
-            // 1. Dictionnaire "Exact" enrichi (Priorité absolue, singulier et pluriel)
             const exactMatches = {
                 // Fruits
                 'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐',
@@ -98,7 +97,6 @@
             
             if (exactMatches[n]) return exactMatches[n];
 
-            // 2. Fallback aux catégories
             const categories = [
                 { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'dinde', 'canard', 'volaille', 'saucisse', 'charcuterie', 'escalope'] },
                 { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette', 'dorade', 'bar', 'sardine', 'sole', 'merlu', 'colin'] },
@@ -147,7 +145,7 @@
                     <div class="item-info">
                         <span class="item-name">${item.name}</span>
                         <span class="item-meta">${item.date} • ${item.loc}</span>
-                        ${alertText ? `<span class="alert-text">${alertText}</span>' : ''}
+                        ${alertText ? `<span class="alert-text">${alertText}</span>` : ''}
                     </div>
                     <button class="del-btn" onclick="deleteFood(${index})">Suppr</button>
                 `;
@@ -157,6 +155,32 @@
 
         function addFood() {
             const name = document.getElementById('foodName').value;
+            const date = document.getElementById('expiryDate').value;
+            const loc = document.getElementById('storageLocation').value;
+            if(!name || !date) return alert("Remplissez le nom et la date !");
+            inventory.push({ name, date, loc, selected: false });
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            document.getElementById('foodName').value = '';
+            render();
+        }
+
+        function deleteFood(index) {
+            inventory.splice(index, 1);
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            render();
+        }
+
+        function searchRecipes() {
+            const selected = inventory.filter(i => i.selected).map(i => i.name).join(" ");
+            if(!selected) return alert("Cochez au moins un ingrédient !");
+            window.open(`https://www.google.com/search?q=recette+anti-gaspi+${encodeURIComponent(selected)}`, '_blank');
+        }
+
+        render();
+    </script>
+</body>
+</html>
+).value;
             const date = document.getElementById('expiryDate').value;
             const loc = document.getElementById('storageLocation').value;
             if(!name || !date) return alert("Remplissez le nom et la date !");
