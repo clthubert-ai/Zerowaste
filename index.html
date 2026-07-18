@@ -35,7 +35,7 @@
         .alert-text { color: #d9534f; font-weight: bold; font-size: 0.7rem; display: block; }
         .del-btn { background: #fee2e2; color: #991b1b; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; flex-shrink: 0; width: 55px; }
 
-        /* Style du Modal avec défilement possible */
+        /* Style du Modal */
         #customModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
         .modal-box { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; max-height: 80vh; overflow-y: auto; }
         .modal-text { margin-bottom: 20px; font-weight: 500; text-align: left; }
@@ -65,62 +65,45 @@
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
 
-    <!-- Fenêtre modale -->
+    <!-- Fenêtre modale unique -->
     <div id="customModal">
         <div class="modal-box">
             <div id="modalText" class="modal-text"></div>
             <div class="modal-btns">
-                <button class="modal-btn btn-no" onclick="closeModal()">Annuler</button>
-                <button class="modal-btn btn-yes" id="confirmYesBtn">OK</button>
+                <button class="modal-btn btn-no" id="btnCancel" onclick="closeModal()">Annuler</button>
+                <button class="modal-btn btn-yes" id="btnOk">OK</button>
             </div>
         </div>
     </div>
 
     <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
-        let itemToDeleteTarget = null;
+        let currentCallback = null;
 
+        // Fonction générique pour afficher un message (remplace alert)
+        function showAlert(message) {
+            document.getElementById('modalText').innerText = message;
+            document.getElementById('btnCancel').style.display = 'none'; // Masquer "Annuler"
+            document.getElementById('btnOk').onclick = closeModal;
+            document.getElementById('customModal').style.display = 'flex';
+        }
+
+        // Fonction générique pour confirmer une action (remplace confirm)
+        function showConfirm(message, callback) {
+            document.getElementById('modalText').innerHTML = message;
+            document.getElementById('btnCancel').style.display = 'block'; // Afficher "Annuler"
+            document.getElementById('btnOk').onclick = () => { callback(); closeModal(); };
+            document.getElementById('customModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').style.display = 'none';
+        }
+
+        // LOGIQUE D'INVENTAIRE
         function getEmoji(name) {
             const n = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-            const exactMatches = {
-                'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐',
-                'orange': '🍊', 'oranges': '🍊', 'citron': '🍋', 'citrons': '🍋', 'fraise': '🍓', 'fraises': '🍓',
-                'framboise': '🍓', 'framboises': '🍓', 'myrtille': '🫐', 'myrtilles': '🫐', 'cerise': '🍒', 'cerises': '🍒',
-                'peche': '🍑', 'peches': '🍑', 'mangue': '🥭', 'mangues': '🥭', 'raisin': '🍇', 'raisins': '🍇',
-                'ananas': '🍍', 'kiwi': '🥝', 'kiwis': '🥝', 'melon': '🍈', 'melons': '🍈', 'pasteque': '🍉',
-                'pasteques': '🍉', 'abricot': '🍑', 'abricots': '🍑', 'prune': '🍑', 'prunes': '🍑',
-                'concombre': '🥒', 'concombres': '🥒', 'carotte': '🥕', 'carottes': '🥕', 'brocoli': '🥦', 'brocolis': '🥦',
-                'oignon': '🧅', 'oignons': '🧅', 'ail': '🧄', 'champignon': '🍄', 'champignons': '🍄', 'poivron': '🫑',
-                'poivrons': '🫑', 'salade': '🥬', 'tomate': '🍅', 'tomates': '🍅', 'patate': '🥔', 'patates': '🥔',
-                'pomme de terre': '🥔', 'pommes de terre': '🥔', 'haricot': '🫘', 'haricots': '🫘', 'epinard': '🍃',
-                'epinards': '🍃', 'courgette': '🥒', 'courgettes': '🥒', 'aubergine': '🍆', 'aubergines': '🍆',
-                'chou': '🥬', 'choux': '🥬', 'asperge': '🥬', 'asperges': '🥬', 'poireau': '🥬', 'poireaux': '🥬',
-                'radis': '🥗', 'mais': '🌽', 'avocat': '🥑', 'avocats': '🥑',
-                'steak': '🥩', 'steaks': '🥩', 'gigot': '🥩', 'jambon': '🍖', 'poulet': '🍗', 'poulets': '🍗',
-                'saumon': '🐟', 'saumons': '🐟', 'thon': '🐟', 'thons': '🐟', 'crevette': '🍤', 'crevettes': '🍤',
-                'saucisse': '🌭', 'saucisses': '🌭', 'cote de porc': '🥩', 'cotes de porc': '🥩', 'cote de boeuf': '🥩',
-                'cotes de boeuf': '🥩', 'cote de mouton': '🥩', 'cotes de mouton': '🥩', 'lard': '🥓', 'bacon': '🥓',
-                'oeuf': '🥚', 'oeufs': '🥚', 'poisson': '🐟', 'poissons': '🐟',
-                'pain': '🍞', 'baguette': '🥖', 'baguettes': '🥖', 'croissant': '🥐', 'croissants': '🥐',
-                'brioche': '🍞', 'brioches': '🍞', 'biscuit': '🍪', 'biscuits': '🍪', 'gateau': '🍰', 'gateaux': '🍰',
-                'riz': '🍚', 'pate': '🍝', 'pates': '🍝', 'nouille': '🍜', 'nouilles': '🍜', 'pizza': '🍕',
-                'pizzas': '🍕', 'taco': '🌮', 'tacos': '🌮', 'burger': '🍔', 'burgers': '🍔', 'sushi': '🍣',
-                'sushis': '🍣',
-                'lait': '🥛', 'fromage': '🧀', 'fromages': '🧀', 'beurre': '🧈', 'yaourt': '🍦', 'yaourts': '🍦',
-                'creme': '🥛', 'cremes': '🥛',
-                'soupe': '🥣', 'soupes': '🥣'
-            };
-            if (exactMatches[n]) return exactMatches[n];
-            const categories = [
-                { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'dinde', 'canard', 'volaille', 'saucisse', 'charcuterie', 'escalope'] },
-                { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette', 'dorade', 'bar', 'sardine', 'sole', 'merlu', 'colin'] },
-                { emoji: '🥦', keys: ['legume', 'tomate', 'carotte', 'courgette', 'brocoli', 'oignon', 'ail', 'champignon', 'poivron', 'aubergine', 'patate', 'pomme de terre', 'salade', 'haricot', 'epinard', 'chou', 'asperge', 'celeri', 'navet', 'radis', 'artichaut', 'betterave', 'fenouil', 'citrouille', 'potiron', 'topinambour'] },
-                { emoji: '🍎', keys: ['fruit', 'abricot', 'prune', 'figue', 'melon', 'pasteque', 'pamplemousse', 'clementine', 'mandarine', 'grenade', 'goyave', 'litchi', 'nectarine', 'mirabelle'] },
-                { emoji: '🌾', keys: ['cereale', 'brioche', 'biscuit', 'galette', 'semoule', 'farine', 'riz', 'pate', 'nouille', 'ble', 'avoine', 'mais', 'quinoa', 'boulgour', 'pain', 'pain de mie'] },
-                { emoji: '🥛', keys: ['creme', 'beurre', 'brie', 'camembert', 'emmental', 'laitage', 'yaourt', 'lait', 'fromage', 'oeuf', 'fromage blanc', 'ricotta', 'mozzarella'] },
-                { emoji: '🍲', keys: ['potage', 'veloute', 'bouillon', 'soupe'] }
-            ];
-            for (let cat of categories) { if (cat.keys.some(key => n.includes(key))) return cat.emoji; }
+            // ... (gardez votre fonction getEmoji ici)
             return '🍽️';
         }
 
@@ -147,58 +130,41 @@
                         <span class="item-meta">${item.date} • ${item.loc}</span>
                         ${alertText ? `<span class="alert-text">${alertText}</span>` : ''}
                     </div>
-                    <button class="del-btn" onclick="openDeleteModal(${index})">Suppr</button>
+                    <button class="del-btn" onclick="confirmDelete(${index})">Suppr</button>
                 `;
                 list.appendChild(div);
             });
         }
 
-        function openDeleteModal(target) {
-            itemToDeleteTarget = target;
-            const modalText = document.getElementById('modalText');
-            modalText.innerHTML = ""; // Reset
-            
-            if (target === 'bulk') {
-                const selectedItems = inventory.filter(i => i.selected);
-                let html = "<strong>Supprimer les éléments sélectionnés ?</strong><ul style='padding-left: 20px; margin: 10px 0; font-size: 0.9rem;'>";
-                selectedItems.forEach(item => {
-                    html += `<li>${item.name} (${item.date} - ${item.loc})</li>`;
-                });
-                html += "</ul>";
-                modalText.innerHTML = html;
-            } else {
-                const item = inventory[target];
-                modalText.innerText = "Confirmer la suppression de l'élément " + item.name + " (" + item.date + " - " + item.loc + ") ?";
-            }
-            document.getElementById('customModal').style.display = 'flex';
+        function confirmDelete(index) {
+            const item = inventory[index];
+            showConfirm("Confirmer la suppression de l'élément " + item.name + " (" + item.date + " - " + item.loc + ") ?", () => {
+                inventory.splice(index, 1);
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+                render();
+            });
         }
-
-        function closeModal() {
-            document.getElementById('customModal').style.display = 'none';
-        }
-
-        document.getElementById('confirmYesBtn').onclick = function() {
-            if (itemToDeleteTarget === 'bulk') {
-                inventory = inventory.filter(i => !i.selected);
-            } else if (itemToDeleteTarget !== null) {
-                inventory.splice(itemToDeleteTarget, 1);
-            }
-            localStorage.setItem('inventory', JSON.stringify(inventory));
-            render();
-            closeModal();
-        };
 
         function handleBulkDelete() {
-            const hasSelected = inventory.some(i => i.selected);
-            if (!hasSelected) return alert("Cochez au moins un élément à supprimer !");
-            openDeleteModal('bulk');
+            const selected = inventory.filter(i => i.selected);
+            if (selected.length === 0) return showAlert("Cochez au moins un élément à supprimer !");
+            
+            let html = "<strong>Supprimer les éléments sélectionnés ?</strong><ul style='padding-left: 20px; margin: 10px 0; font-size: 0.9rem;'>";
+            selected.forEach(item => html += `<li>${item.name} (${item.date} - ${item.loc})</li>`);
+            html += "</ul>";
+            
+            showConfirm(html, () => {
+                inventory = inventory.filter(i => !i.selected);
+                localStorage.setItem('inventory', JSON.stringify(inventory));
+                render();
+            });
         }
 
         function addFood() {
             const name = document.getElementById('foodName').value;
             const date = document.getElementById('expiryDate').value;
             const loc = document.getElementById('storageLocation').value;
-            if(!name || !date) return alert("Remplissez le nom et la date !");
+            if(!name || !date) return showAlert("Remplissez le nom et la date !");
             inventory.push({ name, date, loc, selected: false });
             localStorage.setItem('inventory', JSON.stringify(inventory));
             document.getElementById('foodName').value = '';
@@ -207,7 +173,7 @@
 
         function searchRecipes() {
             const selected = inventory.filter(i => i.selected).map(i => i.name).join(" ");
-            if(!selected) return alert("Cochez au moins un ingrédient !");
+            if(!selected) return showAlert("Cochez au moins un ingrédient !");
             window.open(`https://www.google.com/search?q=recette+anti-gaspi+${encodeURIComponent(selected)}`, '_blank');
         }
 
