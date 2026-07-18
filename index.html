@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zero Gachi</title>
+    <!-- Bibliothèque pour le scanner -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; }
         .container { max-width: 500px; margin: 0 auto; padding: 15px; }
@@ -62,6 +64,9 @@
         </div>
         
         <button class="btn-search" onclick="searchRecipes()">Rechercher des recettes</button>
+        <button class="btn-search" style="background:#555; margin-top:10px;" onclick="startScanner()">Scanner un code-barres 📷</button>
+        <div id="reader" style="width: 100%; display:none; margin-top:10px;"></div>
+        
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
 
@@ -84,6 +89,7 @@
         </div>
     </div>
 
+    <!-- Autres modales -->
     <div id="confirmModal" class="modal-overlay">
         <div class="modal-box">
             <div id="confirmText" style="text-align: left;"></div>
@@ -109,10 +115,28 @@
 
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         
+        // --- SCANNER ---
+        function startScanner() {
+            document.getElementById('reader').style.display = 'block';
+            const html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 150 } },
+                (decodedText) => {
+                    html5QrCode.stop().then(() => {
+                        document.getElementById('reader').style.display = 'none';
+                        document.getElementById('foodName').value = decodedText; // On remplit le champ avec le code
+                        openAddModal(); // Ouvre la modale
+                    });
+                }
+            ).catch(err => { alert("Erreur caméra : " + err); });
+        }
+        
+        // --- LOGIQUE INVENTAIRE ---
         function openAddModal() {
             editingId = null;
             document.getElementById('modalTitle').innerText = "Nouvel aliment";
-            document.getElementById('foodName').value = '';
+            document.getElementById('foodName').value = document.getElementById('foodName').value || '';
             document.getElementById('expiryDate').value = '';
             document.getElementById('foodEmoji').value = '';
             document.getElementById('itemModal').style.display = 'flex';
@@ -139,11 +163,9 @@
             if(!name || !date) return showAlert("Remplissez le nom et la date !");
             
             if (editingId) {
-                // Édition
                 const item = inventory.find(i => String(i.id) === String(editingId));
                 item.name = name; item.date = date; item.loc = loc; item.customEmoji = customEmoji;
             } else {
-                // Création
                 inventory.push({ id: Date.now().toString(), name, date, loc, customEmoji, selected: false });
             }
             
@@ -174,7 +196,6 @@
 
         function getEmoji(item) {
             if (item.customEmoji && item.customEmoji.trim() !== '') return item.customEmoji;
-
             const n = item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
             const exactMatches = {
                 'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐',
@@ -236,13 +257,8 @@
                 
                 const div = document.createElement('div');
                 div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
-                
                 div.onclick = () => toggleSelect(item.id);
-                
-                div.oncontextmenu = (e) => {
-                    e.preventDefault();
-                    openEditModal(item.id);
-                };
+                div.oncontextmenu = (e) => { e.preventDefault(); openEditModal(item.id); };
                 
                 div.innerHTML = `
                     <div class="visual">${getEmoji(item)}</div>
