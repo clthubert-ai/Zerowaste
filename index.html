@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Zero Gachi</title>
+    <style>
+        body { font-family: sans-serif; background-color: #fdfbf7; padding: 20px; }
+        .container { max-width: 500px; margin: auto; }
+        .item { background: white; padding: 15px; margin-bottom: 10px; border-radius: 12px; display: flex; align-items: center; gap: 15px; border: 2px solid transparent; }
+        .urgent { border-color: #d9534f; background: #fffcfc; }
+        .visual { font-size: 1.5rem; }
+        .alert-text { color: #d9534f; font-weight: bold; font-size: 0.8rem; }
+        input, select, button { width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #ccc; }
+        .btn-add { background: #2d5a27; color: white; border: none; font-weight: bold; }
+        .btn-search { background: #7fb069; color: white; border: none; font-weight: bold; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Zero Gachi</h1>
+        <input type="text" id="foodName" placeholder="Ex: Pomme, Yaourt, Steak...">
+        <input type="date" id="expiryDate">
+        <select id="storageLocation">
+            <option value="❄️ Réfrigérateur">❄️ Réfrigérateur</option>
+            <option value="🧊 Congélateur">🧊 Congélateur</option>
+            <option value="📦 Placard">📦 Placard</option>
+        </select>
+        <button class="btn-add" onclick="addFood()">Ajouter à l'inventaire</button>
+        <div id="productList"></div>
+        <button class="btn-search" onclick="searchRecipes()">Rechercher des recettes</button>
+    </div>
+
+    <script>
+        let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
+
+        function getEmoji(name, loc) {
+            const n = name.toLowerCase();
+            const map = {
+                'pomme': '🍎', 'banane': '🍌', 'raisin': '🍇', 'fraise': '🍓', 'citron': '🍋', 'orange': '🍊',
+                'carotte': '🥕', 'tomate': '🍅', 'salade': '🥗', 'oignon': '🧅', 'ail': '🧄', 'brocoli': '🥦',
+                'poulet': '🍗', 'viande': '🥩', 'poisson': '🐟', 'oeuf': '🥚', 'lait': '🥛', 'pain': '🍞',
+                'pâtes': '🍝', 'riz': '🍚', 'fromage': '🧀', 'yaourt': '🍦', 'beurre': '🧈', 'chocolat': '🍫',
+                'steak': '🥩', 'avocat': '🥑', 'concombre': '🥒', 'pomme de terre': '🥔', 'champignon': '🍄'
+            };
+            
+            // Retourne l'emoji trouvé ou une catégorie logique basée sur le stockage
+            if (map[n]) return map[n];
+            if (loc.includes('Réfrigérateur')) return '❄️';
+            if (loc.includes('Congélateur')) return '🧊';
+            return '📦';
+        }
+
+        function render() {
+            const list = document.getElementById('productList');
+            list.innerHTML = "";
+            inventory.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            inventory.forEach((item, index) => {
+                const expiry = new Date(item.date);
+                const diffTime = expiry - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const isUrgent = diffDays <= 2 && diffDays >= 0;
+
+                const div = document.createElement('div');
+                div.className = `item ${isUrgent ? 'urgent' : ''}`;
+                div.innerHTML = `
+                    <div class="visual">${getEmoji(item.name, item.loc)}</div>
+                    <div style="flex-grow:1">
+                        <strong>${item.name}</strong><br>
+                        <small>${item.date} • ${item.loc}</small>
+                        ${isUrgent ? '<br><span class="alert-text">⚠️ Urgent (J-' + diffDays + ')</span>' : ''}
+                    </div>
+                    <button onclick="deleteFood(${index})" style="width:auto">Suppr</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function addFood() {
+            const name = document.getElementById('foodName').value;
+            const date = document.getElementById('expiryDate').value;
+            const loc = document.getElementById('storageLocation').value;
+            if(!name || !date) return alert("Remplissez le nom et la date !");
+            inventory.push({ name, date, loc });
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            document.getElementById('foodName').value = '';
+            render();
+        }
+
+        function deleteFood(index) {
+            inventory.splice(index, 1);
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            render();
+        }
+
+        function searchRecipes() {
+            if(inventory.length === 0) return alert("Ajoutez des ingrédients d'abord !");
+            const ingredients = inventory.map(i => i.name).join("+");
+            window.open(`https://www.google.com/search?q=recette+anti-gaspi+${ingredients}`, '_blank');
+        }
+
+        render();
+    </script>
+</body>
+</html>
