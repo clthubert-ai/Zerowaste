@@ -41,17 +41,25 @@
 
         function getEmoji(name) {
             const n = name.toLowerCase().trim();
-            // Catégories par mots-clés larges
-            if (n.includes('pomme')) return '🍎';
-            if (n.includes('banane')) return '🍌';
-            if (n.includes('steak') || n.includes('viande') || n.includes('poulet') || n.includes('boeuf')) return '🥩';
-            if (n.includes('poisson') || n.includes('saumon')) return '🐟';
-            if (n.includes('tomate') || n.includes('poireau') || n.includes('carotte') || n.includes('légume')) return '🥦';
-            if (n.includes('pain') || n.includes('pâtes') || n.includes('riz') || n.includes('semoule') || n.includes('farine')) return '🍞';
-            if (n.includes('yaourt') || n.includes('lait') || n.includes('fromage')) return '🥛';
-            if (n.includes('raisin') || n.includes('fraise')) return '🍇';
             
-            return '🍽️';
+            // Dictionnaire dynamique : Catégorie -> Mots-clés associés
+            const categories = {
+                '🥩': ['steak', 'viande', 'poulet', 'boeuf', 'porc', 'agneau', 'rumsteck', 'gigot', 'jambon'],
+                '🐟': ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette'],
+                '🥦': ['légume', 'carotte', 'poireau', 'salade', 'courgette', 'brocoli', 'tomate', 'oignon', 'ail'],
+                '🍎': ['fruit', 'pomme', 'banane', 'raisin', 'fraise', 'citron', 'orange'],
+                '🍞': ['pain', 'pâtes', 'riz', 'semoule', 'farine', 'boulangerie'],
+                '🥛': ['yaourt', 'lait', 'fromage', 'beurre', 'crème']
+            };
+
+            // Parcours automatique des catégories
+            for (const [emoji, keywords] of Object.entries(categories)) {
+                if (keywords.some(keyword => n.includes(keyword))) {
+                    return emoji;
+                }
+            }
+            
+            return '🍽️'; // Défaut
         }
 
         function render() {
