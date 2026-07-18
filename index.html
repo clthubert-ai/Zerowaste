@@ -8,7 +8,7 @@
         body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; }
         
         header { background: #2d5a27; color: white; padding: 18px; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
-        header h1 { margin: 0; font-size: 1.4rem; }
+        .header-logo { height: 40px; width: auto; display: block; margin: 0 auto; }
         
         .container { max-width: 500px; margin: 10px auto; padding: 15px; }
         input[type="text"], input[type="date"], select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
@@ -46,7 +46,9 @@
     </style>
 </head>
 <body>
-    <header><h1>Zero Gachi</h1></header>
+    <header>
+        <img src="logo.png" alt="Zero Gachi" class="header-logo">
+    </header>
     <div class="container">
         <input type="text" id="foodName" placeholder="Nom de l'aliment">
         <input type="date" id="expiryDate">
@@ -65,7 +67,6 @@
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
 
-    <!-- Fenêtre modale unique -->
     <div id="customModal">
         <div class="modal-box">
             <div id="modalText" class="modal-text"></div>
@@ -78,32 +79,27 @@
 
     <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
-        let currentCallback = null;
 
-        // Fonction générique pour afficher un message (remplace alert)
         function showAlert(message) {
             document.getElementById('modalText').innerText = message;
-            document.getElementById('btnCancel').style.display = 'none'; // Masquer "Annuler"
+            document.getElementById('btnCancel').style.display = 'none';
             document.getElementById('btnOk').onclick = closeModal;
             document.getElementById('customModal').style.display = 'flex';
         }
 
-        // Fonction générique pour confirmer une action (remplace confirm)
         function showConfirm(message, callback) {
             document.getElementById('modalText').innerHTML = message;
-            document.getElementById('btnCancel').style.display = 'block'; // Afficher "Annuler"
+            document.getElementById('btnCancel').style.display = 'block';
             document.getElementById('btnOk').onclick = () => { callback(); closeModal(); };
             document.getElementById('customModal').style.display = 'flex';
         }
 
-        function closeModal() {
-            document.getElementById('customModal').style.display = 'none';
-        }
+        function closeModal() { document.getElementById('customModal').style.display = 'none'; }
 
-        // LOGIQUE D'INVENTAIRE
         function getEmoji(name) {
             const n = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-            // ... (gardez votre fonction getEmoji ici)
+            const exactMatches = { 'banane': '🍌', 'pomme': '🍎', 'poire': '🍐', 'orange': '🍊', 'citron': '🍋', 'fraise': '🍓', 'framboise': '🍓', 'myrtille': '🫐', 'cerise': '🍒', 'peche': '🍑', 'mangue': '🥭', 'raisin': '🍇', 'ananas': '🍍', 'kiwi': '🥝', 'melon': '🍈', 'pasteque': '🍉', 'abricot': '🍑', 'prune': '🍑', 'concombre': '🥒', 'carotte': '🥕', 'brocoli': '🥦', 'oignon': '🧅', 'ail': '🧄', 'champignon': '🍄', 'poivron': '🫑', 'salade': '🥬', 'tomate': '🍅', 'patate': '🥔', 'haricot': '🫘', 'epinard': '🍃', 'courgette': '🥒', 'aubergine': '🍆', 'chou': '🥬', 'asperge': '🥬', 'poireau': '🥬', 'radis': '🥗', 'mais': '🌽', 'avocat': '🥑', 'steak': '🥩', 'jambon': '🍖', 'poulet': '🍗', 'saumon': '🐟', 'thon': '🐟', 'crevette': '🍤', 'saucisse': '🌭', 'oeuf': '🥚', 'pain': '🍞', 'baguette': '🥖', 'croissant': '🥐', 'brioche': '🍞', 'biscuit': '🍪', 'gateau': '🍰', 'riz': '🍚', 'pate': '🍝', 'nouille': '🍜', 'pizza': '🍕', 'taco': '🌮', 'burger': '🍔', 'sushi': '🍣', 'lait': '🥛', 'fromage': '🧀', 'beurre': '🧈', 'yaourt': '🍦', 'creme': '🥛', 'soupe': '🥣' };
+            if (exactMatches[n]) return exactMatches[n];
             return '🍽️';
         }
 
@@ -115,8 +111,7 @@
             inventory.forEach((item, index) => {
                 const expiry = new Date(item.date);
                 const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
-                let cssClass = '';
-                let alertText = '';
+                let cssClass = '', alertText = '';
                 if (diffDays === -1) { cssClass = 'expired-one'; alertText = '⚠️ Dépassé (Hier)'; }
                 else if (diffDays < -1) { cssClass = 'expired-long'; alertText = '❌ Périmé depuis ' + Math.abs(diffDays) + ' jours'; }
                 else if (diffDays >= 0 && diffDays <= 2) { cssClass = 'urgent'; alertText = diffDays === 0 ? '⚠️ Urgent (Aujourd\'hui)' : `⚠️ Urgent (J-${diffDays})`; }
@@ -148,11 +143,9 @@
         function handleBulkDelete() {
             const selected = inventory.filter(i => i.selected);
             if (selected.length === 0) return showAlert("Cochez au moins un élément à supprimer !");
-            
             let html = "<strong>Supprimer les éléments sélectionnés ?</strong><ul style='padding-left: 20px; margin: 10px 0; font-size: 0.9rem;'>";
             selected.forEach(item => html += `<li>${item.name} (${item.date} - ${item.loc})</li>`);
             html += "</ul>";
-            
             showConfirm(html, () => {
                 inventory = inventory.filter(i => !i.selected);
                 localStorage.setItem('inventory', JSON.stringify(inventory));
