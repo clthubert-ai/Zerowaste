@@ -65,7 +65,10 @@
         
         <button class="btn-search" onclick="searchRecipes()">Rechercher des recettes</button>
         <button class="btn-search" style="background:#555; margin-top:10px;" onclick="startScanner()">Scanner un code-barres 📷</button>
-        <div id="reader" style="width: 100%; display:none; margin-top:10px;"></div>
+        
+        <div id="reader" style="width: 100%; display:none; margin-top:10px;">
+            <button class="btn-del-selected" style="width: 100%; margin-top: 5px; background: #666;" onclick="stopScanner()">Fermer le scanner ❌</button>
+        </div>
         
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
@@ -89,7 +92,6 @@
         </div>
     </div>
 
-    <!-- Autres modales -->
     <div id="confirmModal" class="modal-overlay">
         <div class="modal-box">
             <div id="confirmText" style="text-align: left;"></div>
@@ -112,24 +114,32 @@
     <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
         let editingId = null;
+        let html5QrCode = null; // Instance globale pour contrôler le scanner
 
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         
         // --- SCANNER ---
         function startScanner() {
             document.getElementById('reader').style.display = 'block';
-            const html5QrCode = new Html5Qrcode("reader");
+            html5QrCode = new Html5Qrcode("reader");
             html5QrCode.start(
                 { facingMode: "environment" },
                 { fps: 10, qrbox: { width: 250, height: 150 } },
                 (decodedText) => {
-                    html5QrCode.stop().then(() => {
-                        document.getElementById('reader').style.display = 'none';
-                        document.getElementById('foodName').value = decodedText; // On remplit le champ avec le code
-                        openAddModal(); // Ouvre la modale
-                    });
+                    stopScanner(); // On arrête automatiquement après le scan
+                    document.getElementById('foodName').value = decodedText;
+                    openAddModal();
                 }
             ).catch(err => { alert("Erreur caméra : " + err); });
+        }
+
+        function stopScanner() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('reader').style.display = 'none';
+                    html5QrCode = null;
+                }).catch(err => { console.error("Erreur à l'arrêt du scanner", err); });
+            }
         }
         
         // --- LOGIQUE INVENTAIRE ---
