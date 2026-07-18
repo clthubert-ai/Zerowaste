@@ -9,6 +9,7 @@
         header { background: #2d5a27; padding: 0; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; overflow: hidden; line-height: 0; }
         .header-logo { width: 100%; height: auto; display: block; }
         .container { max-width: 500px; margin: 10px auto; padding: 15px; }
+        
         .button-group { display: flex; gap: 10px; margin-bottom: 20px; }
         .button-group button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
         .btn-add { background: #2d5a27; color: white; }
@@ -18,34 +19,29 @@
         /* Cartes d'aliments */
         .item { 
             background: white; 
-            padding: 10px; 
+            padding: 10px 15px; 
             margin-bottom: 10px; 
             border-radius: 14px; 
             display: flex; 
             align-items: center; 
             gap: 10px; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-            border: none; /* Pas de bordure par défaut */
-            transition: background-color 0.2s ease;
+            border-left: 8px solid transparent; /* Bordure transparente par défaut */
+            transition: border-left 0.2s ease;
         }
         
-        /* État sélectionné : Fond bleu clair, pas de bordure */
-        .item.selected { background-color: #e3f2fd; }
+        /* État sélectionné : On ajoute une grosse bande bleue à gauche */
+        .item.selected { border-left: 8px solid #007bff; }
         
-        /* Couleurs de fond pour les états (Alertes) */
-        .item.urgent { background-color: #fff0f0; }
-        .item.expired-one { background-color: #ffcccc; }
+        /* Couleurs de fond pour les alertes (Gardées pures pour la visibilité) */
+        .item.urgent { background-color: #ffcccc; } /* Rose/Saumon pour Urgent */
+        .item.expired-long { background-color: #c9302c; } /* Rouge profond pour Périmé */
         
-        /* État périmé longue durée : Fond rouge vif et texte blanc */
-        .item.expired-long { background-color: #d9534f; }
+        /* Ajustement du texte pour le contraste */
         .item.expired-long .item-name, 
         .item.expired-long .item-meta, 
         .item.expired-long .alert-text { color: white; }
         
-        /* Ajustement si un élément est sélectionné ET en alerte (pour garder un contraste) */
-        .item.selected.urgent { background-color: #ffe0e0; } /* Teinte légèrement plus rouge */
-        .item.selected.expired-long { background-color: #b71c1c; } /* Rouge un peu plus foncé */
-
         .item input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; flex-shrink: 0; }
         .visual { font-size: 1.4rem; width: 30px; text-align: center; flex-shrink: 0; }
         .item-info { flex-grow: 1; min-width: 0; overflow: hidden; }
@@ -215,7 +211,7 @@
                 const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
                 let cssClass = '', alertText = '';
                 
-                if (diffDays === -1) { cssClass = 'expired-one'; alertText = '⚠️ Dépassé (Hier)'; }
+                if (diffDays === -1) { cssClass = 'urgent'; alertText = '⚠️ Dépassé (Hier)'; }
                 else if (diffDays < -1) { cssClass = 'expired-long'; alertText = '❌ Périmé depuis ' + Math.abs(diffDays) + ' jours'; }
                 else if (diffDays >= 0 && diffDays <= 2) { cssClass = 'urgent'; alertText = diffDays === 0 ? '⚠️ Urgent (Aujourd\'hui)' : `⚠️ Urgent (J-${diffDays})`; }
                 
