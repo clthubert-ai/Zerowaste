@@ -41,22 +41,35 @@
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
 
         function getEmoji(name) {
-            const n = name.toLowerCase().trim();
-            const exactMatches = {
-                'pomme': '🍎', 'banane': '🍌', 'raisin': '🍇', 'fraise': '🍓', 'framboise': '🍓',
-                'steak': '🥩', 'rumsteck': '🥩', 'gigot': '🥩', 'poulet': '🍗', 'porc': '🥩',
-                'poireau': '🥦', 'tomate': '🍅', 'carotte': '🥕', 'concombre': '🥒', 'pain': '🍞', 'semoule': '🍞', 'farine': '🍞'
-            };
-            if (exactMatches[n]) return exactMatches[n];
-            const categories = [
-                { emoji: '🥩', keys: ['viande', 'boeuf', 'agneau', 'jambon', 'volaille'] },
-                { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette'] },
-                { emoji: '🥦', keys: ['légume', 'salade', 'courgette', 'brocoli', 'oignon', 'ail', 'haricot', 'champignon', 'concombre'] },
-                { emoji: '🍎', keys: ['fruit', 'poire', 'abricot', 'citron', 'orange', 'framboise'] },
-                { emoji: '🍞', keys: ['pâtes', 'riz', 'céréale'] },
-                { emoji: '🥛', keys: ['yaourt', 'lait', 'fromage', 'beurre', 'crème', 'oeuf'] }
+            // Normalisation pour ignorer les accents
+            const n = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+            
+            // 1. Dictionnaire d'objets spécifiques (priorité haute)
+            const specific = [
+                { k: 'banane', e: '🍌' }, { k: 'pomme', e: '🍎' }, { k: 'raisin', e: '🍇' }, 
+                { k: 'fraise', e: '🍓' }, { k: 'framboise', e: '🍓' }, { k: 'steak', e: '🥩' }, 
+                { k: 'rumsteck', e: '🥩' }, { k: 'gigot', e: '🥩' }, { k: 'poulet', e: '🍗' }, 
+                { k: 'porc', e: '🥩' }, { k: 'cote', e: '🥩' }, { k: 'poireau', e: '🥦' }, 
+                { k: 'tomate', e: '🍅' }, { k: 'carotte', e: '🥕' }, { k: 'concombre', e: '🥒' }, 
+                { k: 'pain', e: '🍞' }, { k: 'semoule', e: '🍞' }, { k: 'farine', e: '🍞' }
             ];
-            for (let cat of categories) { if (cat.keys.some(key => n.includes(key))) return cat.emoji; }
+            // On cherche si un mot-clé est contenu dans le nom
+            for (let item of specific) {
+                if (n.includes(item.k)) return item.e;
+            }
+
+            // 2. Catégories génériques
+            const categories = [
+                { e: '🥩', keys: ['viande', 'boeuf', 'agneau', 'jambon', 'volaille'] },
+                { e: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette'] },
+                { e: '🥦', keys: ['legume', 'salade', 'courgette', 'brocoli', 'oignon', 'ail', 'haricot', 'champignon'] },
+                { e: '🍎', keys: ['fruit', 'poire', 'abricot', 'citron', 'orange'] },
+                { e: '🍞', keys: ['pates', 'riz', 'cereale'] },
+                { e: '🥛', keys: ['yaourt', 'lait', 'fromage', 'beurre', 'creme', 'oeuf'] }
+            ];
+            for (let cat of categories) { 
+                if (cat.keys.some(key => n.includes(key))) return cat.e; 
+            }
             return '🍽️';
         }
 
