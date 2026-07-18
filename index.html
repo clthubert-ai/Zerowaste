@@ -26,8 +26,9 @@
         .item-meta { font-size: 0.75rem; color: #666; }
         .alert-text { color: #d9534f; font-weight: bold; font-size: 0.7rem; display: block; }
         .del-btn { background: #fee2e2; color: #991b1b; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; flex-shrink: 0; width: 55px; }
+        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-box { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
+        .modal-box { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; max-height: 80vh; overflow-y: auto; }
         .modal-input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; }
         .modal-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
@@ -50,7 +51,6 @@
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
 
-    <!-- Modale d'ajout -->
     <div id="addModal" class="modal-overlay">
         <div class="modal-box">
             <h3>Nouvel aliment</h3>
@@ -68,10 +68,9 @@
         </div>
     </div>
 
-    <!-- Modale de confirmation -->
     <div id="confirmModal" class="modal-overlay">
         <div class="modal-box">
-            <div id="confirmText"></div>
+            <div id="confirmText" style="text-align: left;"></div>
             <div class="modal-btns">
                 <button class="modal-btn btn-cancel" onclick="closeModal('confirmModal')">Annuler</button>
                 <button class="modal-btn btn-confirm" id="confirmOk">OK</button>
@@ -150,7 +149,7 @@
         function confirmDelete(id) {
             const item = inventory.find(i => String(i.id) === String(id));
             if(!item) return;
-            showConfirm("Confirmer la suppression de " + item.name + " ?", () => {
+            showConfirm(`<strong>Confirmer la suppression de :</strong><br>${item.name} (${item.date})`, () => {
                 inventory = inventory.filter(i => String(i.id) !== String(id));
                 localStorage.setItem('inventory', JSON.stringify(inventory));
                 render();
@@ -160,7 +159,15 @@
         function handleBulkDelete() {
             const selected = inventory.filter(i => i.selected);
             if (selected.length === 0) return alert("Cochez au moins un élément !");
-            showConfirm("Supprimer les éléments sélectionnés ?", () => {
+            
+            // Création de la liste HTML pour la confirmation
+            let listHtml = "<strong>Supprimer les éléments suivants ?</strong><ul style='text-align:left; font-size:0.9rem; margin-top:10px; padding-left:20px;'>";
+            selected.forEach(item => {
+                listHtml += `<li><strong>${item.name}</strong> - ${item.date} (${item.loc})</li>`;
+            });
+            listHtml += "</ul>";
+            
+            showConfirm(listHtml, () => {
                 inventory = inventory.filter(i => !i.selected);
                 localStorage.setItem('inventory', JSON.stringify(inventory));
                 render();
