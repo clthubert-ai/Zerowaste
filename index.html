@@ -7,21 +7,26 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; }
         
-        /* Container principal pour tout centrer */
         .container { max-width: 500px; margin: 0 auto; padding: 15px; }
         
-        /* Header : maintenant dans le container, même largeur que les items */
+        /* HEADER CORRIGÉ : Fond transparent, pas de padding, coins arrondis */
         header { 
-            background: #2d5a27; 
-            padding: 10px; 
+            background: transparent; 
+            padding: 0; 
             margin-bottom: 15px; 
             border-radius: 14px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+            overflow: hidden; /* Important pour que l'image respecte les bords arrondis */
+            display: flex;
+            justify-content: center;
         }
-        .header-logo { height: 40px; width: auto; display: block; }
+        
+        /* L'image définit maintenant la taille du header */
+        .header-logo { 
+            width: 100%; 
+            height: auto; 
+            display: block; 
+        }
         
         .button-group { display: flex; gap: 10px; margin-bottom: 20px; }
         .button-group button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
@@ -87,7 +92,6 @@
 <body>
     
     <div class="container">
-        <!-- Header déplacé ici pour hériter des contraintes du container -->
         <header>
             <img src="logo.png" alt="Zero Gachi" class="header-logo">
         </header>
