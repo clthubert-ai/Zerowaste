@@ -41,19 +41,16 @@
 
         function getEmoji(name) {
             const n = name.toLowerCase().trim();
-            const map = { 
-                'pomme': '🍎', 'banane': '🍌', 'raisin': '🍇', 'fraise': '🍓', 'citron': '🍋', 'orange': '🍊', 
-                'carotte': '🥕', 'tomate': '🍅', 'salade': '🥗', 'oignon': '🧅', 'ail': '🧄', 'brocoli': '🥦', 
-                'poulet': '🍗', 'viande': '🥩', 'poisson': '🐟', 'oeuf': '🥚', 'lait': '🥛', 'pain': '🍞', 
-                'pâtes': '🍝', 'riz': '🍚', 'fromage': '🧀', 'yaourt': '🍦', 'beurre': '🧈', 'chocolat': '🍫', 
-                'steak': '🥩', 'avocat': '🥑', 'concombre': '🥒', 'pomme de terre': '🥔', 'champignon': '🍄' 
-            };
-            if (map[n]) return map[n];
-            if (n.includes('banane')) return '🍌';
+            // Catégories par mots-clés larges
             if (n.includes('pomme')) return '🍎';
-            if (n.includes('tomate')) return '🍅';
-            if (n.includes('steak') || n.includes('viande')) return '🥩';
-            if (n.includes('pain')) return '🍞';
+            if (n.includes('banane')) return '🍌';
+            if (n.includes('steak') || n.includes('viande') || n.includes('poulet') || n.includes('boeuf')) return '🥩';
+            if (n.includes('poisson') || n.includes('saumon')) return '🐟';
+            if (n.includes('tomate') || n.includes('poireau') || n.includes('carotte') || n.includes('légume')) return '🥦';
+            if (n.includes('pain') || n.includes('pâtes') || n.includes('riz') || n.includes('semoule') || n.includes('farine')) return '🍞';
+            if (n.includes('yaourt') || n.includes('lait') || n.includes('fromage')) return '🥛';
+            if (n.includes('raisin') || n.includes('fraise')) return '🍇';
+            
             return '🍽️';
         }
 
@@ -70,7 +67,6 @@
                 
                 const div = document.createElement('div');
                 div.className = `item ${isUrgent ? 'urgent' : ''}`;
-                // L'emoji est recalculé ici à chaque affichage avec getEmoji(item.name)
                 div.innerHTML = `
                     <input type="checkbox" onchange="inventory[${index}].selected = this.checked" ${item.selected ? 'checked' : ''}>
                     <div class="visual">${getEmoji(item.name)}</div>
