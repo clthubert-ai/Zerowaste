@@ -245,7 +245,7 @@
             
             let htmlList = "<strong>Supprimer ces éléments ?</strong><ul style='padding-left: 20px; margin-top: 10px;'>";
             selected.forEach(item => {
-                htmlList += `<li><strong>${item.name}</strong> (${item.date})</li>`;
+                htmlList += `<li><strong>${item.name}</strong> - ${item.loc} (${item.date})</li>`;
             });
             htmlList += "</ul>";
             
