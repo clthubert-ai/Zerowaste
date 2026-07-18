@@ -50,6 +50,7 @@
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
 
+    <!-- Modale d'ajout -->
     <div id="addModal" class="modal-overlay">
         <div class="modal-box">
             <h3>Nouvel aliment</h3>
@@ -67,6 +68,7 @@
         </div>
     </div>
 
+    <!-- Modale de confirmation -->
     <div id="confirmModal" class="modal-overlay">
         <div class="modal-box">
             <div id="confirmText"></div>
@@ -94,9 +96,10 @@
             const date = document.getElementById('expiryDate').value;
             const loc = document.getElementById('storageLocation').value;
             if(!name || !date) return alert("Remplissez le nom et la date !");
-            // Génération ID simple
+            
             inventory.push({ id: Date.now().toString(), name, date, loc, selected: false });
             localStorage.setItem('inventory', JSON.stringify(inventory));
+            
             document.getElementById('foodName').value = '';
             closeModal('addModal');
             render();
@@ -123,6 +126,7 @@
                 const expiry = new Date(item.date);
                 const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
                 let cssClass = '', alertText = '';
+                
                 if (diffDays === -1) { cssClass = 'expired-one'; alertText = '⚠️ Dépassé (Hier)'; }
                 else if (diffDays < -1) { cssClass = 'expired-long'; alertText = '❌ Périmé depuis ' + Math.abs(diffDays) + ' jours'; }
                 else if (diffDays >= 0 && diffDays <= 2) { cssClass = 'urgent'; alertText = diffDays === 0 ? '⚠️ Urgent (Aujourd\'hui)' : `⚠️ Urgent (J-${diffDays})`; }
@@ -135,7 +139,7 @@
                     <div class="item-info">
                         <span class="item-name">${item.name}</span>
                         <span class="item-meta">${item.date} • ${item.loc}</span>
-                        ${alertText ? `<span class="alert-text">${alertText}</span>' : ''}
+                        ${alertText ? `<span class="alert-text">${alertText}</span>` : ''}
                     </div>
                     <button class="del-btn" onclick="confirmDelete('${item.id}')">Suppr</button>
                 `;
