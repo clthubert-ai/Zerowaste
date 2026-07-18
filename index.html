@@ -180,9 +180,19 @@
                 const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
                 let cssClass = '', alertText = '';
                 
-                if (diffDays < -1) { cssClass = 'expired-long'; alertText = '❌ Périmé ' + Math.abs(diffDays) + 'j'; }
-                else if (diffDays === -1) { cssClass = 'expired-yesterday'; alertText = '⚠️ Hier'; }
-                else if (diffDays >= 0 && diffDays <= 2) { cssClass = 'urgent'; alertText = diffDays === 0 ? '⚠️ Urgent' : `⚠️ J-${diffDays}`; }
+                // Logique des labels mise à jour
+                if (diffDays < -1) { 
+                    cssClass = 'expired-long'; 
+                    alertText = '❌ Périmé ' + Math.abs(diffDays) + 'j'; 
+                }
+                else if (diffDays === -1) { 
+                    cssClass = 'expired-yesterday'; 
+                    alertText = 'Périmé 1j'; 
+                }
+                else if (diffDays >= 0 && diffDays <= 2) { 
+                    cssClass = 'urgent'; 
+                    alertText = 'Date proche'; 
+                }
                 
                 const div = document.createElement('div');
                 div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
