@@ -6,26 +6,19 @@
     <title>Zero Gachi</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; }
-        
         header { background: #2d5a27; padding: 0; text-align: center; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; overflow: hidden; line-height: 0; }
         .header-logo { width: 100%; height: auto; display: block; }
-        
         .container { max-width: 500px; margin: 10px auto; padding: 15px; }
-        
-        /* Styles des boutons */
         .button-group { display: flex; gap: 10px; margin-bottom: 20px; }
         .button-group button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
         .btn-add { background: #2d5a27; color: white; }
         .btn-del-selected { background: #d9534f; color: white; }
         .btn-search { background: #7fb069; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
-
-        /* Styles des éléments */
         .item { background: white; padding: 10px; margin-bottom: 10px; border-radius: 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 2px solid transparent; }
         .item.urgent { border-color: #d9534f; }
         .item.expired-one { background-color: #ffcccc; border-color: #ff4d4d; }
         .item.expired-long { background-color: black; border-color: #990000; }
         .item.expired-long .item-name, .item.expired-long .item-meta, .item.expired-long .alert-text { color: #ff0000; }
-        
         .item input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; flex-shrink: 0; }
         .visual { font-size: 1.4rem; width: 30px; text-align: center; flex-shrink: 0; }
         .item-info { flex-grow: 1; min-width: 0; overflow: hidden; }
@@ -33,8 +26,6 @@
         .item-meta { font-size: 0.75rem; color: #666; }
         .alert-text { color: #d9534f; font-weight: bold; font-size: 0.7rem; display: block; }
         .del-btn { background: #fee2e2; color: #991b1b; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; flex-shrink: 0; width: 55px; }
-
-        /* Modals */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
         .modal-box { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
         .modal-input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
@@ -59,7 +50,6 @@
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
 
-    <!-- Modal d'ajout -->
     <div id="addModal" class="modal-overlay">
         <div class="modal-box">
             <h3>Nouvel aliment</h3>
@@ -77,7 +67,6 @@
         </div>
     </div>
 
-    <!-- Modal de confirmation -->
     <div id="confirmModal" class="modal-overlay">
         <div class="modal-box">
             <div id="confirmText"></div>
@@ -90,7 +79,6 @@
 
     <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
-        inventory.forEach(item => { if(!item.id) item.id = Date.now() + Math.random(); });
 
         function openAddModal() { document.getElementById('addModal').style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -106,7 +94,8 @@
             const date = document.getElementById('expiryDate').value;
             const loc = document.getElementById('storageLocation').value;
             if(!name || !date) return alert("Remplissez le nom et la date !");
-            inventory.push({ id: Date.now() + Math.random(), name, date, loc, selected: false });
+            // Génération ID simple
+            inventory.push({ id: Date.now().toString(), name, date, loc, selected: false });
             localStorage.setItem('inventory', JSON.stringify(inventory));
             document.getElementById('foodName').value = '';
             closeModal('addModal');
@@ -114,14 +103,14 @@
         }
 
         function toggleSelect(id, isChecked) {
-            const item = inventory.find(i => i.id === id);
+            const item = inventory.find(i => String(i.id) === String(id));
             if(item) item.selected = isChecked;
         }
 
         function getEmoji(name) {
             const n = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-            const exactMatches = { 'banane': '🍌', 'pomme': '🍎', 'poire': '🍐', 'orange': '🍊', 'citron': '🍋', 'fraise': '🍓', 'framboise': '🍓', 'myrtille': '🫐', 'cerise': '🍒', 'peche': '🍑', 'mangue': '🥭', 'raisin': '🍇', 'ananas': '🍍', 'kiwi': '🥝', 'melon': '🍈', 'pasteque': '🍉', 'abricot': '🍑', 'prune': '🍑', 'concombre': '🥒', 'carotte': '🥕', 'brocoli': '🥦', 'oignon': '🧅', 'ail': '🧄', 'champignon': '🍄', 'poivron': '🫑', 'salade': '🥬', 'tomate': '🍅', 'patate': '🥔', 'haricot': '🫘', 'epinard': '🍃', 'courgette': '🥒', 'aubergine': '🍆', 'chou': '🥬', 'asperge': '🥬', 'poireau': '🥬', 'radis': '🥗', 'mais': '🌽', 'avocat': '🥑', 'steak': '🥩', 'jambon': '🍖', 'poulet': '🍗', 'saumon': '🐟', 'thon': '🐟', 'crevette': '🍤', 'saucisse': '🌭', 'oeuf': '🥚', 'pain': '🍞', 'baguette': '🥖', 'croissant': '🥐', 'brioche': '🍞', 'biscuit': '🍪', 'gateau': '🍰', 'riz': '🍚', 'pate': '🍝', 'nouille': '🍜', 'pizza': '🍕', 'taco': '🌮', 'burger': '🍔', 'sushi': '🍣', 'lait': '🥛', 'fromage': '🧀', 'beurre': '🧈', 'yaourt': '🍦', 'creme': '🥛', 'soupe': '🥣' };
-            return exactMatches[n] || '🍽️';
+            const e = { 'banane': '🍌', 'pomme': '🍎', 'poire': '🍐', 'orange': '🍊', 'citron': '🍋', 'fraise': '🍓', 'carotte': '🥕', 'brocoli': '🥦', 'oignon': '🧅', 'ail': '🧄', 'champignon': '🍄', 'poivron': '🫑', 'salade': '🥬', 'tomate': '🍅', 'patate': '🥔', 'steak': '🥩', 'jambon': '🍖', 'poulet': '🍗', 'saumon': '🐟', 'lait': '🥛', 'fromage': '🧀', 'oeuf': '🥚', 'pain': '🍞', 'riz': '🍚', 'pate': '🍝' };
+            return e[n] || '🍽️';
         }
 
         function render() {
@@ -146,7 +135,7 @@
                     <div class="item-info">
                         <span class="item-name">${item.name}</span>
                         <span class="item-meta">${item.date} • ${item.loc}</span>
-                        ${alertText ? `<span class="alert-text">${alertText}</span>` : ''}
+                        ${alertText ? `<span class="alert-text">${alertText}</span>' : ''}
                     </div>
                     <button class="del-btn" onclick="confirmDelete('${item.id}')">Suppr</button>
                 `;
@@ -155,9 +144,10 @@
         }
 
         function confirmDelete(id) {
-            const item = inventory.find(i => i.id === id);
-            showConfirm("Confirmer la suppression de l'élément " + item.name + " ?", () => {
-                inventory = inventory.filter(i => i.id !== id);
+            const item = inventory.find(i => String(i.id) === String(id));
+            if(!item) return;
+            showConfirm("Confirmer la suppression de " + item.name + " ?", () => {
+                inventory = inventory.filter(i => String(i.id) !== String(id));
                 localStorage.setItem('inventory', JSON.stringify(inventory));
                 render();
             });
