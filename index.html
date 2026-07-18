@@ -18,12 +18,13 @@
         /* Cartes d'aliments */
         .item { background: white; padding: 10px; margin-bottom: 10px; border-radius: 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
-        /* Couleurs de fond uniquement (pas de bordure) */
+        /* Couleurs de fond pour les états (pas de bordure) */
         .item.urgent { background-color: #fff0f0; }
         .item.expired-one { background-color: #ffcccc; }
-        .item.expired-long { background-color: #ff9999; }
+        .item.expired-long { background-color: black; }
         
-        .item.expired-long .item-name, .item.expired-long .item-meta, .item.expired-long .alert-text { color: #800000; }
+        /* Texte rouge pour le périmé longue durée */
+        .item.expired-long .item-name, .item.expired-long .item-meta, .item.expired-long .alert-text { color: red; }
         
         .item input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; flex-shrink: 0; }
         .visual { font-size: 1.4rem; width: 30px; text-align: center; flex-shrink: 0; }
