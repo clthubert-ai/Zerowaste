@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero Gachi - Modern</title>
+    <style>
+        :root {
+            --primary: #2d5a27;
+            --accent: #7fb069;
+            --bg: #fdfbf7;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+            --alert: #d9534f;
+        }
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
+        header { 
+            background: linear-gradient(135deg, var(--primary), var(--accent)); 
+            color: white; 
+            padding: 40px 20px; 
+            text-align: center; 
+            border-bottom-left-radius: 30px; 
+            border-bottom-right-radius: 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        header h1 { margin: 0; font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; }
+        header p { margin: 10px 0 0; opacity: 0.9; font-weight: 300; }
+        .container { padding: 20px; max-width: 600px; margin: auto; }
+        .input-group { background: var(--card-bg); padding: 20px; border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); margin-top: -30px; position: relative; }
+        input, select { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid #eee; border-radius: 12px; box-sizing: border-box; background: #f9f9f9; }
+        .btn-action { width: 100%; padding: 16px; border: none; border-radius: 12px; background: var(--primary); color: white; font-weight: 700; cursor: pointer; transition: transform 0.2s; margin-top: 10px; }
+        .btn-action:active { transform: scale(0.98); }
+        .section-title { font-size: 1.2rem; color: var(--primary); margin: 30px 0 15px; font-weight: 700; display: flex; align-items: center; }
+        .item { background: var(--card-bg); padding: 16px; border-radius: 16px; display: flex; align-items: center; gap: 15px; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 2px solid transparent; transition: all 0.2s; }
+        .item.urgent { border-color: var(--alert); background: #fffcfc; }
+        .item.selected { border: 2px solid var(--primary); background: #f0fdf0; }
+        .checkbox-container { display: flex; align-items: center; }
+        input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; accent-color: var(--primary); }
+        .visual { font-size: 1.8rem; min-width: 45px; text-align: center; }
+        .info { flex-grow: 1; }
+        .item-title { font-weight: 700; font-size: 1.05rem; }
+        .item-meta { font-size: 0.85rem; color: #7f8c8d; margin-top: 2px; }
+        .del-btn { background: #fff0f0; color: var(--alert); border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+        .alert-text { color: var(--alert); font-weight: bold; font-size: 0.75rem; display: block; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Zero Gachi</h1>
+        <p>Gérez votre inventaire, sauvez vos repas.</p>
+    </header>
+    <div class="container">
+        <div class="input-group">
+            <input type="text" id="foodName" placeholder="Nom de l'aliment">
+            <input type="date" id="expiryDate">
+            <select id="storageLocation">
+                <option value="Réfrigérateur">❄️ Réfrigérateur</option>
+                <option value="Congélateur">🧊 Congélateur</option>
+                <option value="Placard">📦 Placard</option>
+            </select>
+            <button class="btn-action" onclick="addFood()">Ajouter à l'inventaire</button>
+        </div>
+        <div class="section-title">Ingrédients actifs</div>
+        <div id="productList"></div>
+        <button class="btn-action" style="background: var(--accent); margin-top: 20px;" onclick="searchGoogle()">Rechercher des recettes</button>
+    </div>
+    <script>
+        let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
+        function getVisual(name) {
+            const n = name.toLowerCase();
+            const map = {
+                'pomme': '🍎', 'banane': '🍌', 'raisin': '🍇', 'fraise': '🍓', 'citron': '🍋', 'orange': '🍊', 'ananas': '🍍', 'mangue': '🥭', 'poire': '🍐', 'pêche': '🍑', 'cerise': '🍒', 'melon': '🍈', 'kiwi': '🥝', 'avocat': '🥑', 'pastèque': '🍉',
+                'carotte': '🥕', 'tomate': '🍅', 'salade': '🥗', 'pomme de terre': '🥔', 'oignon': '🧅', 'ail': '🧄', 'brocoli': '🥦', 'chou': '🥬', 'concombre': '🥒', 'poivron': '🫑', 'maïs': '🌽', 'champignon': '🍄', 'aubergine': '🍆', 'courgette': '🥒', 'citrouille': '🎃', 'radis': '🥕', 'asperge': '🥦',
+                'pain': '🍞', 'riz': '🍚', 'pâtes': '🍝', 'semoule': '🌾', 'farine': '🌾', 'avoine': '🥣', 'blé': '🌾', 'quinoa': '🍚', 'boulgour': '🌾', 'pizza': '🍕', 'tortilla': '🌮', 'crêpe': '🥞', 'baguette': '🥖', 'biscotte': '🍞',
+                'lait': '🥛', 'yaourt': '🍦', 'fromage': '🧀', 'beurre': '🧈', 'oeuf': '🥚', 'crème': '🥛', 'margarine': '🧈', 'lait de soja': '🥛', 'lait d\'amande': '🥛',
+                'poulet': '🍗', 'viande': '🥩', 'poisson': '🐟', 'boeuf': '🥩', 'porc': '🥓', 'jambon': '🥓', 'crevette': '🍤', 'saumon': '🍣', 'thon': '🐟', 'saucisse': '🌭', 'steak': '🥩', 'dinde': '🍗',
+                'soupe': '🥣', 'chocolat': '🍫', 'sucre': '🍬', 'sel': '🧂', 'huile': '🫗', 'vinaigre': '🫗', 'miel': '🍯', 'café': '☕', 'thé': '🍵', 'jus': '🧃', 'vin': '🍷', 'bière': '🍺', 'eau': '💧', 'noix': '🥜', 'amande': '🥜', 'cacahuète': '🥜', 'lentille': '🫘', 'haricot': '🫘', 'pois': '🫛', 'soja': '🫘', 'épice': '🧂'
+            };
+            for (const key in map) if (n.includes(key)) return map[key];
+            return '🍽️';
+        }
+        function addFood() {
+            const name = document.getElementById('foodName').value;
+            const date = document.getElementById('expiryDate').value;
+            const loc = document.getElementById('storageLocation').value;
+            if(!name || !date) return alert("Remplissez le nom et la date !");
+            inventory.push({ name, date, loc, selected: false });
+            save(); render();
+            document.getElementById('foodName').value = '';
+        }
+        function deleteFood(idx) { inventory.splice(idx, 1); save(); render(); }
+        function save() { localStorage.setItem('inventory', JSON.stringify(inventory)); }
+        function isUrgent(dateStr) {
+            const today = new Date(); today.setHours(0,0,0,0);
+            const expiry = new Date(dateStr); expiry.setHours(0,0,0,0);
+            return (expiry - today) / (1000 * 60 * 60 * 24) <= 2;
+        }
+        function render() {
+            inventory.sort((a, b) => new Date(a.date) - new Date(b.date));
+            document.getElementById('productList').innerHTML = inventory.map((i, idx) => {
+                const urgent = isUrgent(i.date);
+                return `
+                <div class="item ${urgent ? 'urgent' : ''} ${i.selected ? 'selected' : ''}">
+                    <div class="checkbox-container">
+                        <input type="checkbox" ${i.selected ? 'checked' : ''} onchange="inventory[${idx}].selected = this.checked; save(); render();">
+                    </div>
+                    <span class="visual">${getVisual(i.name)}</span>
+                    <div class="info">
+                        <div class="item-title">${i.name}</div>
+                        <div class="item-meta">${i.date} • ${i.loc}</div>
+                        ${urgent ? '<span class="alert-text">⚠️ Consommer sous 2 jours</span>' : ''}
+                    </div>
+                    <button class="del-btn" onclick="deleteFood(${idx})">Supprimer</button>
+                </div>
+                `).join('');
+        }
+        function searchGoogle() {
+            const selected = inventory.filter(i => i.selected).map(i => i.name).join(' ');
+            if(!selected) return alert("Sélectionnez au moins un ingrédient !");
+            window.open(`https://www.google.com/search?q=${encodeURIComponent(selected + " recette anti-gaspi")}`, '_blank');
+        }
+        render();
+    </script>
+</body>
+</html>
