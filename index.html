@@ -29,10 +29,8 @@
         .alert-text { color: #d9534f; font-weight: bold; font-size: 0.7rem; display: block; }
         .del-btn { background: #fee2e2; color: #991b1b; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; flex-shrink: 0; width: 55px; }
         
-        /* Correction ici : alignement en haut pour laisser la place au clavier */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: flex-start; padding-top: 50px; overflow-y: auto; }
         .modal-box { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; margin-bottom: 50px; }
-        
         .modal-input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; }
         .modal-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
@@ -55,7 +53,6 @@
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
 
-    <!-- Modale d'ajout -->
     <div id="addModal" class="modal-overlay">
         <div class="modal-box">
             <h3>Nouvel aliment</h3>
@@ -73,7 +70,6 @@
         </div>
     </div>
 
-    <!-- Modale de confirmation -->
     <div id="confirmModal" class="modal-overlay">
         <div class="modal-box">
             <div id="confirmText" style="text-align: left;"></div>
@@ -84,7 +80,6 @@
         </div>
     </div>
 
-    <!-- Modale d'alerte -->
     <div id="alertModal" class="modal-overlay">
         <div class="modal-box">
             <div id="alertText"></div>
@@ -197,7 +192,7 @@
                     <div class="item-info">
                         <span class="item-name">${item.name}</span>
                         <span class="item-meta">${item.date} • ${item.loc}</span>
-                        ${alertText ? `<span class="alert-text">${alertText}</span>' : ''}
+                        ${alertText ? `<span class="alert-text">${alertText}</span>` : ''}
                     </div>
                     <button class="del-btn" onclick="confirmDelete('${item.id}')">Suppr</button>
                 `;
