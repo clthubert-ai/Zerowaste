@@ -32,9 +32,7 @@
             <option value="📦 Placard">📦 Placard</option>
         </select>
         <button class="btn-add" onclick="addFood()">Ajouter à l'inventaire</button>
-        
         <div id="productList" style="margin-top: 20px;"></div>
-        
         <button class="btn-search" onclick="searchRecipes()">Rechercher des recettes anti-gaspi</button>
     </div>
 
@@ -42,19 +40,23 @@
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
 
         function getEmoji(name) {
-            const n = name.toLowerCase();
+            const n = name.toLowerCase().trim();
+            const map = { 
+                'pomme': '🍎', 'banane': '🍌', 'raisin': '🍇', 'fraise': '🍓', 'citron': '🍋', 'orange': '🍊', 
+                'carotte': '🥕', 'tomate': '🍅', 'salade': '🥗', 'oignon': '🧅', 'ail': '🧄', 'brocoli': '🥦', 
+                'poulet': '🍗', 'viande': '🥩', 'poisson': '🐟', 'oeuf': '🥚', 'lait': '🥛', 'pain': '🍞', 
+                'pâtes': '🍝', 'riz': '🍚', 'fromage': '🧀', 'yaourt': '🍦', 'beurre': '🧈', 'chocolat': '🍫', 
+                'steak': '🥩', 'avocat': '🥑', 'concombre': '🥒', 'pomme de terre': '🥔', 'champignon': '🍄' 
+            };
             
-            // 1. Liste précise
-            const map = { 'pomme': '🍎', 'banane': '🍌', 'raisin': '🍇', 'fraise': '🍓', 'citron': '🍋', 'orange': '🍊', 'carotte': '🥕', 'tomate': '🍅', 'salade': '🥗', 'oignon': '🧅', 'ail': '🧄', 'brocoli': '🥦', 'poulet': '🍗', 'viande': '🥩', 'poisson': '🐟', 'oeuf': '🥚', 'lait': '🥛', 'pain': '🍞', 'pâtes': '🍝', 'riz': '🍚', 'fromage': '🧀', 'yaourt': '🍦', 'beurre': '🧈', 'chocolat': '🍫', 'steak': '🥩', 'avocat': '🥑', 'concombre': '🥒', 'pomme de terre': '🥔', 'champignon': '🍄' };
             if (map[n]) return map[n];
-
-            // 2. Catégorisation logique (si non trouvé dans la liste)
-            if (n.includes('steak') || n.includes('viande') || n.includes('poulet') || n.includes('boeuf') || n.includes('porc')) return '🥩';
-            if (n.includes('poisson') || n.includes('saumon') || n.includes('thon')) return '🐟';
-            if (n.includes('légume') || n.includes('carotte') || n.includes('poireau') || n.includes('salade') || n.includes('courgette')) return '🥦';
-            if (n.includes('fruit') || n.includes('pomme') || n.includes('poire')) return '🍎';
+            // Catégorisation auto par mot-clé
+            if (n.includes('steak') || n.includes('viande') || n.includes('poulet')) return '🥩';
+            if (n.includes('pomme')) return '🍎';
+            if (n.includes('tomate')) return '🍅';
+            if (n.includes('pain')) return '🍞';
             
-            return '🍽️'; // Emoji générique par défaut
+            return '🍽️';
         }
 
         function render() {
