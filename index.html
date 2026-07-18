@@ -41,35 +41,35 @@
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
 
         function getEmoji(name) {
-            // Normalisation pour ignorer les accents
+            // Normalisation : met en minuscule et retire les accents (Côte -> cote)
             const n = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
             
-            // 1. Dictionnaire d'objets spécifiques (priorité haute)
-            const specific = [
-                { k: 'banane', e: '🍌' }, { k: 'pomme', e: '🍎' }, { k: 'raisin', e: '🍇' }, 
-                { k: 'fraise', e: '🍓' }, { k: 'framboise', e: '🍓' }, { k: 'steak', e: '🥩' }, 
-                { k: 'rumsteck', e: '🥩' }, { k: 'gigot', e: '🥩' }, { k: 'poulet', e: '🍗' }, 
-                { k: 'porc', e: '🥩' }, { k: 'cote', e: '🥩' }, { k: 'poireau', e: '🥦' }, 
-                { k: 'tomate', e: '🍅' }, { k: 'carotte', e: '🥕' }, { k: 'concombre', e: '🥒' }, 
-                { k: 'pain', e: '🍞' }, { k: 'semoule', e: '🍞' }, { k: 'farine', e: '🍞' }
-            ];
-            // On cherche si un mot-clé est contenu dans le nom
-            for (let item of specific) {
-                if (n.includes(item.k)) return item.e;
-            }
+            // 1. Détection prioritaire (si le nom contient le mot clé, on attribue l'emoji)
+            if (n.includes('banane')) return '🍌';
+            if (n.includes('pomme')) return '🍎';
+            if (n.includes('raisin')) return '🍇';
+            if (n.includes('fraise') || n.includes('framboise')) return '🍓';
+            
+            // Viandes
+            if (n.includes('steak') || n.includes('rumsteck') || n.includes('gigot') || 
+                n.includes('cote') || n.includes('porc') || n.includes('boeuf') || 
+                n.includes('viande') || n.includes('agneau') || n.includes('jambon')) return '🥩';
+            if (n.includes('poulet')) return '🍗';
+            
+            // Poissons
+            if (n.includes('poisson') || n.includes('saumon') || n.includes('thon') || 
+                n.includes('cabillaud') || n.includes('crevette')) return '🐟';
+            
+            // Légumes
+            if (n.includes('poireau') || n.includes('tomate') || n.includes('carotte') || 
+                n.includes('concombre') || n.includes('legume') || n.includes('salade') || 
+                n.includes('courgette') || n.includes('brocoli') || n.includes('oignon')) return '🥦';
+            
+            // Autres
+            if (n.includes('pain') || n.includes('semoule') || n.includes('farine') || 
+                n.includes('pates') || n.includes('riz')) return '🍞';
+            if (n.includes('yaourt') || n.includes('lait') || n.includes('fromage')) return '🥛';
 
-            // 2. Catégories génériques
-            const categories = [
-                { e: '🥩', keys: ['viande', 'boeuf', 'agneau', 'jambon', 'volaille'] },
-                { e: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette'] },
-                { e: '🥦', keys: ['legume', 'salade', 'courgette', 'brocoli', 'oignon', 'ail', 'haricot', 'champignon'] },
-                { e: '🍎', keys: ['fruit', 'poire', 'abricot', 'citron', 'orange'] },
-                { e: '🍞', keys: ['pates', 'riz', 'cereale'] },
-                { e: '🥛', keys: ['yaourt', 'lait', 'fromage', 'beurre', 'creme', 'oeuf'] }
-            ];
-            for (let cat of categories) { 
-                if (cat.keys.some(key => n.includes(key))) return cat.e; 
-            }
             return '🍽️';
         }
 
