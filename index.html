@@ -7,17 +7,16 @@
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; }
         
-        /* Modification du Header */
         header { 
             background: #2d5a27; 
-            padding: 0; /* Suppression du padding */
+            padding: 0; 
             text-align: center; 
             border-bottom-left-radius: 20px; 
             border-bottom-right-radius: 20px;
-            overflow: hidden; /* Pour respecter les bords arrondis */
+            overflow: hidden;
         }
         .header-logo { 
-            width: 100%; /* Prend toute la largeur */
+            width: 100%; 
             height: auto; 
             display: block; 
         }
@@ -71,8 +70,8 @@
         </select>
         
         <div class="button-group">
-            <button class="btn-add" onclick="addFood()">Ajouter</button>
-            <button class="btn-del-selected" onclick="handleBulkDelete()">Supprimer</button>
+            <button class="btn-add" onclick="addFood()">Ajout de l'aliment</button>
+            <button class="btn-del-selected" onclick="handleBulkDelete()">Suppression multiple</button>
         </div>
         
         <button class="btn-search" onclick="searchRecipes()">Rechercher des recettes anti-gaspi</button>
@@ -135,7 +134,7 @@
                     <div class="item-info">
                         <span class="item-name">${item.name}</span>
                         <span class="item-meta">${item.date} • ${item.loc}</span>
-                        ${alertText ? `<span class="alert-text">${alertText}</span>` : ''}
+                        ${alertText ? `<span class="alert-text">${alertText}</span>' : ''}
                     </div>
                     <button class="del-btn" onclick="confirmDelete(${index})">Suppr</button>
                 `;
