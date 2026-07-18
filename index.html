@@ -64,7 +64,6 @@
         </div>
         
         <button class="btn-search" onclick="searchRecipes()">Rechercher des recettes</button>
-        <!-- Bouton unique pour scanner et fermer -->
         <button class="btn-search" id="scanBtn" style="background:#555; margin-top:10px;" onclick="toggleScanner()">Scanner un code-barres 📷</button>
         
         <div id="reader" style="width: 100%; display:none; margin-top:10px;"></div>
@@ -114,17 +113,29 @@
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
         let editingId = null;
         let html5QrCode = null; 
-        let isScannerActive = false; // Flag pour suivre l'état
+        let isScannerActive = false; 
 
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         
+        // --- API OPEN FOOD FACTS ---
+        async function fetchProductName(barcode) {
+            const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}.json`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.status === 1) {
+                    return data.product.product_name_fr || data.product.product_name || barcode;
+                }
+                return barcode; // Retourne le code si rien trouvé
+            } catch (error) {
+                console.error("Erreur API:", error);
+                return barcode;
+            }
+        }
+
         // --- SCANNER ---
         function toggleScanner() {
-            if (isScannerActive) {
-                stopScanner();
-            } else {
-                startScanner();
-            }
+            if (isScannerActive) { stopScanner(); } else { startScanner(); }
         }
 
         function startScanner() {
@@ -136,10 +147,12 @@
             html5QrCode.start(
                 { facingMode: "environment" },
                 { fps: 10, qrbox: { width: 250, height: 150 } },
-                (decodedText) => {
-                    stopScanner(); // On arrête après le scan
-                    document.getElementById('foodName').value = decodedText;
+                async (decodedText) => {
+                    stopScanner();
                     openAddModal();
+                    document.getElementById('foodName').value = "Recherche...";
+                    const productName = await fetchProductName(decodedText);
+                    document.getElementById('foodName').value = productName;
                 }
             ).catch(err => { 
                 alert("Erreur caméra : " + err); 
@@ -162,7 +175,8 @@
         function openAddModal() {
             editingId = null;
             document.getElementById('modalTitle').innerText = "Nouvel aliment";
-            document.getElementById('foodName').value = document.getElementById('foodName').value || '';
+            // Si foodName est vide, on réinitialise. Sinon on laisse le nom (ex: celui du scan)
+            if(!document.getElementById('foodName').value) document.getElementById('foodName').value = '';
             document.getElementById('expiryDate').value = '';
             document.getElementById('foodEmoji').value = '';
             document.getElementById('itemModal').style.display = 'flex';
