@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero Gachi</title>
+    <style>
+        body { font-family: sans-serif; background-color: #fdfbf7; padding: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ccc; }
+        .btn-action { background: #2d5a27; color: white; border: none; cursor: pointer; font-weight: bold; }
+        .item { background: white; padding: 15px; margin-top: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Zero Gachi</h1>
+        <input type="text" id="foodName" placeholder="Nom de l'aliment">
+        <input type="date" id="expiryDate">
+        <select id="storageLocation">
+            <option value="Réfrigérateur">Réfrigérateur</option>
+            <option value="Congélateur">Congélateur</option>
+            <option value="Placard">Placard</option>
+        </select>
+        <button class="btn-action" onclick="addFood()">Ajouter</button>
+        <div id="productList"></div>
+    </div>
+
+    <script>
+        let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
+
+        function render() {
+            const list = document.getElementById('productList');
+            list.innerHTML = "";
+            inventory.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerHTML = `
+                    <div>
+                        <strong>${item.name}</strong><br>
+                        <small>${item.date} (${item.loc})</small>
+                    </div>
+                    <button onclick="deleteFood(${index})">Supprimer</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function addFood() {
+            const name = document.getElementById('foodName').value;
+            const date = document.getElementById('expiryDate').value;
+            const loc = document.getElementById('storageLocation').value;
+
+            if(!name || !date) {
+                alert("Veuillez remplir le nom et la date.");
+                return;
+            }
+
+            inventory.push({ name, date, loc });
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            
+            document.getElementById('foodName').value = '';
+            render();
+        }
+
+        function deleteFood(index) {
+            inventory.splice(index, 1);
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            render();
+        }
+
+        // Initialisation
+        render();
+    </script>
+</body>
+</html>
