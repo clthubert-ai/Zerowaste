@@ -11,8 +11,14 @@
         input[type="text"], input[type="date"], select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         .btn-add { background: #2d5a27; color: white; border: none; font-weight: bold; cursor: pointer; }
         .btn-search { background: #7fb069; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        
+        /* Styles des items */
         .item { background: white; padding: 10px; margin-bottom: 10px; border-radius: 14px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 2px solid transparent; }
         .item.urgent { border-color: #d9534f; }
+        .item.expired-one { background-color: #ffcccc; border-color: #ff4d4d; }
+        .item.expired-long { background-color: black; color: red; border-color: red; }
+        .item.expired-long .item-name, .item.expired-long .item-meta { color: red; }
+        
         .item input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; flex-shrink: 0; }
         .visual { font-size: 1.4rem; width: 30px; text-align: center; flex-shrink: 0; }
         .item-info { flex-grow: 1; min-width: 0; overflow: hidden; }
@@ -42,8 +48,6 @@
 
         function getEmoji(name) {
             const n = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-            
-            // 1. Correspondances exactes (Priorité haute)
             const exactMatches = {
                 'banane': '🍌', 'pomme': '🍎', 'poire': '🍐', 'raisin': '🍇', 'fraise': '🍓', 
                 'framboise': '🍓', 'myrtille': '🫐', 'cerise': '🍒', 'peche': '🍑', 'kiwi': '🥝', 
@@ -54,7 +58,6 @@
             };
             if (exactMatches[n]) return exactMatches[n];
 
-            // 2. Catégories génériques enrichies
             const categories = [
                 { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'dinde', 'canard', 'volaille', 'cote', 'saucisse', 'charcuterie', 'escalope'] },
                 { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette', 'dorade', 'bar', 'sardine', 'sole', 'merlu', 'cabillaud', 'colin'] },
@@ -79,18 +82,32 @@
 
             inventory.forEach((item, index) => {
                 const expiry = new Date(item.date);
-                const diffDays = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
-                const isUrgent = diffDays <= 2 && diffDays >= 0;
+                const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
+                
+                let cssClass = '';
+                let alertText = '';
+
+                // Logique des styles selon la date
+                if (diffDays === -1) {
+                    cssClass = 'expired-one';
+                    alertText = '⚠️ Dépassé (Hier)';
+                } else if (diffDays < -1) {
+                    cssClass = 'expired-long';
+                    alertText = '❌ Périmé depuis ' + Math.abs(diffDays) + ' jours';
+                } else if (diffDays >= 0 && diffDays <= 2) {
+                    cssClass = 'urgent';
+                    alertText = diffDays === 0 ? '⚠️ Urgent (Aujourd\'hui)' : `⚠️ Urgent (J-${diffDays})`;
+                }
                 
                 const div = document.createElement('div');
-                div.className = `item ${isUrgent ? 'urgent' : ''}`;
+                div.className = `item ${cssClass}`;
                 div.innerHTML = `
                     <input type="checkbox" onchange="inventory[${index}].selected = this.checked" ${item.selected ? 'checked' : ''}>
                     <div class="visual">${getEmoji(item.name)}</div>
                     <div class="item-info">
                         <span class="item-name">${item.name}</span>
                         <span class="item-meta">${item.date} • ${item.loc}</span>
-                        ${isUrgent ? `<span class="alert-text">⚠️ Urgent (J-${diffDays})</span>` : ''}
+                        ${alertText ? `<span class="alert-text">${alertText}</span>` : ''}
                     </div>
                     <button class="del-btn" onclick="deleteFood(${index})">Suppr</button>
                 `;
