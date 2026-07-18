@@ -16,7 +16,8 @@
         .btn-add { background: #3e7b37; color: white; } 
         .btn-del-selected { background: #d9534f; color: white; }
         .btn-search { background: #7fb069; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
-        .btn-scan { background: #555; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .btn-scan { background: #555; color: white; }
+        .btn-select-all { background: #777; color: white; }
         
         /* Tuiles */
         .item { 
@@ -58,9 +59,13 @@
             <button class="btn-add" onclick="openAddModal()">Ajout</button>
             <button class="btn-del-selected" onclick="handleBulkDelete()">Suppression</button>
         </div>
+
+        <div class="button-group">
+            <button id="scanBtn" class="btn-scan" onclick="toggleScanner()">Scanner 📷</button>
+            <button id="toggleSelectBtn" class="btn-select-all" onclick="toggleSelectAll()">Tout cocher</button>
+        </div>
         
         <button class="btn-search" onclick="searchRecipes()">Rechercher des recettes</button>
-        <button id="scanBtn" class="btn-scan" onclick="toggleScanner()">Scanner un produit 📷</button>
         
         <div id="reader" style="width: 100%; display:none; margin-top:10px;"></div>
         <div id="productList" style="margin-top: 20px;"></div>
@@ -112,11 +117,11 @@
             if(isScannerActive) {
                 if(html5QrCode) html5QrCode.stop();
                 document.getElementById('reader').style.display = 'none';
-                document.getElementById('scanBtn').innerText = "Scanner un produit 📷";
+                document.getElementById('scanBtn').innerText = "Scanner 📷";
                 isScannerActive = false;
             } else {
                 document.getElementById('reader').style.display = 'block';
-                document.getElementById('scanBtn').innerText = "Arrêter le scanner";
+                document.getElementById('scanBtn').innerText = "Arrêter";
                 html5QrCode = new Html5Qrcode("reader");
                 html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, async (decodedText) => {
                     toggleScanner();
@@ -166,6 +171,14 @@
             }
             localStorage.setItem('inventory', JSON.stringify(inventory));
             closeModal('itemModal');
+            render();
+        }
+
+        // --- Logique Selection ---
+        function toggleSelectAll() {
+            const allSelected = inventory.every(i => i.selected);
+            inventory.forEach(i => i.selected = !allSelected);
+            localStorage.setItem('inventory', JSON.stringify(inventory));
             render();
         }
 
@@ -221,6 +234,10 @@
             list.innerHTML = "";
             inventory.sort((a, b) => new Date(a.date) - new Date(b.date));
             const today = new Date(); today.setHours(0,0,0,0);
+            
+            // Mise à jour texte bouton toggle
+            const toggleBtn = document.getElementById('toggleSelectBtn');
+            toggleBtn.innerText = (inventory.length > 0 && inventory.every(i => i.selected)) ? "Tout décocher" : "Tout cocher";
             
             inventory.forEach((item) => {
                 const expiry = new Date(item.date);
