@@ -6,15 +6,11 @@
     <title>Zero Gachi</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; }
-        
         .container { max-width: 500px; margin: 0 auto; padding: 15px; }
-        
         header { background: transparent; padding: 0; margin-bottom: 15px; border-radius: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow: hidden; display: flex; justify-content: center; }
         .header-logo { width: 100%; height: auto; display: block; }
-        
         .button-group { display: flex; gap: 10px; margin-bottom: 20px; }
         .button-group button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-        
         .btn-add { background: #3e7b37; color: white; } 
         .btn-del-selected { background: #d9534f; color: white; }
         .btn-search { background: #7fb069; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
@@ -25,45 +21,26 @@
             border-left: 8px solid transparent; border-right: 8px solid transparent;
             transition: all 0.2s ease; cursor: pointer;
         }
-        
         .item.selected { border-left: 8px solid #3e7b37; border-right: 8px solid #3e7b37; background-color: #f0f7ef; }
         
         /* États */
         .item.urgent { background-color: #fff3cd; } 
         .item.urgent.selected { background-color: #fceec5; border-left: 8px solid #3e7b37; border-right: 8px solid #3e7b37; }
-        
         .item.expired-yesterday { background-color: #ffcc99; } 
         .item.expired-yesterday.selected { background-color: #f9c088; border-left: 8px solid #3e7b37; border-right: 8px solid #3e7b37; }
-        
         .item.expired-long { background-color: #c9302c; } 
         .item.expired-long.selected { background-color: #b02a26; border-left: 8px solid #3e7b37; border-right: 8px solid #3e7b37; }
-        
         .item.expired-long .item-name, .item.expired-long .item-meta, .item.expired-long .item-alert { color: white; }
         
         .visual { font-size: 1.4rem; width: 30px; text-align: center; flex-shrink: 0; }
-        
         .item-info { flex-grow: 1; min-width: 0; overflow: hidden; }
         .item-name { font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .item-meta { font-size: 0.75rem; color: #666; }
         .item.expired-long .item-meta { color: #ffe5e5; }
-        
-        /* Alerte avec icône à droite */
-        .item-alert { 
-            flex-shrink: 0; 
-            font-weight: bold; 
-            font-size: 0.75rem; 
-            margin-left: 10px;
-            white-space: nowrap;
-            text-align: right;
-        }
-        
-        .item.urgent .item-alert { color: #856404; }
-        .item.expired-yesterday .item-alert { color: #856404; }
-        .item.expired-long .item-alert { color: #fff; }
+        .item-alert { flex-shrink: 0; font-weight: bold; font-size: 0.75rem; margin-left: 10px; white-space: nowrap; text-align: right; }
         
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; overflow-y: auto; }
         .modal-overlay.top-aligned { align-items: flex-start; padding-top: 50px; }
-        
         .modal-box { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; margin-bottom: 20px; }
         .modal-input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; }
@@ -88,20 +65,21 @@
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
 
-    <!-- Modales -->
-    <div id="addModal" class="modal-overlay top-aligned">
+    <!-- Modale Ajout/Édition -->
+    <div id="itemModal" class="modal-overlay top-aligned">
         <div class="modal-box">
-            <h3>Nouvel aliment</h3>
+            <h3 id="modalTitle">Aliment</h3>
             <input type="text" id="foodName" class="modal-input" placeholder="Nom de l'aliment">
             <input type="date" id="expiryDate" class="modal-input">
+            <input type="text" id="foodEmoji" class="modal-input" placeholder="Emoji (optionnel, ex: 🍎)">
             <select id="storageLocation" class="modal-input">
                 <option value="❄️ Réfrigérateur">❄️ Réfrigérateur</option>
                 <option value="🧊 Congélateur">🧊 Congélateur</option>
                 <option value="📦 Placard">📦 Placard</option>
             </select>
             <div class="modal-btns">
-                <button class="modal-btn btn-cancel" onclick="closeModal('addModal')">Annuler</button>
-                <button class="modal-btn btn-confirm" onclick="processAddFood()">Ajouter</button>
+                <button class="modal-btn btn-cancel" onclick="closeModal('itemModal')">Annuler</button>
+                <button class="modal-btn btn-confirm" onclick="saveFood()">Enregistrer</button>
             </div>
         </div>
     </div>
@@ -127,9 +105,52 @@
 
     <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
+        let editingId = null;
 
-        function openAddModal() { document.getElementById('addModal').style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        
+        function openAddModal() {
+            editingId = null;
+            document.getElementById('modalTitle').innerText = "Nouvel aliment";
+            document.getElementById('foodName').value = '';
+            document.getElementById('expiryDate').value = '';
+            document.getElementById('foodEmoji').value = '';
+            document.getElementById('itemModal').style.display = 'flex';
+        }
+
+        function openEditModal(id) {
+            const item = inventory.find(i => String(i.id) === String(id));
+            if (!item) return;
+            editingId = id;
+            document.getElementById('modalTitle').innerText = "Modifier l'aliment";
+            document.getElementById('foodName').value = item.name;
+            document.getElementById('expiryDate').value = item.date;
+            document.getElementById('foodEmoji').value = item.customEmoji || '';
+            document.getElementById('storageLocation').value = item.loc;
+            document.getElementById('itemModal').style.display = 'flex';
+        }
+
+        function saveFood() {
+            const name = document.getElementById('foodName').value;
+            const date = document.getElementById('expiryDate').value;
+            const loc = document.getElementById('storageLocation').value;
+            const customEmoji = document.getElementById('foodEmoji').value;
+            
+            if(!name || !date) return showAlert("Remplissez le nom et la date !");
+            
+            if (editingId) {
+                // Édition
+                const item = inventory.find(i => String(i.id) === String(editingId));
+                item.name = name; item.date = date; item.loc = loc; item.customEmoji = customEmoji;
+            } else {
+                // Création
+                inventory.push({ id: Date.now().toString(), name, date, loc, customEmoji, selected: false });
+            }
+            
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            closeModal('itemModal');
+            render();
+        }
 
         function showConfirm(message, callback) {
             document.getElementById('confirmText').innerHTML = message;
@@ -142,20 +163,6 @@
             document.getElementById('alertModal').style.display = 'flex';
         }
 
-        function processAddFood() {
-            const name = document.getElementById('foodName').value;
-            const date = document.getElementById('expiryDate').value;
-            const loc = document.getElementById('storageLocation').value;
-            if(!name || !date) return showAlert("Remplissez le nom et la date !");
-            
-            inventory.push({ id: Date.now().toString(), name, date, loc, selected: false });
-            localStorage.setItem('inventory', JSON.stringify(inventory));
-            
-            document.getElementById('foodName').value = '';
-            closeModal('addModal');
-            render();
-        }
-
         function toggleSelect(id) {
             const item = inventory.find(i => String(i.id) === String(id));
             if(item) {
@@ -165,8 +172,11 @@
             }
         }
 
-        function getEmoji(name) {
-            const n = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        function getEmoji(item) {
+            // Priorité à l'emoji personnalisé si défini
+            if (item.customEmoji && item.customEmoji.trim() !== '') return item.customEmoji;
+
+            const n = item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
             const exactMatches = {
                 'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐',
                 'orange': '🍊', 'oranges': '🍊', 'citron': '🍋', 'citrons': '🍋', 'fraise': '🍓', 'fraises': '🍓',
@@ -227,9 +237,18 @@
                 
                 const div = document.createElement('div');
                 div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
+                
+                // Clic simple pour sélectionner
                 div.onclick = () => toggleSelect(item.id);
+                
+                // Clic droit / Appui long pour modifier
+                div.oncontextmenu = (e) => {
+                    e.preventDefault();
+                    openEditModal(item.id);
+                };
+                
                 div.innerHTML = `
-                    <div class="visual">${getEmoji(item.name)}</div>
+                    <div class="visual">${getEmoji(item)}</div>
                     <div class="item-info">
                         <span class="item-name">${item.name}</span>
                         <span class="item-meta">${item.date} • ${item.loc}</span>
