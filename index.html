@@ -75,7 +75,7 @@
             <select id="storageLocation" class="modal-input">
                 <option value="❄️ Réfrigérateur">❄️ Réfrigérateur</option>
                 <option value="🧊 Congélateur">🧊 Congélateur</option>
-                <option value="📦 Placard">📦 Placard</option>
+                <option value="🗄️ Placard">🗄️ Placard</option>
             </select>
             <div class="modal-btns">
                 <button class="modal-btn btn-cancel" onclick="closeModal('itemModal')">Annuler</button>
@@ -173,7 +173,6 @@
         }
 
         function getEmoji(item) {
-            // Priorité à l'emoji personnalisé si défini
             if (item.customEmoji && item.customEmoji.trim() !== '') return item.customEmoji;
 
             const n = item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
@@ -238,10 +237,8 @@
                 const div = document.createElement('div');
                 div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
                 
-                // Clic simple pour sélectionner
                 div.onclick = () => toggleSelect(item.id);
                 
-                // Clic droit / Appui long pour modifier
                 div.oncontextmenu = (e) => {
                     e.preventDefault();
                     openEditModal(item.id);
