@@ -13,7 +13,6 @@
         .container { max-width: 500px; margin: 10px auto; padding: 15px; }
         input[type="text"], input[type="date"], select, button { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         
-        /* Conteneur pour aligner les boutons */
         .button-group { display: flex; gap: 10px; }
         .button-group button { margin: 8px 0; flex: 1; }
 
@@ -36,11 +35,11 @@
         .alert-text { color: #d9534f; font-weight: bold; font-size: 0.7rem; display: block; }
         .del-btn { background: #fee2e2; color: #991b1b; border: none; padding: 6px 8px; border-radius: 6px; cursor: pointer; font-size: 0.7rem; flex-shrink: 0; width: 55px; }
 
-        /* Style du Modal */
+        /* Style du Modal avec défilement possible */
         #customModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-box { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
-        .modal-text { margin-bottom: 20px; font-weight: 500; }
-        .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+        .modal-box { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; max-height: 80vh; overflow-y: auto; }
+        .modal-text { margin-bottom: 20px; font-weight: 500; text-align: left; }
+        .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; }
         .modal-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .btn-no { background: #eee; }
         .btn-yes { background: #d9534f; color: white; }
@@ -57,7 +56,6 @@
             <option value="📦 Placard">📦 Placard</option>
         </select>
         
-        <!-- Conteneur pour aligner les boutons -->
         <div class="button-group">
             <button class="btn-add" onclick="addFood()">Ajouter</button>
             <button class="btn-del-selected" onclick="handleBulkDelete()">Supprimer</button>
@@ -139,6 +137,85 @@
                 if (diffDays === -1) { cssClass = 'expired-one'; alertText = '⚠️ Dépassé (Hier)'; }
                 else if (diffDays < -1) { cssClass = 'expired-long'; alertText = '❌ Périmé depuis ' + Math.abs(diffDays) + ' jours'; }
                 else if (diffDays >= 0 && diffDays <= 2) { cssClass = 'urgent'; alertText = diffDays === 0 ? '⚠️ Urgent (Aujourd\'hui)' : `⚠️ Urgent (J-${diffDays})`; }
+                const div = document.createElement('div');
+                div.className = `item ${cssClass}`;
+                div.innerHTML = `
+                    <input type="checkbox" onchange="inventory[${index}].selected = this.checked" ${item.selected ? 'checked' : ''}>
+                    <div class="visual">${getEmoji(item.name)}</div>
+                    <div class="item-info">
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-meta">${item.date} • ${item.loc}</span>
+                        ${alertText ? `<span class="alert-text">${alertText}</span>` : ''}
+                    </div>
+                    <button class="del-btn" onclick="openDeleteModal(${index})">Suppr</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function openDeleteModal(target) {
+            itemToDeleteTarget = target;
+            const modalText = document.getElementById('modalText');
+            modalText.innerHTML = ""; // Reset
+            
+            if (target === 'bulk') {
+                const selectedItems = inventory.filter(i => i.selected);
+                let html = "<strong>Supprimer les éléments sélectionnés ?</strong><ul style='padding-left: 20px; margin: 10px 0; font-size: 0.9rem;'>";
+                selectedItems.forEach(item => {
+                    html += `<li>${item.name} (${item.date} - ${item.loc})</li>`;
+                });
+                html += "</ul>";
+                modalText.innerHTML = html;
+            } else {
+                const item = inventory[target];
+                modalText.innerText = "Confirmer la suppression de l'élément " + item.name + " (" + item.date + " - " + item.loc + ") ?";
+            }
+            document.getElementById('customModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').style.display = 'none';
+        }
+
+        document.getElementById('confirmYesBtn').onclick = function() {
+            if (itemToDeleteTarget === 'bulk') {
+                inventory = inventory.filter(i => !i.selected);
+            } else if (itemToDeleteTarget !== null) {
+                inventory.splice(itemToDeleteTarget, 1);
+            }
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            render();
+            closeModal();
+        };
+
+        function handleBulkDelete() {
+            const hasSelected = inventory.some(i => i.selected);
+            if (!hasSelected) return alert("Cochez au moins un élément à supprimer !");
+            openDeleteModal('bulk');
+        }
+
+        function addFood() {
+            const name = document.getElementById('foodName').value;
+            const date = document.getElementById('expiryDate').value;
+            const loc = document.getElementById('storageLocation').value;
+            if(!name || !date) return alert("Remplissez le nom et la date !");
+            inventory.push({ name, date, loc, selected: false });
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            document.getElementById('foodName').value = '';
+            render();
+        }
+
+        function searchRecipes() {
+            const selected = inventory.filter(i => i.selected).map(i => i.name).join(" ");
+            if(!selected) return alert("Cochez au moins un ingrédient !");
+            window.open(`https://www.google.com/search?q=recette+anti-gaspi+${encodeURIComponent(selected)}`, '_blank');
+        }
+
+        render();
+    </script>
+</body>
+</html>
+i)' : `⚠️ Urgent (J-${diffDays})`; }
                 const div = document.createElement('div');
                 div.className = `item ${cssClass}`;
                 div.innerHTML = `
