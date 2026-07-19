@@ -18,8 +18,9 @@
         .btn-scan { background: #555; color: white; }
         
         .filter-group { display: flex; gap: 5px; margin-bottom: 15px; }
-        .filter-btn { flex: 1; padding: 8px 2px; border-radius: 8px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 0.7rem; font-weight: bold; color: #555; }
-        .filter-btn.active { background: #3e7b37; color: white; border-color: #3e7b37; }
+        .filter-btn { flex: 1; padding: 8px 2px; border-radius: 8px; border: 2px solid #ddd; background: white; cursor: pointer; font-size: 0.7rem; font-weight: bold; color: #555; }
+        /* Style quand le bouton est actif (entouré) */
+        .filter-btn.active { background: #e8f5e9; border: 2px solid #3e7b37; color: #3e7b37; }
 
         /* Grille : 3 colonnes forcées */
         #productList { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 10px; }
@@ -143,18 +144,54 @@
         let currentSpeed = 1;
         let currentEase = 1;
 
+        // Fonction modifiée pour basculer la sélection (Toggle)
         function selectItems(type) {
             const today = new Date(); today.setHours(0,0,0,0);
-            inventory.forEach(item => {
+            
+            // Identifier les éléments correspondant au filtre
+            const targetItems = inventory.filter(item => {
                 const expiry = new Date(item.date);
                 const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
-                if (type === 'expired' && diffDays < -1) item.selected = true;
-                else if (type === 'yesterday' && diffDays === -1) item.selected = true;
-                else if (type === 'today' && diffDays === 0) item.selected = true;
-                else if (type === 'urgent' && diffDays >= 1 && diffDays <= 2) item.selected = true;
+                if (type === 'expired') return diffDays < -1;
+                if (type === 'yesterday') return diffDays === -1;
+                if (type === 'today') return diffDays === 0;
+                if (type === 'urgent') return diffDays >= 1 && diffDays <= 2;
+                return false;
             });
+
+            // Si tous sont déjà sélectionnés, on les désélectionne. Sinon, on les sélectionne.
+            const allSelected = targetItems.length > 0 && targetItems.every(i => i.selected);
+            targetItems.forEach(i => i.selected = !allSelected);
+            
             localStorage.setItem('inventory', JSON.stringify(inventory));
             render();
+        }
+
+        // Mise à jour de l'état des boutons filtres
+        function updateFilterButtonsState() {
+            const types = ['urgent', 'today', 'yesterday', 'expired'];
+            const today = new Date(); today.setHours(0,0,0,0);
+
+            types.forEach(type => {
+                const btn = document.getElementById(`filter-${type}`);
+                const matches = inventory.filter(item => {
+                    const expiry = new Date(item.date);
+                    const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
+                    if (type === 'expired') return diffDays < -1;
+                    if (type === 'yesterday') return diffDays === -1;
+                    if (type === 'today') return diffDays === 0;
+                    if (type === 'urgent') return diffDays >= 1 && diffDays <= 2;
+                    return false;
+                });
+                // Est-ce que tout est sélectionné pour ce type ?
+                const allSelected = matches.length > 0 && matches.every(i => i.selected);
+                btn.classList.toggle('active', allSelected);
+            });
+            
+            // Mise à jour du bouton "Tout"
+            const allBtn = document.getElementById('toggleSelectBtn');
+            const allItemsSelected = inventory.length > 0 && inventory.every(i => i.selected);
+            allBtn.classList.toggle('active', allItemsSelected);
         }
 
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -308,23 +345,10 @@
             const list = document.getElementById('productList');
             list.innerHTML = "";
             inventory.sort((a, b) => new Date(a.date) - new Date(b.date));
-            const today = new Date(); today.setHours(0,0,0,0);
-            
-            const btn = document.getElementById('toggleSelectBtn');
-            if (btn) btn.innerText = (inventory.length > 0 && inventory.every(i => i.selected)) ? "Tout" : "Tout";
             
             inventory.forEach((item) => {
-                const expiry = new Date(item.date);
-                const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
-                let cssClass = '';
-                
-                if (diffDays < -1) cssClass = 'expired-long';
-                else if (diffDays === -1) cssClass = 'expired-yesterday';
-                else if (diffDays === 0) cssClass = 'expired-today';
-                else if (diffDays <= 2) cssClass = 'urgent';
-                
                 const div = document.createElement('div');
-                div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
+                div.className = `item ${item.selected ? 'selected' : ''}`;
                 
                 div.onclick = () => { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); };
                 div.oncontextmenu = (e) => { e.preventDefault(); openEditModal(item.id); };
@@ -337,6 +361,7 @@
                 `;
                 list.appendChild(div);
             });
+            updateFilterButtonsState();
         }
 
         function handleBulkDelete() {
