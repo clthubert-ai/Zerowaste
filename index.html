@@ -151,7 +151,7 @@
                 isScannerActive = false;
             } else {
                 document.getElementById('reader').style.display = 'block';
-                btn.innerHTML = "Arrêter ❌";
+                btn.innerHTML = "Arrêter 📷";
                 html5QrCode = new Html5Qrcode("reader");
                 html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, async (decodedText) => {
                     toggleScanner();
