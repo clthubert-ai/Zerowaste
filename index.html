@@ -1,274 +1,449 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zero Gachi</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; height: 100vh; overflow: hidden; }
-        .container { display: flex; flex-direction: column; height: 100vh; max-width: 500px; margin: 0 auto; padding: 15px; box-sizing: border-box; }
-        header { background: transparent; padding: 0; margin-bottom: 15px; border-radius: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow: hidden; display: flex; justify-content: center; flex-shrink: 0; }
-        .header-logo { width: 100%; height: auto; display: block; }
-        .button-group { display: flex; gap: 10px; margin-bottom: 10px; flex-shrink: 0; }
-        .button-group button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-        .btn-add { background: #3e7b37; color: white; } 
-        .btn-del-selected { background: #d9534f; color: white; }
-        .btn-search { background: #7fb069; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 10px; flex-shrink: 0; }
-        .filter-group { display: flex; gap: 5px; margin-bottom: 15px; flex-shrink: 0; }
-        .filter-btn { flex: 1; padding: 8px 2px; border-radius: 8px; border: 2px solid #ddd; background: white; cursor: pointer; font-size: 0.65rem; font-weight: bold; color: #555; }
-        .filter-btn.active { background: #e8f5e9; border: 2px solid #3e7b37; color: #3e7b37; }
-        #productList { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; overflow-y: auto; flex: 1; min-height: 0; align-content: start; padding-bottom: 30px; }
-        
-        .item { background: white; padding: 4px 2px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 2px solid transparent; transition: all 0.2s ease; cursor: pointer; height: 75px; position: relative; text-align: center; overflow: hidden; }
-        .item.selected { border: 3px solid #3e7b37; background-color: #f0f7ef; }
-        .item.urgent { background-color: #fff3cd; } 
-        .item.expired-yesterday { background-color: #ffcdd2; }
-        .item.expired-today { background-color: #ffcc99; }
-        .item.expired-long { background-color: #c9302c; color: white; }
-        
-        .item-emoji { font-size: 1.1rem; line-height: 1; }
-        .item-name { font-weight: bold; font-size: 0.65rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.1; margin: 1px 0; }
-        .item-loc { font-size: 0.55rem; line-height: 1; margin: 1px 0; }
-        .item-meta { font-size: 0.6rem; line-height: 1; margin: 1px 0; font-weight: bold; }
-        .item.expired-long .item-meta { color: #ffe5e5; }
-        
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: flex-start; overflow-y: auto; padding-top: 50px; }
-        .modal-box { background: white; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; box-sizing: border-box; }
-        .modal-input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
-        .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; }
-        .modal-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .btn-cancel { background: #eee; } .btn-confirm { background: #3e7b37; color: white; }
-        .btn-scan { background: #555; color: white; margin-bottom: 10px; width: 100%; padding: 10px; }
-        .delete-list { max-height: 200px; overflow-y: auto; margin: 10px 0; text-align: left; font-size: 0.85rem; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Zéro Gâchis</title>
+<script src="https://unpkg.com/html5-qrcode"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0F1A15;
+    --surface:#17251E;
+    --surface-raised:#1E2E25;
+    --surface-hover:#243529;
+    --hairline:#2B3D31;
+    --paper:#EDF5EE;
+    --mist:#8FA79A;
+    --mist-dim:#66806F;
+    --leaf:#6FCF63;
+    --leaf-dim:#39562F;
+    --amber:#FFC857;
+    --amber-dim:#5A4A24;
+    --clay:#FF9F5A;
+    --clay-dim:#5A3B22;
+    --tomato:#FF6B4A;
+    --tomato-dim:#5A2C20;
+    --ember:#3A0F0B;
+    --ember-text:#FFD9CF;
+    --ring-track:#2B3D31;
+    --radius-lg:22px;
+    --radius-md:16px;
+    --radius-sm:11px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:'Inter',sans-serif;
+    background:
+      radial-gradient(circle at 15% -10%, rgba(111,207,99,0.10), transparent 40%),
+      var(--ink);
+    margin:0; padding:0; color:var(--paper);
+    height:100vh; overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+  .container{ display:flex; flex-direction:column; height:100vh; max-width:520px; margin:0 auto; padding:18px 16px 0; }
+
+  /* ---------- Header ---------- */
+  header{ display:flex; align-items:center; justify-content:space-between; flex-shrink:0; margin-bottom:16px; }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand-mark{
+    width:38px; height:38px; border-radius:12px; flex-shrink:0;
+    background:conic-gradient(from 210deg, var(--leaf), var(--amber) 40%, var(--leaf) 100%);
+    display:flex; align-items:center; justify-content:center; font-size:1.15rem;
+  }
+  .brand-text{ line-height:1; }
+  .brand-text .l1{ font-family:'Fraunces',serif; font-style:italic; font-weight:600; font-size:1.15rem; letter-spacing:0.2px; }
+  .brand-text .l2{ font-family:'IBM Plex Mono',monospace; font-size:0.62rem; letter-spacing:2.5px; color:var(--mist); text-transform:uppercase; }
+  .today-pill{ font-family:'IBM Plex Mono',monospace; font-size:0.62rem; color:var(--mist); border:1px solid var(--hairline); padding:5px 10px; border-radius:100px; }
+
+  /* ---------- Buttons ---------- */
+  .button-group{ display:flex; gap:8px; margin-bottom:8px; flex-shrink:0; }
+  .btn{ border:none; cursor:pointer; font-family:'Inter',sans-serif; font-weight:600; border-radius:var(--radius-sm); transition:transform .12s ease, filter .12s ease; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .btn:active{ transform:scale(0.96); }
+  .btn svg{ width:15px; height:15px; flex-shrink:0; }
+  .btn-add{ flex:1.3; background:var(--leaf); color:#0B1A0E; padding:12px; font-size:0.85rem; }
+  .btn-del-selected{ flex:1; background:var(--surface-raised); color:var(--tomato); padding:12px; font-size:0.85rem; border:1px solid var(--hairline); }
+  .btn-search{ background:var(--surface-raised); color:var(--paper); width:100%; padding:13px; border-radius:var(--radius-sm); font-weight:600; font-size:0.87rem; margin-bottom:12px; flex-shrink:0; border:1px solid var(--hairline); position:relative; overflow:hidden; }
+  .btn-search::after{ content:""; position:absolute; inset:0; background:linear-gradient(100deg, transparent, rgba(111,207,99,0.12), transparent); transform:translateX(-100%); }
+  .btn-search:active::after{ transition:transform .5s ease; transform:translateX(100%); }
+
+  /* ---------- Filters ---------- */
+  .filter-group{ display:flex; gap:6px; margin-bottom:14px; flex-shrink:0; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+  .filter-group::-webkit-scrollbar{ display:none; }
+  .filter-btn{ flex:0 0 auto; padding:7px 12px; border-radius:100px; border:1px solid var(--hairline); background:var(--surface); cursor:pointer; font-size:0.68rem; font-weight:600; color:var(--mist); white-space:nowrap; transition:all .15s ease; font-family:'Inter',sans-serif; }
+  .filter-btn.active{ background:var(--leaf-dim); border-color:var(--leaf); color:var(--leaf); }
+  #toggleSelectBtn.active{ background:var(--surface-raised); border-color:var(--paper); color:var(--paper); }
+
+  /* ---------- Grid & Cards ---------- */
+  #productList{ display:grid; grid-template-columns:repeat(auto-fill, minmax(96px, 1fr)); gap:8px; overflow-y:auto; flex:1; min-height:0; align-content:start; padding-bottom:20px; }
+  #productList::-webkit-scrollbar{ width:4px; }
+  #productList::-webkit-scrollbar-thumb{ background:var(--hairline); border-radius:4px; }
+
+  .item-card{
+    background:var(--surface); border-radius:var(--radius-md); padding:10px 6px 8px;
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+    border:1.5px solid transparent; cursor:pointer; text-align:center; position:relative;
+    animation:rise .35s ease both; animation-delay:calc(var(--i, 0) * 18ms);
+  }
+  @keyframes rise{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:translateY(0);} }
+  .item-card.selected{ border-color:var(--leaf); background:var(--surface-hover); }
+  .item-card.selected::before{ content:"✓"; position:absolute; top:6px; left:6px; width:16px; height:16px; background:var(--leaf); color:#0B1A0E; border-radius:50%; font-size:0.6rem; display:flex; align-items:center; justify-content:center; font-weight:800; }
+
+  .item-card[data-state="today"]{ background:var(--clay-dim); }
+  .item-card[data-state="mild"]{ background:var(--tomato-dim); }
+  .item-card[data-state="severe"]{ background:var(--ember); }
+  .item-card[data-state="severe"] .item-status{ color:var(--ember-text); }
+  .item-card[data-state="severe"]{ animation:rise .35s ease both, pulse 2.4s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ box-shadow:0 0 0 0 rgba(255,107,74,0);} 50%{ box-shadow:0 0 0 3px rgba(255,107,74,0.18);} }
+
+  .ring{
+    width:44px; height:44px; border-radius:50%; margin-bottom:6px;
+    display:flex; align-items:center; justify-content:center; position:relative; flex-shrink:0;
+    background:var(--ring-bg, conic-gradient(var(--mist-dim) 0 100%));
+  }
+  .ring::before{ content:""; position:absolute; inset:3px; border-radius:50%; background:var(--surface); }
+  .item-card[data-state="today"] .ring::before{ background:var(--clay-dim); }
+  .item-card[data-state="mild"] .ring::before{ background:var(--tomato-dim); }
+  .item-card[data-state="severe"] .ring::before{ background:var(--ember); }
+  .item-emoji{ font-size:1.05rem; z-index:1; }
+  .loc-badge{ position:absolute; bottom:-2px; right:-2px; width:16px; height:16px; background:var(--surface-raised); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.55rem; border:1.5px solid var(--surface); z-index:1; }
+
+  .item-name{ font-weight:700; font-size:0.68rem; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.2; margin:0 0 2px; }
+  .item-status{ font-family:'IBM Plex Mono',monospace; font-size:0.56rem; color:var(--mist); font-weight:600; letter-spacing:0.2px; }
+
+  .empty-state{ grid-column:1/-1; text-align:center; padding:60px 20px; color:var(--mist); }
+  .empty-state .emoji{ font-size:2.2rem; display:block; margin-bottom:10px; }
+  .empty-state .l1{ font-family:'Fraunces',serif; font-style:italic; font-size:1.1rem; color:var(--paper); margin-bottom:4px; }
+  .empty-state .l2{ font-size:0.78rem; }
+
+  /* ---------- Modals ---------- */
+  .modal-overlay{ display:none; position:fixed; inset:0; background:rgba(6,10,8,0.72); backdrop-filter:blur(3px); z-index:1000; justify-content:center; align-items:flex-end; }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{ background:var(--surface-raised); padding:22px; border-radius:26px 26px 0 0; width:100%; max-width:460px; box-sizing:border-box; animation:sheet .28s cubic-bezier(.2,.9,.3,1) both; max-height:88vh; overflow-y:auto; border-top:1px solid var(--hairline); }
+  @keyframes sheet{ from{ transform:translateY(24px); opacity:0;} to{ transform:translateY(0); opacity:1;} }
+  .modal-box h3{ font-family:'Fraunces',serif; font-weight:600; font-size:1.25rem; margin:0 0 14px; }
+  .field-label{ font-size:0.68rem; font-weight:600; color:var(--mist); margin:12px 0 5px; text-transform:uppercase; letter-spacing:0.5px; }
+  .field-label:first-of-type{ margin-top:0; }
+  .modal-input{ width:100%; padding:12px 13px; border:1.5px solid var(--hairline); border-radius:var(--radius-sm); box-sizing:border-box; background:var(--surface); color:var(--paper); font-family:'Inter',sans-serif; font-size:0.9rem; }
+  .modal-input:focus{ outline:none; border-color:var(--leaf); }
+  select.modal-input{ appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238FA79A' stroke-width='1.5' fill='none' fill-rule='evenodd'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; }
+  .modal-btns{ display:flex; gap:10px; justify-content:flex-end; margin-top:18px; }
+  .modal-btn{ padding:12px 20px; border:none; border-radius:var(--radius-sm); cursor:pointer; font-weight:700; font-family:'Inter',sans-serif; font-size:0.85rem; transition:transform .12s ease; }
+  .modal-btn:active{ transform:scale(0.96); }
+  .btn-cancel{ background:transparent; color:var(--mist); border:1.5px solid var(--hairline); }
+  .btn-confirm{ background:var(--leaf); color:#0B1A0E; }
+  .btn-confirm.danger{ background:var(--tomato); color:#2A0D06; }
+  .btn-scan{ background:var(--surface); color:var(--paper); margin:14px 0 0; width:100%; padding:11px; border:1.5px solid var(--hairline); }
+  .delete-list{ max-height:220px; overflow-y:auto; margin:6px 0; text-align:left; font-size:0.85rem; display:flex; flex-direction:column; gap:6px; }
+  .delete-list div{ background:var(--surface); padding:8px 10px; border-radius:10px; }
+  #reader{ width:100%; display:none; margin:12px 0 0; border-radius:var(--radius-sm); overflow:hidden; }
+</style>
 </head>
 <body>
-    <div class="container">
-        <header><img src="logo.png" alt="Zero Gachi" class="header-logo"></header>
-        <div class="button-group">
-            <button class="btn-add" onclick="openAddModal()">Ajout</button>
-            <button class="btn-del-selected" onclick="handleBulkDelete()">Suppression</button>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="brand-mark">🌿</div>
+        <div class="brand-text">
+          <div class="l1">Zéro</div>
+          <div class="l2">Gâchis</div>
         </div>
-        <button class="btn-search" onclick="openRecipeModal()">Rechercher des recettes</button>
-        <div class="filter-group">
-            <button class="filter-btn" id="toggleSelectBtn" onclick="toggleSelectAll()">Tout</button>
-            <button class="filter-btn" id="filter-urgent" onclick="selectItems('urgent')">Bientôt</button>
-            <button class="filter-btn" id="filter-today" onclick="selectItems('today')">Ce jour</button>
-            <button class="filter-btn" id="filter-yesterday" onclick="selectItems('yesterday')">Périmé léger</button>
-            <button class="filter-btn" id="filter-expired" onclick="selectItems('expired')">À jeter</button>
-        </div>
-        <div id="productList"></div>
+      </div>
+      <div class="today-pill" id="itemCount">0 aliment</div>
+    </header>
+
+    <div class="button-group">
+      <button class="btn btn-add" onclick="openAddModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Ajouter
+      </button>
+      <button class="btn btn-del-selected" onclick="handleBulkDelete()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6"/></svg>
+        Supprimer
+      </button>
     </div>
-    
-    <div id="itemModal" class="modal-overlay">
-        <div class="modal-box">
-            <h3 id="modalTitle">Aliment</h3>
-            <input type="text" id="foodName" class="modal-input" placeholder="Nom de l'aliment">
-            <input type="date" id="expiryDate" class="modal-input">
-            <input type="text" id="foodEmoji" class="modal-input" placeholder="Emoji personnalisé">
-            <select id="storageLocation" class="modal-input">
-                <option value="❄️ Réfrigérateur">❄️ Réfrigérateur</option>
-                <option value="🧊 Congélateur">🧊 Congélateur</option>
-                <option value="🗄️ Placard">🗄️ Placard</option>
-            </select>
-            <button class="modal-btn btn-scan" id="scanBtn" onclick="toggleScanner()">Scanner 📷</button>
-            <div id="reader" style="width: 100%; display:none; margin-bottom:10px;"></div>
-            <div class="modal-btns">
-                <button class="modal-btn btn-cancel" onclick="closeModal('itemModal')">Annuler</button>
-                <button class="modal-btn btn-confirm" onclick="saveFood()">Enregistrer</button>
-            </div>
-        </div>
+    <button class="btn-search" onclick="openRecipeModal()">🍳 Trouver une recette avec ma sélection</button>
+
+    <div class="filter-group">
+      <button class="filter-btn" id="toggleSelectBtn" onclick="toggleSelectAll()">Tout</button>
+      <button class="filter-btn" id="filter-urgent" onclick="selectItems('urgent')">Bientôt</button>
+      <button class="filter-btn" id="filter-today" onclick="selectItems('today')">Ce jour</button>
+      <button class="filter-btn" id="filter-yesterday" onclick="selectItems('yesterday')">Périmé léger</button>
+      <button class="filter-btn" id="filter-expired" onclick="selectItems('expired')">À jeter</button>
     </div>
 
-    <div id="deleteModal" class="modal-overlay">
-        <div class="modal-box">
-            <h3>Supprimer les éléments ?</h3>
-            <div id="deleteList" class="delete-list"></div>
-            <div class="modal-btns">
-                <button class="modal-btn btn-cancel" onclick="closeModal('deleteModal')">Annuler</button>
-                <button class="modal-btn btn-confirm" style="background:#d9534f;" onclick="confirmDelete()">Supprimer</button>
-            </div>
-        </div>
+    <div id="productList"></div>
+  </div>
+
+  <div id="itemModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3 id="modalTitle">Nouvel aliment</h3>
+      <div class="field-label">Nom de l'aliment</div>
+      <input type="text" id="foodName" class="modal-input" placeholder="Ex : Tomates">
+      <div class="field-label">Date limite</div>
+      <input type="date" id="expiryDate" class="modal-input">
+      <div class="field-label">Emplacement</div>
+      <select id="storageLocation" class="modal-input">
+        <option value="❄️ Réfrigérateur">❄️ Réfrigérateur</option>
+        <option value="🧊 Congélateur">🧊 Congélateur</option>
+        <option value="🗄️ Placard">🗄️ Placard</option>
+      </select>
+      <div class="field-label">Emoji personnalisé (facultatif)</div>
+      <input type="text" id="foodEmoji" class="modal-input" placeholder="Laisser vide pour une détection automatique">
+      <button class="modal-btn btn-scan" id="scanBtn" onclick="toggleScanner()">Scanner un code-barres 📷</button>
+      <div id="reader"></div>
+      <div class="modal-btns">
+        <button class="modal-btn btn-cancel" onclick="closeModal('itemModal')">Annuler</button>
+        <button class="modal-btn btn-confirm" onclick="saveFood()">Enregistrer</button>
+      </div>
     </div>
+  </div>
 
-    <div id="alertModal" class="modal-overlay">
-        <div class="modal-box">
-            <h3>Attention</h3>
-            <p id="alertText"></p>
-            <div class="modal-btns">
-                <button class="modal-btn btn-confirm" onclick="closeModal('alertModal')">OK</button>
-            </div>
-        </div>
+  <div id="deleteModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3>Supprimer ces aliments ?</h3>
+      <div id="deleteList" class="delete-list"></div>
+      <div class="modal-btns">
+        <button class="modal-btn btn-cancel" onclick="closeModal('deleteModal')">Annuler</button>
+        <button class="modal-btn btn-confirm danger" onclick="confirmDelete()">Supprimer</button>
+      </div>
     </div>
-    <script>
-        let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
-        let editingId = null; let html5QrCode = null; let isScannerActive = false;
+  </div>
 
-        function getEmoji(item) {
-            if (item.customEmoji && item.customEmoji.trim() !== '') return item.customEmoji;
-            const n = item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-            const exactMatches = {
-                'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐',
-                'orange': '🍊', 'oranges': '🍊', 'citron': '🍋', 'citrons': '🍋', 'fraise': '🍓', 'fraises': '🍓',
-                'framboise': '🍓', 'framboises': '🍓', 'myrtille': '🫐', 'myrtilles': '🫐', 'cerise': '🍒', 'cerises': '🍒',
-                'peche': '🍑', 'peches': '🍑', 'mangue': '🥭', 'mangues': '🥭', 'raisin': '🍇', 'raisins': '🍇',
-                'ananas': '🍍', 'kiwi': '🥝', 'kiwis': '🥝', 'melon': '🍈', 'melons': '🍈', 'pasteque': '🍉',
-                'pasteques': '🍉', 'abricot': '🍑', 'abricots': '🍑', 'prune': '🍑', 'prunes': '🍑',
-                'concombre': '🥒', 'concombres': '🥒', 'carotte': '🥕', 'carottes': '🥕', 'brocoli': '🥦', 'brocolis': '🥦',
-                'oignon': '🧅', 'oignons': '🧅', 'ail': '🧄', 'champignon': '🍄', 'champignons': '🍄', 'poivron': '🫑',
-                'poivrons': '🫑', 'salade': '🥬', 'tomate': '🍅', 'tomates': '🍅', 'patate': '🥔', 'patates': '🥔',
-                'pomme de terre': '🥔', 'pommes de terre': '🥔', 'haricot': '🫘', 'haricots': '🫘', 'epinard': '🍃',
-                'epinards': '🍃', 'courgette': '🥒', 'courgettes': '🥒', 'aubergine': '🍆', 'aubergines': '🍆',
-                'chou': '🥬', 'choux': '🥬', 'asperge': '🥬', 'asperges': '🥬', 'poireau': '🥬', 'poireaux': '🥬',
-                'radis': '🥗', 'mais': '🌽', 'avocat': '🥑', 'avocats': '🥑',
-                'steak': '🥩', 'steaks': '🥩', 'gigot': '🥩', 'jambon': '🍖', 'chorizo': '🍖', 'poulet': '🍗', 'poulets': '🍗',
-                'saumon': '🐟', 'saumons': '🐟', 'thon': '🐟', 'thons': '🐟', 'crevette': '🍤', 'crevettes': '🍤',
-                'saucisse': '🌭', 'saucisses': '🌭', 'cote de porc': '🥩', 'cotes de porc': '🥩', 'cote de boeuf': '🥩',
-                'cotes de boeuf': '🥩', 'cote de mouton': '🥩', 'cotes de mouton': '🥩', 'lard': '🥓', 'bacon': '🥓',
-                'oeuf': '🥚', 'oeufs': '🥚', 'œuf': '🥚', 'œufs': '🥚', 'poisson': '🐟', 'poissons': '🐟',
-                'pain': '🍞', 'baguette': '🥖', 'baguettes': '🥖', 'croissant': '🥐', 'croissants': '🥐',
-                'brioche': '🍞', 'brioches': '🍞', 'biscuit': '🍪', 'biscuits': '🍪', 'gateau': '🍰', 'gateaux': '🍰',
-                'riz': '🍚', 'pate': '🍝', 'pates': '🍝', 'nouille': '🍜', 'nouilles': '🍜', 'pizza': '🍕',
-                'pizzas': '🍕', 'taco': '🌮', 'tacos': '🌮', 'burger': '🍔', 'burgers': '🍔', 'sushi': '🍣',
-                'sushis': '🍣',
-                'lait': '🥛', 'fromage': '🧀', 'fromages': '🧀', 'beurre': '🧈', 'yaourt': '🥣', 'yaourts': '🥣',
-                'creme': '🥛', 'cremes': '🥛',
-                'soupe': '🥣', 'soupes': '🥣'
-            };
-            if (exactMatches[n]) return exactMatches[n];
-            const categories = [
-                { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'dinde', 'canard', 'volaille', 'saucisse', 'charcuterie', 'escalope'] },
-                { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette', 'dorade', 'bar', 'sardine', 'sole', 'merlu', 'colin'] },
-                { emoji: '🧀', keys: ['fromage', 'comte', 'cancoillotte', 'emmental', 'gruyere', 'camembert', 'brie', 'bleu', 'roquefort', 'vache qui rit', 'chevre', 'morbier', 'abondance', 'ricotta', 'mozzarella'] },
-                { emoji: '🥦', keys: ['legume', 'tomate', 'carotte', 'courgette', 'brocoli', 'oignon', 'ail', 'champignon', 'poivron', 'aubergine', 'patate', 'pomme de terre', 'salade', 'haricot', 'epinard', 'chou', 'asperge', 'celeri', 'navet', 'radis', 'artichaut', 'betterave', 'fenouil', 'citrouille', 'potiron', 'topinambour'] },
-                { emoji: '🍎', keys: ['fruit', 'abricot', 'prune', 'figue', 'melon', 'pasteque', 'pamplemousse', 'clementine', 'mandarine', 'grenade', 'goyave', 'litchi', 'nectarine', 'mirabelle'] },
-                { emoji: '🌾', keys: ['cereale', 'brioche', 'biscuit', 'galette', 'semoule', 'farine', 'riz', 'pate', 'nouille', 'ble', 'avoine', 'mais', 'quinoa', 'boulgour', 'pain', 'pain de mie'] },
-                { emoji: '🥛', keys: ['creme', 'beurre', 'brie', 'camembert', 'emmental', 'laitage', 'yaourt', 'lait', 'fromage blanc'] },
-                { emoji: '🍲', keys: ['potage', 'veloute', 'bouillon', 'soupe'] }
-            ];
-            for (let cat of categories) { if (cat.keys.some(key => n.includes(key))) return cat.emoji; }
-            return '🍽️';
-        }
+  <div id="alertModal" class="modal-overlay">
+    <div class="modal-box">
+      <h3>Attention</h3>
+      <p id="alertText" style="color:var(--mist); font-size:0.88rem;"></p>
+      <div class="modal-btns">
+        <button class="modal-btn btn-confirm" onclick="closeModal('alertModal')">Compris</button>
+      </div>
+    </div>
+  </div>
 
-        function showAlert(msg) { document.getElementById('alertText').innerText = msg; document.getElementById('alertModal').style.display = 'flex'; }
-        
-        function selectItems(type) {
-            const today = new Date(); today.setHours(0,0,0,0);
-            const targetItems = inventory.filter(item => {
-                const expiry = new Date(item.date);
-                const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
-                if (type === 'expired') return diffDays < -2;
-                if (type === 'yesterday') return diffDays === -1 || diffDays === -2;
-                if (type === 'today') return diffDays === 0;
-                if (type === 'urgent') return diffDays >= 1 && diffDays <= 5;
-                return false;
-            });
-            const allSelected = targetItems.length > 0 && targetItems.every(i => i.selected);
-            targetItems.forEach(i => i.selected = !allSelected);
-            localStorage.setItem('inventory', JSON.stringify(inventory)); render();
-        }
+<script>
+  let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
+  let editingId = null; let html5QrCode = null; let isScannerActive = false;
 
-        function updateFilterButtonsState() {
-            const types = ['urgent', 'today', 'yesterday', 'expired'];
-            const today = new Date(); today.setHours(0,0,0,0);
-            types.forEach(type => {
-                const btn = document.getElementById(`filter-${type}`);
-                const matches = inventory.filter(item => {
-                    const expiry = new Date(item.date);
-                    const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
-                    if (type === 'expired') return diffDays < -2;
-                    if (type === 'yesterday') return diffDays === -1 || diffDays === -2;
-                    if (type === 'today') return diffDays === 0;
-                    if (type === 'urgent') return diffDays >= 1 && diffDays <= 5;
-                    return false;
-                });
-                btn.classList.toggle('active', matches.length > 0 && matches.every(i => i.selected));
-            });
-            document.getElementById('toggleSelectBtn').classList.toggle('active', inventory.length > 0 && inventory.every(i => i.selected));
-        }
+function getEmoji(item) {
+    if (item.customEmoji && item.customEmoji.trim() !== '') return item.customEmoji;
+    const n = item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    const exactMatches = {
+      'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐',
+      'orange': '🍊', 'oranges': '🍊', 'citron': '🍋', 'citrons': '🍋', 'fraise': '🍓', 'fraises': '🍓',
+      'framboise': '🍓', 'framboises': '🍓', 'myrtille': '🫐', 'myrtilles': '🫐', 'cerise': '🍒', 'cerises': '🍒',
+      'peche': '🍑', 'peches': '🍑', 'mangue': '🥭', 'mangues': '🥭', 'raisin': '🍇', 'raisins': '🍇',
+      'ananas': '🍍', 'kiwi': '🥝', 'kiwis': '🥝', 'melon': '🍈', 'melons': '🍈', 'pasteque': '🍉',
+      'pasteques': '🍉', 'abricot': '🍑', 'abricots': '🍑', 'prune': '🍑', 'prunes': '🍑',
+      'concombre': '🥒', 'concombres': '🥒', 'carotte': '🥕', 'carottes': '🥕', 'brocoli': '🥦', 'brocolis': '🥦',
+      'oignon': '🧅', 'oignons': '🧅', 'ail': '🧄', 'champignon': '🍄', 'champignons': '🍄', 'poivron': '🫑',
+      'poivrons': '🫑', 'salade': '🥬', 'tomate': '🍅', 'tomates': '🍅', 'patate': '🥔', 'patates': '🥔',
+      'pomme de terre': '🥔', 'pommes de terre': '🥔', 'haricot': '🫘', 'haricots': '🫘', 'epinard': '🍃',
+      'epinards': '🍃', 'courgette': '🥒', 'courgettes': '🥒', 'aubergine': '🍆', 'aubergines': '🍆',
+      'chou': '🥬', 'choux': '🥬', 'asperge': '🥬', 'asperges': '🥬', 'poireau': '🥬', 'poireaux': '🥬',
+      'radis': '🥗', 'mais': '🌽', 'avocat': '🥑', 'avocats': '🥑',
+      'steak': '🥩', 'steaks': '🥩', 'gigot': '🥩', 'jambon': '🍖', 'chorizo': '🍖', 'poulet': '🍗', 'poulets': '🍗',
+      'saumon': '🐟', 'saumons': '🐟', 'thon': '🐟', 'thons': '🐟', 'crevette': '🍤', 'crevettes': '🍤',
+      'saucisse': '🌭', 'saucisses': '🌭', 'cote de porc': '🥩', 'cotes de porc': '🥩', 'cote de boeuf': '🥩',
+      'cotes de boeuf': '🥩', 'cote de mouton': '🥩', 'cotes de mouton': '🥩', 'lard': '🥓', 'bacon': '🥓',
+      'oeuf': '🥚', 'oeufs': '🥚', 'œuf': '🥚', 'œufs': '🥚', 'poisson': '🐟', 'poissons': '🐟',
+      'pain': '🍞', 'baguette': '🥖', 'baguettes': '🥖', 'croissant': '🥐', 'croissants': '🥐',
+      'brioche': '🍞', 'brioches': '🍞', 'biscuit': '🍪', 'biscuits': '🍪', 'gateau': '🍰', 'gateaux': '🍰',
+      'riz': '🍚', 'pate': '🍝', 'pates': '🍝', 'nouille': '🍜', 'nouilles': '🍜', 'pizza': '🍕',
+      'pizzas': '🍕', 'taco': '🌮', 'tacos': '🌮', 'burger': '🍔', 'burgers': '🍔', 'sushi': '🍣',
+      'sushis': '🍣',
+      'lait': '🥛', 'fromage': '🧀', 'fromages': '🧀', 'beurre': '🧈', 'yaourt': '🥣', 'yaourts': '🥣',
+      'creme': '🥛', 'cremes': '🥛',
+      'soupe': '🥣', 'soupes': '🥣'
+    };
+    if (exactMatches[n]) return exactMatches[n];
+    const categories = [
+      { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'dinde', 'canard', 'volaille', 'saucisse', 'charcuterie', 'escalope'] },
+      { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette', 'dorade', 'bar', 'sardine', 'sole', 'merlu', 'colin'] },
+      { emoji: '🧀', keys: ['fromage', 'comte', 'cancoillotte', 'emmental', 'gruyere', 'camembert', 'brie', 'bleu', 'roquefort', 'vache qui rit', 'chevre', 'morbier', 'abondance', 'ricotta', 'mozzarella'] },
+      { emoji: '🥦', keys: ['legume', 'tomate', 'carotte', 'courgette', 'brocoli', 'oignon', 'ail', 'champignon', 'poivron', 'aubergine', 'patate', 'pomme de terre', 'salade', 'haricot', 'epinard', 'chou', 'asperge', 'celeri', 'navet', 'radis', 'artichaut', 'betterave', 'fenouil', 'citrouille', 'potiron', 'topinambour'] },
+      { emoji: '🍎', keys: ['fruit', 'abricot', 'prune', 'figue', 'melon', 'pasteque', 'pamplemousse', 'clementine', 'mandarine', 'grenade', 'goyave', 'litchi', 'nectarine', 'mirabelle'] },
+      { emoji: '🌾', keys: ['cereale', 'brioche', 'biscuit', 'galette', 'semoule', 'farine', 'riz', 'pate', 'nouille', 'ble', 'avoine', 'mais', 'quinoa', 'boulgour', 'pain', 'pain de mie'] },
+      { emoji: '🥛', keys: ['creme', 'beurre', 'brie', 'camembert', 'emmental', 'laitage', 'yaourt', 'lait', 'fromage blanc'] },
+      { emoji: '🍲', keys: ['potage', 'veloute', 'bouillon', 'soupe'] }
+    ];
+    for (let cat of categories) { if (cat.keys.some(key => n.includes(key))) return cat.emoji; }
+    return '🍽️';
+  }
 
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        
-        function openRecipeModal() {
-            const selected = inventory.filter(i => i.selected);
-            if (selected.length === 0) { showAlert("Veuillez sélectionner au moins un ingrédient pour la recherche."); return; }
-            const query = selected.map(i => i.name).join(' ');
-            window.open(`https://www.google.com/search?q=recette+avec+${encodeURIComponent(query)}`, '_blank');
-        }
+  function showAlert(msg) { document.getElementById('alertText').innerText = msg; document.getElementById('alertModal').classList.add('show'); }
 
-        async function fetchProductName(barcode) { try { const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}.json`); const data = await res.json(); return data.status === 1 ? (data.product.product_name_fr || data.product.product_name) : "Produit inconnu"; } catch(e) { return "Erreur API"; } }
+  function getDiffDays(item) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const expiry = new Date(item.date);
+    return Math.round((expiry - today) / (1000 * 60 * 60 * 24));
+  }
 
-        function toggleScanner() {
-            const btn = document.getElementById('scanBtn');
-            if(isScannerActive) { if(html5QrCode) html5QrCode.stop(); document.getElementById('reader').style.display = 'none'; btn.innerHTML = "Scanner 📷"; isScannerActive = false; }
-            else { document.getElementById('reader').style.display = 'block'; btn.innerHTML = "Arrêter 📷"; html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, async (decodedText) => { toggleScanner(); document.getElementById('foodName').value = "Recherche..."; const name = await fetchProductName(decodedText); document.getElementById('foodName').value = name; }); isScannerActive = true; }
-        }
+  function getState(diffDays) {
+    if (diffDays < -2) return 'severe';
+    if (diffDays === -1 || diffDays === -2) return 'mild';
+    if (diffDays === 0) return 'today';
+    if (diffDays >= 1 && diffDays <= 5) return 'soon';
+    return 'fresh';
+  }
 
-        function openAddModal() { editingId = null; document.getElementById('modalTitle').innerText = "Nouvel aliment"; document.getElementById('foodName').value = ''; document.getElementById('expiryDate').value = new Date().toISOString().split('T')[0]; document.getElementById('foodEmoji').value = ''; document.getElementById('itemModal').style.display = 'flex'; }
-        
-        function openEditModal(item) {
-            editingId = item.id;
-            document.getElementById('modalTitle').innerText = "Modifier";
-            document.getElementById('foodName').value = item.name;
-            document.getElementById('expiryDate').value = item.date;
-            document.getElementById('foodEmoji').value = item.customEmoji || '';
-            document.getElementById('storageLocation').value = item.loc;
-            document.getElementById('itemModal').style.display = 'flex';
-        }
+  function getStatusLabel(diffDays) {
+    if (diffDays < -2) return `Périmé depuis ${Math.abs(diffDays)} j`;
+    if (diffDays === -2) return 'Périmé avant-hier';
+    if (diffDays === -1) return 'Périmé hier';
+    if (diffDays === 0) return "Aujourd'hui";
+    if (diffDays === 1) return 'Demain';
+    if (diffDays > 1 && diffDays <= 5) return `Dans ${diffDays} j`;
+    return `Dans ${diffDays} j`;
+  }
 
-        function handleBulkDelete() {
-            const selected = inventory.filter(i => i.selected);
-            if(selected.length === 0) { showAlert("Veuillez sélectionner au moins un ingrédient à supprimer."); return; }
-            const listDiv = document.getElementById('deleteList');
-            listDiv.innerHTML = selected.map(i => `<div>${getEmoji(i)} <strong>${i.name}</strong> - ${i.date} - ${i.loc}</div>`).join('');
-            document.getElementById('deleteModal').style.display = 'flex';
-        }
+  function getRingBackground(state, diffDays) {
+    if (state === 'soon') {
+      const pct = Math.max(10, Math.min(100, ((6 - diffDays) / 5) * 100));
+      return `conic-gradient(var(--amber) ${pct}%, var(--ring-track) 0)`;
+    }
+    if (state === 'today') return `conic-gradient(var(--clay) 0 100%)`;
+    if (state === 'mild') return `conic-gradient(var(--tomato) 0 100%)`;
+    if (state === 'severe') return `conic-gradient(#FF6B4A 0 100%)`;
+    return `conic-gradient(var(--mist-dim) 0 100%)`;
+  }
 
-        function confirmDelete() {
-            inventory = inventory.filter(i => !i.selected);
-            localStorage.setItem('inventory', JSON.stringify(inventory));
-            closeModal('deleteModal');
-            render();
-        }
+  function selectItems(type) {
+    const targetItems = inventory.filter(item => {
+      const diffDays = getDiffDays(item);
+      if (type === 'expired') return diffDays < -2;
+      if (type === 'yesterday') return diffDays === -1 || diffDays === -2;
+      if (type === 'today') return diffDays === 0;
+      if (type === 'urgent') return diffDays >= 1 && diffDays <= 5;
+      return false;
+    });
+    const allSelected = targetItems.length > 0 && targetItems.every(i => i.selected);
+    targetItems.forEach(i => i.selected = !allSelected);
+    localStorage.setItem('inventory', JSON.stringify(inventory)); render();
+  }
 
-        function saveFood() { const name = document.getElementById('foodName').value; const date = document.getElementById('expiryDate').value; const loc = document.getElementById('storageLocation').value; const customEmoji = document.getElementById('foodEmoji').value; if(!name || !date) return; if (editingId) { const item = inventory.find(i => String(i.id) === String(editingId)); if (item) Object.assign(item, { name, date, loc, customEmoji }); } else { inventory.push({ id: Date.now().toString(), name, date, loc, customEmoji, selected: false }); } localStorage.setItem('inventory', JSON.stringify(inventory)); closeModal('itemModal'); render(); }
-        function toggleSelectAll() { const allSelected = inventory.every(i => i.selected); inventory.forEach(i => i.selected = !allSelected); render(); }
-        
-        function render() {
-            const list = document.getElementById('productList'); list.innerHTML = "";
-            inventory.sort((a, b) => new Date(a.date) - new Date(b.date));
-            const today = new Date(); today.setHours(0,0,0,0);
-            
-            inventory.forEach((item) => {
-                const expiry = new Date(item.date);
-                const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
-                let cssClass = '';
-                if (diffDays < -2) cssClass = 'expired-long';
-                else if (diffDays === -1 || diffDays === -2) cssClass = 'expired-yesterday';
-                else if (diffDays === 0) cssClass = 'expired-today';
-                else if (diffDays >= 1 && diffDays <= 5) cssClass = 'urgent';
-                
-                const div = document.createElement('div');
-                div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
-                
-                div.onclick = () => { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); };
-                div.oncontextmenu = (e) => { e.preventDefault(); openEditModal(item); };
+  function updateFilterButtonsState() {
+    const types = ['urgent', 'today', 'yesterday', 'expired'];
+    types.forEach(type => {
+      const btn = document.getElementById(`filter-${type}`);
+      const matches = inventory.filter(item => {
+        const diffDays = getDiffDays(item);
+        if (type === 'expired') return diffDays < -2;
+        if (type === 'yesterday') return diffDays === -1 || diffDays === -2;
+        if (type === 'today') return diffDays === 0;
+        if (type === 'urgent') return diffDays >= 1 && diffDays <= 5;
+        return false;
+      });
+      btn.classList.toggle('active', matches.length > 0 && matches.every(i => i.selected));
+    });
+    document.getElementById('toggleSelectBtn').classList.toggle('active', inventory.length > 0 && inventory.every(i => i.selected));
+    document.getElementById('itemCount').innerText = `${inventory.length} aliment${inventory.length !== 1 ? 's' : ''}`;
+  }
 
-                div.innerHTML = `
-                    <div class="item-emoji">${getEmoji(item)}</div>
-                    <div class="item-name">${item.name}</div>
-                    <div class="item-loc">${item.loc}</div>
-                    <div class="item-meta">${item.date}</div>
-                `;
-                list.appendChild(div);
-            });
-            const spacer = document.createElement('div'); spacer.style.gridColumn = "span 3"; spacer.style.height = "100px"; list.appendChild(spacer);
-            updateFilterButtonsState();
-        }
-        render();
-    </script>
+  function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+  function openRecipeModal() {
+    const selected = inventory.filter(i => i.selected);
+    if (selected.length === 0) { showAlert("Sélectionnez au moins un ingrédient pour lancer la recherche."); return; }
+    const query = selected.map(i => i.name).join(' ');
+    window.open(`https://www.google.com/search?q=recette+avec+${encodeURIComponent(query)}`, '_blank');
+  }
+
+  async function fetchProductName(barcode) { try { const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}.json`); const data = await res.json(); return data.status === 1 ? (data.product.product_name_fr || data.product.product_name) : "Produit inconnu"; } catch(e) { return "Erreur API"; } }
+
+  function toggleScanner() {
+    const btn = document.getElementById('scanBtn');
+    if(isScannerActive) { if(html5QrCode) html5QrCode.stop(); document.getElementById('reader').style.display = 'none'; btn.innerHTML = "Scanner un code-barres 📷"; isScannerActive = false; }
+    else { document.getElementById('reader').style.display = 'block'; btn.innerHTML = "Arrêter le scan 📷"; html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, async (decodedText) => { toggleScanner(); document.getElementById('foodName').value = "Recherche..."; const name = await fetchProductName(decodedText); document.getElementById('foodName').value = name; }); isScannerActive = true; }
+  }
+
+  function openAddModal() { editingId = null; document.getElementById('modalTitle').innerText = "Nouvel aliment"; document.getElementById('foodName').value = ''; document.getElementById('expiryDate').value = new Date().toISOString().split('T')[0]; document.getElementById('foodEmoji').value = ''; document.getElementById('storageLocation').value = '❄️ Réfrigérateur'; document.getElementById('itemModal').classList.add('show'); }
+
+  function openEditModal(item) {
+    editingId = item.id;
+    document.getElementById('modalTitle').innerText = "Modifier l'aliment";
+    document.getElementById('foodName').value = item.name;
+    document.getElementById('expiryDate').value = item.date;
+    document.getElementById('foodEmoji').value = item.customEmoji || '';
+    document.getElementById('storageLocation').value = item.loc;
+    document.getElementById('itemModal').classList.add('show');
+  }
+
+  function handleBulkDelete() {
+    const selected = inventory.filter(i => i.selected);
+    if(selected.length === 0) { showAlert("Sélectionnez au moins un aliment à supprimer."); return; }
+    const listDiv = document.getElementById('deleteList');
+    listDiv.innerHTML = selected.map(i => `<div>${getEmoji(i)} <strong>${i.name}</strong> — ${i.date} — ${i.loc}</div>`).join('');
+    document.getElementById('deleteModal').classList.add('show');
+  }
+
+  function confirmDelete() {
+    inventory = inventory.filter(i => !i.selected);
+    localStorage.setItem('inventory', JSON.stringify(inventory));
+    closeModal('deleteModal');
+    render();
+  }
+
+  function saveFood() {
+    const name = document.getElementById('foodName').value;
+    const date = document.getElementById('expiryDate').value;
+    const loc = document.getElementById('storageLocation').value;
+    const customEmoji = document.getElementById('foodEmoji').value;
+    if(!name || !date) { showAlert("Merci de renseigner au moins le nom et la date limite."); return; }
+    if (editingId) { const item = inventory.find(i => String(i.id) === String(editingId)); if (item) Object.assign(item, { name, date, loc, customEmoji }); }
+    else { inventory.push({ id: Date.now().toString(), name, date, loc, customEmoji, selected: false }); }
+    localStorage.setItem('inventory', JSON.stringify(inventory)); closeModal('itemModal'); render();
+  }
+
+  function toggleSelectAll() { const allSelected = inventory.length > 0 && inventory.every(i => i.selected); inventory.forEach(i => i.selected = !allSelected); localStorage.setItem('inventory', JSON.stringify(inventory)); render(); }
+
+  function render() {
+    const list = document.getElementById('productList'); list.innerHTML = "";
+    inventory.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    if (inventory.length === 0) {
+      list.innerHTML = `<div class="empty-state">
+        <span class="emoji">🌱</span>
+        <div class="l1">Ton garde-manger est vide</div>
+        <div class="l2">Ajoute un aliment pour suivre ses dates et limiter le gâchis.</div>
+      </div>`;
+      updateFilterButtonsState();
+      return;
+    }
+
+    inventory.forEach((item, idx) => {
+      const diffDays = getDiffDays(item);
+      const state = getState(diffDays);
+      const cssState = state === 'soon' ? '' : state;
+
+      const div = document.createElement('div');
+      div.className = `item-card ${item.selected ? 'selected' : ''}`;
+      if (cssState) div.dataset.state = cssState;
+      div.style.setProperty('--i', idx);
+
+      div.onclick = () => { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); };
+      div.oncontextmenu = (e) => { e.preventDefault(); openEditModal(item); };
+
+      const locIcon = (item.loc || '').trim().split(' ')[0] || '📍';
+
+      div.innerHTML = `
+        <div class="ring" style="--ring-bg:${getRingBackground(state, diffDays)}">
+          <span class="item-emoji">${getEmoji(item)}</span>
+          <span class="loc-badge">${locIcon}</span>
+        </div>
+        <div class="item-name">${item.name}</div>
+        <div class="item-status">${getStatusLabel(diffDays)}</div>
+      `;
+      list.appendChild(div);
+    });
+    const spacer = document.createElement('div'); spacer.style.gridColumn = "1/-1"; spacer.style.height = "70px"; list.appendChild(spacer);
+    updateFilterButtonsState();
+  }
+  render();
+</script>
 </body>
 </html>
-
-    
