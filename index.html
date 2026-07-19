@@ -19,17 +19,20 @@
         .filter-btn { flex: 1; padding: 8px 2px; border-radius: 8px; border: 2px solid #ddd; background: white; cursor: pointer; font-size: 0.65rem; font-weight: bold; color: #555; }
         .filter-btn.active { background: #e8f5e9; border: 2px solid #3e7b37; color: #3e7b37; }
         #productList { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; overflow-y: auto; flex: 1; min-height: 0; align-content: start; padding-bottom: 30px; }
-        .item { background: white; padding: 4px 2px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 2px solid transparent; transition: all 0.2s ease; cursor: pointer; height: 75px; position: relative; text-align: center; overflow: hidden; }
+        
+        .item { background: white; padding: 4px 2px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 2px solid transparent; transition: all 0.2s ease; cursor: pointer; height: 90px; position: relative; text-align: center; overflow: hidden; }
         .item.selected { border: 3px solid #3e7b37; background-color: #f0f7ef; }
         .item.urgent { background-color: #fff3cd; } 
         .item.expired-yesterday { background-color: #ffcdd2; }
         .item.expired-today { background-color: #ffcc99; }
         .item.expired-long { background-color: #c9302c; color: white; }
-        .visual { font-size: 1rem; line-height: 1; display: flex; align-items: center; gap: 3px; }
-        .loc-name { font-size: 0.55rem; font-weight: bold; }
-        .item-name { font-weight: bold; font-size: 0.65rem; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.1; margin: 2px 0; }
-        .item-meta { font-size: 0.6rem; line-height: 1; margin: 1px 0; }
+        
+        .item-emoji { font-size: 1.1rem; line-height: 1; }
+        .item-name { font-weight: bold; font-size: 0.65rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.1; margin: 1px 0; }
+        .item-loc { font-size: 0.55rem; line-height: 1; margin: 1px 0; }
+        .item-meta { font-size: 0.6rem; line-height: 1; margin: 1px 0; font-weight: bold; }
         .item.expired-long .item-meta { color: #ffe5e5; }
+        
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: flex-start; overflow-y: auto; padding-top: 50px; }
         .modal-box { background: white; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; box-sizing: border-box; }
         .modal-input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
@@ -57,8 +60,7 @@
         </div>
         <div id="productList"></div>
     </div>
-    <!-- (Le reste du HTML des modales est inchangé) -->
-
+    
     <div id="itemModal" class="modal-overlay">
         <div class="modal-box">
             <h3 id="modalTitle">Aliment</h3>
@@ -99,7 +101,6 @@
             </div>
         </div>
     </div>
-
     <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
         let editingId = null; let html5QrCode = null; let isScannerActive = false;
@@ -107,9 +108,45 @@
         function getEmoji(item) {
             if (item.customEmoji && item.customEmoji.trim() !== '') return item.customEmoji;
             const n = item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-            const exactMatches = { 'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐', 'orange': '🍊', 'oranges': '🍊', 'citron': '🍋', 'citrons': '🍋', 'fraise': '🍓', 'fraises': '🍓', 'framboise': '🍓', 'framboises': '🍓', 'myrtille': '🫐', 'myrtilles': '🫐', 'cerise': '🍒', 'cerises': '🍒', 'peche': '🍑', 'peches': '🍑', 'mangue': '🥭', 'mangues': '🥭', 'raisin': '🍇', 'raisins': '🍇', 'ananas': '🍍', 'kiwi': '🥝', 'kiwis': '🥝', 'melon': '🍈', 'melons': '🍈', 'pasteque': '🍉', 'pasteques': '🍉', 'abricot': '🍑', 'abricots': '🍑', 'prune': '🍑', 'prunes': '🍑', 'concombre': '🥒', 'concombres': '🥒', 'carotte': '🥕', 'carottes': '🥕', 'brocoli': '🥦', 'brocolis': '🥦', 'oignon': '🧅', 'oignons': '🧅', 'ail': '🧄', 'champignon': '🍄', 'champignons': '🍄', 'poivron': '🫑', 'poivrons': '🫑', 'salade': '🥬', 'tomate': '🍅', 'tomates': '🍅', 'patate': '🥔', 'patates': '🥔', 'pomme de terre': '🥔', 'pommes de terre': '🥔', 'haricot': '🫘', 'haricots': '🫘', 'epinard': '🍃', 'epinards': '🍃', 'courgette': '🥒', 'courgettes': '🥒', 'aubergine': '🍆', 'aubergines': '🍆', 'chou': '🥬', 'choux': '🥬', 'asperge': '🥬', 'asperges': '🥬', 'poireau': '🥬', 'poireaux': '🥬', 'radis': '🥗', 'mais': '🌽', 'avocat': '🥑', 'avocats': '🥑', 'steak': '🥩', 'steaks': '🥩', 'gigot': '🥩', 'jambon': '🍖', 'chorizo': '🍖', 'poulet': '🍗', 'poulets': '🍗', 'saumon': '🐟', 'saumons': '🐟', 'thon': '🐟', 'thons': '🐟', 'crevette': '🍤', 'crevettes': '🍤', 'saucisse': '🌭', 'saucisses': '🌭', 'cote de porc': '🥩', 'cotes de porc': '🥩', 'cote de boeuf': '🥩', 'cotes de boeuf': '🥩', 'cote de mouton': '🥩', 'cotes de mouton': '🥩', 'lard': '🥓', 'bacon': '🥓', 'oeuf': '🥚', 'oeufs': '🥚', 'œuf': '🥚', 'œufs': '🥚', 'poisson': '🐟', 'poissons': '🐟', 'pain': '🍞', 'baguette': '🥖', 'baguettes': '🥖', 'croissant': '🥐', 'croissants': '🥐', 'brioche': '🍞', 'brioches': '🍞', 'biscuit': '🍪', 'biscuits': '🍪', 'gateau': '🍰', 'gateaux': '🍰', 'riz': '🍚', 'pate': '🍝', 'pates': '🍝', 'nouille': '🍜', 'nouilles': '🍜', 'pizza': '🍕', 'pizzas': '🍕', 'taco': '🌮', 'tacos': '🌮', 'burger': '🍔', 'burgers': '🍔', 'sushi': '🍣', 'sushis': '🍣', 'lait': '🥛', 'fromage': '🧀', 'fromages': '🧀', 'beurre': '🧈', 'yaourt': '🥣', 'yaourts': '🥣', 'creme': '🥛', 'cremes': '🥛', 'soupe': '🥣', 'soupes': '🥣' };
+            const exactMatches = {
+                'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐',
+                'orange': '🍊', 'oranges': '🍊', 'citron': '🍋', 'citrons': '🍋', 'fraise': '🍓', 'fraises': '🍓',
+                'framboise': '🍓', 'framboises': '🍓', 'myrtille': '🫐', 'myrtilles': '🫐', 'cerise': '🍒', 'cerises': '🍒',
+                'peche': '🍑', 'peches': '🍑', 'mangue': '🥭', 'mangues': '🥭', 'raisin': '🍇', 'raisins': '🍇',
+                'ananas': '🍍', 'kiwi': '🥝', 'kiwis': '🥝', 'melon': '🍈', 'melons': '🍈', 'pasteque': '🍉',
+                'pasteques': '🍉', 'abricot': '🍑', 'abricots': '🍑', 'prune': '🍑', 'prunes': '🍑',
+                'concombre': '🥒', 'concombres': '🥒', 'carotte': '🥕', 'carottes': '🥕', 'brocoli': '🥦', 'brocolis': '🥦',
+                'oignon': '🧅', 'oignons': '🧅', 'ail': '🧄', 'champignon': '🍄', 'champignons': '🍄', 'poivron': '🫑',
+                'poivrons': '🫑', 'salade': '🥬', 'tomate': '🍅', 'tomates': '🍅', 'patate': '🥔', 'patates': '🥔',
+                'pomme de terre': '🥔', 'pommes de terre': '🥔', 'haricot': '🫘', 'haricots': '🫘', 'epinard': '🍃',
+                'epinards': '🍃', 'courgette': '🥒', 'courgettes': '🥒', 'aubergine': '🍆', 'aubergines': '🍆',
+                'chou': '🥬', 'choux': '🥬', 'asperge': '🥬', 'asperges': '🥬', 'poireau': '🥬', 'poireaux': '🥬',
+                'radis': '🥗', 'mais': '🌽', 'avocat': '🥑', 'avocats': '🥑',
+                'steak': '🥩', 'steaks': '🥩', 'gigot': '🥩', 'jambon': '🍖', 'chorizo': '🍖', 'poulet': '🍗', 'poulets': '🍗',
+                'saumon': '🐟', 'saumons': '🐟', 'thon': '🐟', 'thons': '🐟', 'crevette': '🍤', 'crevettes': '🍤',
+                'saucisse': '🌭', 'saucisses': '🌭', 'cote de porc': '🥩', 'cotes de porc': '🥩', 'cote de boeuf': '🥩',
+                'cotes de boeuf': '🥩', 'cote de mouton': '🥩', 'cotes de mouton': '🥩', 'lard': '🥓', 'bacon': '🥓',
+                'oeuf': '🥚', 'oeufs': '🥚', 'œuf': '🥚', 'œufs': '🥚', 'poisson': '🐟', 'poissons': '🐟',
+                'pain': '🍞', 'baguette': '🥖', 'baguettes': '🥖', 'croissant': '🥐', 'croissants': '🥐',
+                'brioche': '🍞', 'brioches': '🍞', 'biscuit': '🍪', 'biscuits': '🍪', 'gateau': '🍰', 'gateaux': '🍰',
+                'riz': '🍚', 'pate': '🍝', 'pates': '🍝', 'nouille': '🍜', 'nouilles': '🍜', 'pizza': '🍕',
+                'pizzas': '🍕', 'taco': '🌮', 'tacos': '🌮', 'burger': '🍔', 'burgers': '🍔', 'sushi': '🍣',
+                'sushis': '🍣',
+                'lait': '🥛', 'fromage': '🧀', 'fromages': '🧀', 'beurre': '🧈', 'yaourt': '🥣', 'yaourts': '🥣',
+                'creme': '🥛', 'cremes': '🥛',
+                'soupe': '🥣', 'soupes': '🥣'
+            };
             if (exactMatches[n]) return exactMatches[n];
-            const categories = [ { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'dinde', 'canard', 'volaille', 'saucisse', 'charcuterie', 'escalope'] }, { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette', 'dorade', 'bar', 'sardine', 'sole', 'merlu', 'colin'] }, { emoji: '🧀', keys: ['fromage', 'comte', 'cancoillotte', 'emmental', 'gruyere', 'camembert', 'brie', 'bleu', 'roquefort', 'vache qui rit', 'chevre', 'morbier', 'abondance', 'ricotta', 'mozzarella'] }, { emoji: '🥦', keys: ['legume', 'tomate', 'carotte', 'courgette', 'brocoli', 'oignon', 'ail', 'champignon', 'poivron', 'aubergine', 'patate', 'pomme de terre', 'salade', 'haricot', 'epinard', 'chou', 'asperge', 'celeri', 'navet', 'radis', 'artichaut', 'betterave', 'fenouil', 'citrouille', 'potiron', 'topinambour'] }, { emoji: '🍎', keys: ['fruit', 'abricot', 'prune', 'figue', 'melon', 'pasteque', 'pamplemousse', 'clementine', 'mandarine', 'grenade', 'goyave', 'litchi', 'nectarine', 'mirabelle'] }, { emoji: '🌾', keys: ['cereale', 'brioche', 'biscuit', 'galette', 'semoule', 'farine', 'riz', 'pate', 'nouille', 'ble', 'avoine', 'mais', 'quinoa', 'boulgour', 'pain', 'pain de mie'] }, { emoji: '🥛', keys: ['creme', 'beurre', 'brie', 'camembert', 'emmental', 'laitage', 'yaourt', 'lait', 'fromage blanc'] }, { emoji: '🍲', keys: ['potage', 'veloute', 'bouillon', 'soupe'] } ];
+            const categories = [
+                { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'dinde', 'canard', 'volaille', 'saucisse', 'charcuterie', 'escalope'] },
+                { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette', 'dorade', 'bar', 'sardine', 'sole', 'merlu', 'colin'] },
+                { emoji: '🧀', keys: ['fromage', 'comte', 'cancoillotte', 'emmental', 'gruyere', 'camembert', 'brie', 'bleu', 'roquefort', 'vache qui rit', 'chevre', 'morbier', 'abondance', 'ricotta', 'mozzarella'] },
+                { emoji: '🥦', keys: ['legume', 'tomate', 'carotte', 'courgette', 'brocoli', 'oignon', 'ail', 'champignon', 'poivron', 'aubergine', 'patate', 'pomme de terre', 'salade', 'haricot', 'epinard', 'chou', 'asperge', 'celeri', 'navet', 'radis', 'artichaut', 'betterave', 'fenouil', 'citrouille', 'potiron', 'topinambour'] },
+                { emoji: '🍎', keys: ['fruit', 'abricot', 'prune', 'figue', 'melon', 'pasteque', 'pamplemousse', 'clementine', 'mandarine', 'grenade', 'goyave', 'litchi', 'nectarine', 'mirabelle'] },
+                { emoji: '🌾', keys: ['cereale', 'brioche', 'biscuit', 'galette', 'semoule', 'farine', 'riz', 'pate', 'nouille', 'ble', 'avoine', 'mais', 'quinoa', 'boulgour', 'pain', 'pain de mie'] },
+                { emoji: '🥛', keys: ['creme', 'beurre', 'brie', 'camembert', 'emmental', 'laitage', 'yaourt', 'lait', 'fromage blanc'] },
+                { emoji: '🍲', keys: ['potage', 'veloute', 'bouillon', 'soupe'] }
+            ];
             for (let cat of categories) { if (cat.keys.some(key => n.includes(key))) return cat.emoji; }
             return '🍽️';
         }
@@ -218,10 +255,12 @@
                 div.onclick = () => { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); };
                 div.oncontextmenu = (e) => { e.preventDefault(); openEditModal(item); };
 
-                // Extraction du nom du lieu (partie après l'icône)
-                const locName = item.loc.replace(item.loc.split(' ')[0], '').trim();
-
-                div.innerHTML = `<div class="visual">${item.loc.split(' ')[0]} <span class="loc-name">${locName}</span></div><span class="item-name">${item.name}</span><div class="item-meta"><strong>${item.date}</strong></div>`;
+                div.innerHTML = `
+                    <div class="item-emoji">${getEmoji(item)}</div>
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-loc">${item.loc}</div>
+                    <div class="item-meta">${item.date}</div>
+                `;
                 list.appendChild(div);
             });
             const spacer = document.createElement('div'); spacer.style.gridColumn = "span 3"; spacer.style.height = "100px"; list.appendChild(spacer);
@@ -232,3 +271,4 @@
 </body>
 </html>
 
+    
