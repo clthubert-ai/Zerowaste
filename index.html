@@ -198,8 +198,20 @@ function render(){
 
 const closeModal = id => $(id).classList.remove('show');
 function handleBulkDelete(){ $('deleteModal').classList.add('show'); }
-function confirmDelete(){ inventory=inventory.filter(i=>!i.selected); save(); closeModal('deleteModal'); render(); }
-function toggleScanner(){ /* Logique scanner inchangée */ }
+function confirmDelete(){ inventory=inventory.filter(i=>!i.selected); save(); closeModal('deleteModal'); render(); }function toggleScanner(){
+  const b=$('scanBtn'), r=$('reader');
+  if(isScannerActive){
+    if(html5QrCode) html5QrCode.stop();
+    r.style.display='none'; b.innerHTML="Scanner un code-barres 📷"; isScannerActive=false;
+  }else{
+    r.style.display='block'; b.innerHTML="Arrêter le scan 📷";
+    html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start({facingMode:"environment"},{fps:10,qrbox:250},async t=>{
+      toggleScanner(); $('foodName').value="Recherche..."; $('foodName').value=await fetchProductName(t);
+    });
+    isScannerActive=true;
+  }
+}
 function filterList(){
   // On normalise la requête : minuscule + suppression des accents
   const q = $('searchInput').value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -210,10 +222,22 @@ function filterList(){
     c.style.display = name.includes(q) ? 'flex' : 'none';
   });
 }
-function selectItems(t){ /* Logique sélection inchangée */ }
+function selectItems(type){
+  const tg=inventory.filter(i=>{
+    const d=getDiffDays(i);
+    return type==='expired'?d<-2:type==='yesterday'?d<0&&d>=-2:type==='today'?d===0:type==='urgent'?d>=1&&d<=5:false;
+  });
+  const allSel=tg.length>0 && tg.every(i=>i.selected);
+  tg.forEach(i=>i.selected=!allSel); save(); updateSelectionUI(); updateFilterButtonsState();
+}
 function toggleSelectAll(){ /* Logique tout sélectionner inchangée */ }
 function updateFilterButtonsState(){ /* Logique boutons inchangée */ }
-function openRecipeModal(){ /* Logique recette inchangée */ }
+
+function openRecipeModal(){
+  const sel=inventory.filter(i=>i.selected);
+  if(!sel.length) return showAlert("Sélectionnez au moins un ingrédient pour lancer la recherche.");
+  window.open(`https://www.google.com/search?q=recette+avec+${encodeURIComponent(sel.map(i=>i.name).join(' '))}`,'_blank');
+}
 
 render();
 </script>
