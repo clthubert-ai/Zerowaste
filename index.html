@@ -90,6 +90,7 @@
         <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
         let editingId = null; let html5QrCode = null; let isScannerActive = false;
+        let pressTimer; // Timer pour le long-press
         
         function getEmoji(item) {
             if (item.customEmoji && item.customEmoji.trim() !== '') return item.customEmoji;
@@ -186,11 +187,20 @@
         }
         function openAddModal() { editingId = null; document.getElementById('modalTitle').innerText = "Nouvel aliment"; document.getElementById('foodName').value = ''; document.getElementById('expiryDate').value = new Date().toISOString().split('T')[0]; document.getElementById('foodEmoji').value = ''; document.getElementById('itemModal').style.display = 'flex'; }
         
+        function openEditModal(item) {
+            editingId = item.id;
+            document.getElementById('modalTitle').innerText = "Modifier";
+            document.getElementById('foodName').value = item.name;
+            document.getElementById('expiryDate').value = item.date;
+            document.getElementById('foodEmoji').value = item.customEmoji || '';
+            document.getElementById('storageLocation').value = item.loc;
+            document.getElementById('itemModal').style.display = 'flex';
+        }
+
         function handleBulkDelete() {
             const selected = inventory.filter(i => i.selected);
             if(selected.length === 0) return;
             const listDiv = document.getElementById('deleteList');
-            // Mise à jour ici : ajout de la date et du lieu
             listDiv.innerHTML = selected.map(i => `<div>${getEmoji(i)} <strong>${i.name}</strong> - ${i.date} - ${i.loc}</div>`).join('');
             document.getElementById('deleteModal').style.display = 'flex';
         }
@@ -217,7 +227,16 @@
                 else if (diffDays >= 1 && diffDays <= 5) cssClass = 'urgent';
                 const div = document.createElement('div');
                 div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
-                div.onclick = () => { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); };
+                
+                // Gestion du clic (sélection) et clic prolongé (modification)
+                div.onmousedown = () => { pressTimer = setTimeout(() => openEditModal(item), 800); };
+                div.onmouseup = () => {
+                    clearTimeout(pressTimer);
+                    if(pressTimer) { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); }
+                };
+                div.ontouchstart = div.onmousedown;
+                div.ontouchend = div.onmouseup;
+
                 div.innerHTML = `<div class="visual">${getEmoji(item)}</div><span class="item-name">${item.name}</span><div class="item-meta">${item.loc.split(' ')[0]}</div><div class="item-meta"><strong>${item.date}</strong></div>`;
                 list.appendChild(div);
             });
