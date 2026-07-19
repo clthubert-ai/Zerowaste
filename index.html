@@ -71,7 +71,7 @@
         <div class="modal-box">
             <h3 id="modalTitle">Aliment</h3>
             <input type="text" id="foodName" class="modal-input" placeholder="Nom de l'aliment">
-            <input type="text" onfocus="(this.type='date')" onblur="(this.type='text')" id="expiryDate" class="modal-input" placeholder="Indiquer date de péremption">
+            <input type="text" onfocus="this.type='date'" onblur="this.type='text'" id="expiryDate" class="modal-input" placeholder="Indiquer date de péremption">
             <input type="text" id="foodEmoji" class="modal-input" placeholder="Emoji personnalisé">
             <select id="storageLocation" class="modal-input">
                 <option value="❄️ Réfrigérateur">❄️ Réfrigérateur</option>
@@ -168,8 +168,9 @@
             editingId = null;
             document.getElementById('modalTitle').innerText = "Nouvel aliment";
             document.getElementById('foodName').value = '';
-            document.getElementById('expiryDate').value = '';
-            document.getElementById('expiryDate').type = 'text';
+            const dateInput = document.getElementById('expiryDate');
+            dateInput.value = '';
+            dateInput.type = 'text'; 
             document.getElementById('foodEmoji').value = '';
             document.getElementById('itemModal').style.display = 'flex';
         }
@@ -180,8 +181,9 @@
             editingId = id;
             document.getElementById('modalTitle').innerText = "Modifier l'aliment";
             document.getElementById('foodName').value = item.name;
-            document.getElementById('expiryDate').value = item.date;
-            document.getElementById('expiryDate').type = 'date';
+            const dateInput = document.getElementById('expiryDate');
+            dateInput.value = item.date;
+            dateInput.type = 'date'; 
             document.getElementById('foodEmoji').value = item.customEmoji || '';
             document.getElementById('storageLocation').value = item.loc;
             document.getElementById('itemModal').style.display = 'flex';
@@ -252,10 +254,8 @@
                 'brioche': '🍞', 'brioches': '🍞', 'biscuit': '🍪', 'biscuits': '🍪', 'gateau': '🍰', 'gateaux': '🍰',
                 'riz': '🍚', 'pate': '🍝', 'pates': '🍝', 'nouille': '🍜', 'nouilles': '🍜', 'pizza': '🍕',
                 'pizzas': '🍕', 'taco': '🌮', 'tacos': '🌮', 'burger': '🍔', 'burgers': '🍔', 'sushi': '🍣',
-                'sushis': '🍣',
-                'lait': '🥛', 'fromage': '🧀', 'fromages': '🧀', 'beurre': '🧈', 'yaourt': '🥣', 'yaourts': '🥣',
-                'creme': '🥛', 'cremes': '🥛',
-                'soupe': '🥣', 'soupes': '🥣'
+                'sushis': '🍣', 'lait': '🥛', 'fromage': '🧀', 'fromages': '🧀', 'beurre': '🧈', 'yaourt': '🥣', 
+                'yaourts': '🥣', 'creme': '🥛', 'cremes': '🥛', 'soupe': '🥣', 'soupes': '🥣'
             };
             if (exactMatches[n]) return exactMatches[n];
             const categories = [
@@ -311,4 +311,4 @@
             htmlList += "</ul>";
             
             document.getElementById('confirmText').innerHTML = htmlList;
-            document.getElementById('confirmO
+            document.getElementById('confirmOk').onc
