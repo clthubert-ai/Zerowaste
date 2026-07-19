@@ -36,7 +36,7 @@
         .modal-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .btn-cancel { background: #eee; } .btn-confirm { background: #3e7b37; color: white; }
         .btn-scan { background: #555; color: white; margin-bottom: 10px; width: 100%; padding: 10px; }
-        .delete-list { max-height: 200px; overflow-y: auto; margin: 10px 0; text-align: left; }
+        .delete-list { max-height: 200px; overflow-y: auto; margin: 10px 0; text-align: left; font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -190,7 +190,8 @@
             const selected = inventory.filter(i => i.selected);
             if(selected.length === 0) return;
             const listDiv = document.getElementById('deleteList');
-            listDiv.innerHTML = selected.map(i => `<div>${getEmoji(i)} ${i.name}</div>`).join('');
+            // Mise à jour ici : ajout de la date et du lieu
+            listDiv.innerHTML = selected.map(i => `<div>${getEmoji(i)} <strong>${i.name}</strong> - ${i.date} - ${i.loc}</div>`).join('');
             document.getElementById('deleteModal').style.display = 'flex';
         }
         function confirmDelete() {
