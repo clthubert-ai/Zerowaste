@@ -57,7 +57,7 @@
         <div id="productList" style="margin-top: 20px;"></div>
     </div>
 
-    <!-- Modale Ajout/Édition -->
+    <!-- Modales -->
     <div id="itemModal" class="modal-overlay">
         <div class="modal-box">
             <h3 id="modalTitle">Aliment</h3>
@@ -75,8 +75,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Modale Recettes -->
     <div id="recipeModal" class="modal-overlay">
         <div class="modal-box">
             <h3>Préférences</h3>
@@ -102,18 +100,23 @@
             </div>
         </div>
     </div>
-
     <div id="confirmModal" class="modal-overlay"><div class="modal-box"><div id="confirmText"></div><div class="modal-btns"><button class="modal-btn btn-cancel" onclick="closeModal('confirmModal')">Annuler</button><button class="modal-btn btn-confirm" id="confirmOk">OK</button></div></div></div>
     <div id="alertModal" class="modal-overlay"><div class="modal-box"><div id="alertText"></div><div class="modal-btns" style="justify-content:center;"><button class="modal-btn btn-confirm" onclick="closeModal('alertModal')">OK</button></div></div></div>
 
     <script>
-        let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
+        let inventory = [];
+        try {
+            inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
+            if (!Array.isArray(inventory)) inventory = [];
+        } catch (e) { inventory = []; }
+
         let editingId = null;
         let html5QrCode = null;
         let isScannerActive = false;
         let currentSpeed = 1;
         let currentEase = 1;
         let pressTimer;
+        let isLongPress = false;
 
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         function showAlert(msg) { document.getElementById('alertText').innerText = msg; document.getElementById('alertModal').style.display = 'flex'; }
@@ -171,6 +174,7 @@
         }
 
         function editItem(item) {
+            isLongPress = true;
             editingId = item.id;
             document.getElementById('modalTitle').innerText = "Modifier l'aliment";
             document.getElementById('foodName').value = item.name;
@@ -188,7 +192,7 @@
             if(!name || !date) return showAlert("Remplissez le nom et la date !");
             if (editingId) {
                 const item = inventory.find(i => String(i.id) === String(editingId));
-                Object.assign(item, { name, date, loc, customEmoji });
+                if (item) Object.assign(item, { name, date, loc, customEmoji });
             } else {
                 inventory.push({ id: Date.now().toString(), name, date, loc, customEmoji, selected: false });
             }
@@ -220,6 +224,7 @@
 
         function getEmoji(item) {
             if (item.customEmoji && item.customEmoji.trim() !== '') return item.customEmoji;
+            if (!item.name) return '🍽️';
             const n = item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
             const exactMatches = {
                 'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐',
@@ -274,27 +279,26 @@
             if (btn) btn.innerText = (inventory.length > 0 && inventory.every(i => i.selected)) ? "Tout décocher" : "Tout cocher";
             
             inventory.forEach((item) => {
-                const expiry = new Date(item.date);
-                const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
-                let cssClass = '', alertText = '';
-                if (diffDays < -1) { cssClass = 'expired-long'; alertText = 'Périmé ' + Math.abs(diffDays) + 'j ❌'; }
-                else if (diffDays === -1) { cssClass = 'expired-yesterday'; alertText = 'Périmé 1j ⚠️'; }
-                else if (diffDays >= 0 && diffDays <= 2) { cssClass = 'urgent'; alertText = 'Date proche ⏳'; }
-                
                 const div = document.createElement('div');
-                div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
-                
-                // Clic simple pour sélectionner
-                div.onclick = () => { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); };
-                
-                // Appui long pour modifier
-                div.onmousedown = () => pressTimer = setTimeout(() => editItem(item), 700);
-                div.onmouseup = () => clearTimeout(pressTimer);
-                div.onmouseleave = () => clearTimeout(pressTimer);
-                div.ontouchstart = () => pressTimer = setTimeout(() => editItem(item), 700);
-                div.ontouchend = () => clearTimeout(pressTimer);
+                try {
+                    const expiry = new Date(item.date);
+                    const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
+                    let cssClass = '', alertText = '';
+                    if (diffDays < -1) { cssClass = 'expired-long'; alertText = 'Périmé ' + Math.abs(diffDays) + 'j ❌'; }
+                    else if (diffDays === -1) { cssClass = 'expired-yesterday'; alertText = 'Périmé 1j ⚠️'; }
+                    else if (diffDays >= 0 && diffDays <= 2) { cssClass = 'urgent'; alertText = 'Date proche ⏳'; }
+                    
+                    div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
+                    
+                    div.onclick = () => { if(!isLongPress) { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); } };
+                    div.onmousedown = () => { isLongPress = false; pressTimer = setTimeout(() => editItem(item), 700); };
+                    div.onmouseup = () => clearTimeout(pressTimer);
+                    div.onmouseleave = () => clearTimeout(pressTimer);
+                    div.ontouchstart = () => { isLongPress = false; pressTimer = setTimeout(() => editItem(item), 700); };
+                    div.ontouchend = () => clearTimeout(pressTimer);
 
-                div.innerHTML = `<div class="visual">${getEmoji(item)}</div><div class="item-info"><span class="item-name">${item.name}</span><span class="item-meta">${item.date} • ${item.loc}</span></div><div class="item-alert">${alertText}</div>`;
+                    div.innerHTML = `<div class="visual">${getEmoji(item)}</div><div class="item-info"><span class="item-name">${item.name || "Inconnu"}</span><span class="item-meta">${item.date || ""} • ${item.loc || ""}</span></div><div class="item-alert">${alertText}</div>`;
+                } catch(e) { console.error("Item invalide", item); }
                 list.appendChild(div);
             });
         }
@@ -303,11 +307,4 @@
             const selected = inventory.filter(i => i.selected);
             if (selected.length === 0) return showAlert("Sélectionnez au moins un aliment !");
             
-            let htmlList = "<strong>Supprimer ces éléments ?</strong><ul style='padding-left: 20px; margin-top: 10px; text-align: left;'>";
-            selected.forEach(item => {
-                htmlList += `<li><strong>${item.name}</strong> - ${item.loc} (${item.date})</li>`;
-            });
-            htmlList += "</ul>";
-            
-            document.getElementById('confirmText').innerHTML = htmlList;
-            document.getEleme
+            let htmlList = "<strong>Supprimer ces éléments ?</strong><ul style='padd
