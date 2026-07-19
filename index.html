@@ -36,6 +36,7 @@
         .modal-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .btn-cancel { background: #eee; } .btn-confirm { background: #3e7b37; color: white; }
         .btn-scan { background: #555; color: white; margin-bottom: 10px; width: 100%; padding: 10px; }
+        .delete-list { max-height: 200px; overflow-y: auto; margin: 10px 0; text-align: left; }
     </style>
 </head>
 <body>
@@ -55,7 +56,8 @@
         </div>
         <div id="productList"></div>
     </div>
-        <div id="itemModal" class="modal-overlay">
+    
+    <div id="itemModal" class="modal-overlay">
         <div class="modal-box">
             <h3 id="modalTitle">Aliment</h3>
             <input type="text" id="foodName" class="modal-input" placeholder="Nom de l'aliment">
@@ -74,7 +76,18 @@
             </div>
         </div>
     </div>
-    <script>
+
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Supprimer les éléments ?</h3>
+            <div id="deleteList" class="delete-list"></div>
+            <div class="modal-btns">
+                <button class="modal-btn btn-cancel" onclick="closeModal('deleteModal')">Annuler</button>
+                <button class="modal-btn btn-del-selected" onclick="confirmDelete()">Supprimer</button>
+            </div>
+        </div>
+    </div>
+        <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
         let editingId = null; let html5QrCode = null; let isScannerActive = false;
         
@@ -158,6 +171,13 @@
             document.getElementById('toggleSelectBtn').classList.toggle('active', inventory.length > 0 && inventory.every(i => i.selected));
         }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        
+        function openRecipeModal() {
+            const selected = inventory.filter(i => i.selected);
+            const query = selected.length > 0 ? selected.map(i => i.name).join(' ') : "";
+            window.open(`https://www.google.com/search?q=recette+avec+${encodeURIComponent(query)}`, '_blank');
+        }
+
         async function fetchProductName(barcode) { try { const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}.json`); const data = await res.json(); return data.status === 1 ? (data.product.product_name_fr || data.product.product_name) : "Produit inconnu"; } catch(e) { return "Erreur API"; } }
         function toggleScanner() {
             const btn = document.getElementById('scanBtn');
@@ -165,6 +185,21 @@
             else { document.getElementById('reader').style.display = 'block'; btn.innerHTML = "Arrêter 📷"; html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, async (decodedText) => { toggleScanner(); document.getElementById('foodName').value = "Recherche..."; const name = await fetchProductName(decodedText); document.getElementById('foodName').value = name; }); isScannerActive = true; }
         }
         function openAddModal() { editingId = null; document.getElementById('modalTitle').innerText = "Nouvel aliment"; document.getElementById('foodName').value = ''; document.getElementById('expiryDate').value = new Date().toISOString().split('T')[0]; document.getElementById('foodEmoji').value = ''; document.getElementById('itemModal').style.display = 'flex'; }
+        
+        function handleBulkDelete() {
+            const selected = inventory.filter(i => i.selected);
+            if(selected.length === 0) return;
+            const listDiv = document.getElementById('deleteList');
+            listDiv.innerHTML = selected.map(i => `<div>${getEmoji(i)} ${i.name}</div>`).join('');
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+        function confirmDelete() {
+            inventory = inventory.filter(i => !i.selected);
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            closeModal('deleteModal');
+            render();
+        }
+
         function saveFood() { const name = document.getElementById('foodName').value; const date = document.getElementById('expiryDate').value; const loc = document.getElementById('storageLocation').value; const customEmoji = document.getElementById('foodEmoji').value; if(!name || !date) return; if (editingId) { const item = inventory.find(i => String(i.id) === String(editingId)); if (item) Object.assign(item, { name, date, loc, customEmoji }); } else { inventory.push({ id: Date.now().toString(), name, date, loc, customEmoji, selected: false }); } localStorage.setItem('inventory', JSON.stringify(inventory)); closeModal('itemModal'); render(); }
         function toggleSelectAll() { const allSelected = inventory.every(i => i.selected); inventory.forEach(i => i.selected = !allSelected); render(); }
         function render() {
@@ -188,7 +223,6 @@
             const spacer = document.createElement('div'); spacer.style.gridColumn = "span 3"; spacer.style.height = "100px"; list.appendChild(spacer);
             updateFilterButtonsState();
         }
-        function handleBulkDelete() { inventory = inventory.filter(i => !i.selected); localStorage.setItem('inventory', JSON.stringify(inventory)); render(); }
         render();
     </script>
 </body>
