@@ -30,50 +30,12 @@ header{display:flex;align-items:center;justify-content:space-between;flex-shrink
 .btn-search{background:var(--surface-raised);color:var(--paper);width:100%;padding:13px;border-radius:var(--radius-sm);font-weight:600;font-size:.87rem;margin-bottom:12px;flex-shrink:0;border:1px solid var(--hairline);position:relative;overflow:hidden}
 .btn-search::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent,rgba(111,207,99,.12),transparent);transform:translateX(-100%)}
 .btn-search:active::after{transition:transform .5s ease;transform:translateX(100%)}
-/* Style moteur de recherche */
-.search-input{width:100%;padding:12px 14px;border:1.5px solid var(--hairline);border-radius:var(--radius-sm);background:var(--surface);color:var(--paper);font-family:'Inter',sans-serif;font-size:0.87rem;margin-bottom:14px;outline:none}
+/* Styles recherche ajoutés */
+.search-wrapper{position:relative;width:100%;margin-bottom:14px}
+.search-input{width:100%;padding:12px 35px 12px 14px;border:1.5px solid var(--hairline);border-radius:var(--radius-sm);background:var(--surface);color:var(--paper);font-family:'Inter',sans-serif;font-size:0.87rem;outline:none}
 .search-input:focus{border-color:var(--leaf)}
-.filter-group{display:flex;gap:6px;margin-bottom:14px;flex-shrink:0;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
-.filter-group::-webkit-scrollbar{display:none}
-.filter-btn{flex:0 0 auto;padding:7px 12px;border-radius:100px;border:1px solid var(--hairline);background:var(--surface);cursor:pointer;font-size:.68rem;font-weight:600;color:var(--mist);white-space:nowrap;transition:all .15s ease;font-family:'Inter',sans-serif}
-.filter-btn.active{background:var(--leaf-dim);border-color:var(--leaf);color:var(--leaf)}
-#toggleSelectBtn.active{background:var(--surface-raised);border-color:var(--paper);color:var(--paper)}
-#productList{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;overflow-y:auto;flex:1;min-height:0;align-content:start;padding-bottom:20px}
-#productList::-webkit-scrollbar{width:4px}
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Zéro Gâchis</title>
-<script src="https://unpkg.com/html5-qrcode"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-<style>
-:root{--ink:#0F1A15;--surface:#17251E;--surface-raised:#1E2E25;--surface-hover:#243529;--hairline:#2B3D31;--paper:#EDF5EE;--mist:#8FA79A;--mist-dim:#66806F;--leaf:#6FCF63;--leaf-dim:#39562F;--amber:#FFC857;--amber-dim:#5A4A24;--clay:#FF9F5A;--clay-dim:#5A3B22;--tomato:#FF6B4A;--tomato-dim:#5A2C20;--ember:#3A0F0B;--ember-text:#FFD9CF;--ring-track:#2B3D31;--radius-lg:22px;--radius-md:16px;--radius-sm:11px}
-*{box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:radial-gradient(circle at 15% -10%,rgba(111,207,99,0.1),transparent 40%),var(--ink);margin:0;padding:0;color:var(--paper);height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased}
-@media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
-.container{display:flex;flex-direction:column;height:100vh;max-width:520px;margin:0 auto;padding:18px 16px 0}
-header{display:flex;align-items:center;justify-content:space-between;flex-shrink:0;margin-bottom:16px}
-.brand{display:flex;align-items:center;gap:10px}
-.brand-mark{width:38px;height:38px;border-radius:12px;flex-shrink:0;background:conic-gradient(from 210deg,var(--leaf),var(--amber) 40%,var(--leaf) 100%);display:flex;align-items:center;justify-content:center;font-size:1.15rem}
-.brand-text{line-height:1}
-.brand-text .l1{font-family:'Fraunces',serif;font-style:italic;font-weight:600;font-size:1.15rem;letter-spacing:.2px}
-.brand-text .l2{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:2.5px;color:var(--mist);text-transform:uppercase}
-.today-pill{font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--mist);border:1px solid var(--hairline);padding:5px 10px;border-radius:100px}
-.button-group{display:flex;gap:8px;margin-bottom:8px;flex-shrink:0}
-.btn{border:none;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;border-radius:var(--radius-sm);transition:transform .12s ease,filter .12s ease;display:flex;align-items:center;justify-content:center;gap:6px}
-.btn:active{transform:scale(.96)}
-.btn svg{width:15px;height:15px;flex-shrink:0}
-.btn-add{flex:1.3;background:var(--leaf);color:#0B1A0E;padding:12px;font-size:.85rem}
-.btn-del-selected{flex:1;background:var(--surface-raised);color:var(--tomato);padding:12px;font-size:.85rem;border:1px solid var(--hairline)}
-.btn-search{background:var(--surface-raised);color:var(--paper);width:100%;padding:13px;border-radius:var(--radius-sm);font-weight:600;font-size:.87rem;margin-bottom:12px;flex-shrink:0;border:1px solid var(--hairline);position:relative;overflow:hidden}
-.btn-search::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent,rgba(111,207,99,.12),transparent);transform:translateX(-100%)}
-.btn-search:active::after{transition:transform .5s ease;transform:translateX(100%)}
-.search-input{width:100%;padding:12px 14px;border:1.5px solid var(--hairline);border-radius:var(--radius-sm);background:var(--surface);color:var(--paper);font-family:'Inter',sans-serif;font-size:0.87rem;margin-bottom:14px;outline:none}
-.search-input:focus{border-color:var(--leaf)}
+.clear-btn{position:absolute;right:10px;top:0;height:100%;background:none;border:none;color:var(--mist);cursor:pointer;font-size:1.2rem;display:flex;align-items:center}
+/* Fin ajout */
 .filter-group{display:flex;gap:6px;margin-bottom:14px;flex-shrink:0;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .filter-group::-webkit-scrollbar{display:none}
 .filter-btn{flex:0 0 auto;padding:7px 12px;border-radius:100px;border:1px solid var(--hairline);background:var(--surface);cursor:pointer;font-size:.68rem;font-weight:600;color:var(--mist);white-space:nowrap;transition:all .15s ease;font-family:'Inter',sans-serif}
@@ -126,6 +88,7 @@ select.modal-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
 #reader{width:100%;display:none;margin:12px 0 0;border-radius:var(--radius-sm);overflow:hidden}
 </style>
 </head>
+
 <body>
 <div class="container">
   <header>
@@ -144,7 +107,13 @@ select.modal-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     </button>
   </div>
   <button class="btn-search" onclick="openRecipeModal()">🍳 Trouver une recette avec ma sélection</button>
-  <input type="text" id="searchInput" class="search-input" placeholder="🔍 Rechercher un aliment..." oninput="filterList()">
+  
+  <!-- Barre de recherche avec wrapper -->
+  <div class="search-wrapper">
+    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Rechercher un aliment..." oninput="filterList()">
+    <button class="clear-btn" onclick="clearSearch()">✕</button>
+  </div>
+  
   <div class="filter-group">
     <button class="filter-btn" id="toggleSelectBtn" onclick="toggleSelectAll()">Tout</button>
     <button class="filter-btn" id="filter-urgent" onclick="selectItems('urgent')">Bientôt</button>
@@ -210,82 +179,8 @@ select.modal-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   </div>
 </div>
 
-</head>
-<body>
-<div class="container">
-  <header>
-    <div class="brand">
-      <div class="brand-mark">🌿</div>
-      <div class="brand-text"><div class="l1">Zéro</div><div class="l2">Gâchis</div></div>
-    </div>
-    <div class="today-pill" id="itemCount">0 aliment</div>
-  </header>
-  <div class="button-group">
-    <button class="btn btn-add" onclick="openAddModal()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Ajouter
-    </button>
-    <button class="btn btn-del-selected" onclick="handleBulkDelete()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6"/></svg>Supprimer
-    </button>
-  </div>
-  <button class="btn-search" onclick="openRecipeModal()">🍳 Trouver une recette avec ma sélection</button>
-  <input type="text" id="searchInput" class="search-input" placeholder="🔍 Rechercher un aliment..." oninput="filterList()">
-  <div class="filter-group">
-    <button class="filter-btn" id="toggleSelectBtn" onclick="toggleSelectAll()">Tout</button>
-    <button class="filter-btn" id="filter-urgent" onclick="selectItems('urgent')">Bientôt</button>
-    <button class="filter-btn" id="filter-today" onclick="selectItems('today')">Ce jour</button>
-    <button class="filter-btn" id="filter-yesterday" onclick="selectItems('yesterday')">Périmé léger</button>
-    <button class="filter-btn" id="filter-expired" onclick="selectItems('expired')">À jeter</button>
-  </div>
-  <div id="productList"></div>
-</div>
 
-<div id="itemModal" class="modal-overlay">
-  <div class="modal-box">
-    <h3 id="modalTitle">Nouvel aliment</h3>
-    <div class="field-label">Nom de l'aliment</div>
-    <input type="text" id="foodName" class="modal-input" placeholder="Ex : Tomates">
-    <div class="field-label">Date limite</div>
-    <input type="date" id="expiryDate" class="modal-input">
-    <div class="field-label">Emplacement</div>
-    <select id="storageLocation" class="modal-input">
-      <option value="❄️ Réfrigérateur">❄️ Réfrigérateur</option>
-      <option value="🧊 Congélateur">🧊 Congélateur</option>
-      <option value="🗄️ Placard">🗄️ Placard</option>
-    </select>
-    <div class="field-label">Emoji personnalisé (facultatif)</div>
-    <input type="text" id="foodEmoji" class="modal-input" placeholder="Laisser vide pour une détection automatique">
-    <button class="modal-btn btn-scan" id="scanBtn" onclick="toggleScanner()">Scanner un code-barres 📷</button>
-    <div id="reader"></div>
-    <div class="modal-btns">
-      <button class="modal-btn btn-cancel" onclick="closeModal('itemModal')">Annuler</button>
-      <button class="modal-btn btn-confirm" onclick="saveFood()">Enregistrer</button>
-    </div>
-  </div>
-</div>
-
-<div id="deleteModal" class="modal-overlay">
-  <div class="modal-box">
-    <h3>Supprimer ces aliments ?</h3>
-    <div id="deleteList" class="delete-list"></div>
-    <div class="modal-btns">
-      <button class="modal-btn btn-cancel" onclick="closeModal('deleteModal')">Annuler</button>
-      <button class="modal-btn btn-confirm danger" onclick="confirmDelete()">Supprimer</button>
-    </div>
-  </div>
-</div>
-
-<div id="alertModal" class="modal-overlay">
-  <div class="modal-box">
-    <h3>Attention</h3>
-    <p id="alertText" style="color:var(--mist); font-size:0.88rem;"></p>
-    <div class="modal-btns">
-      <button class="modal-btn btn-confirm" onclick="closeModal('alertModal')">Compris</button>
-    </div>
-  </div>
-</div>
-
-<script>
+ <script>
 const $ = id => document.getElementById(id);
 const save = () => localStorage.setItem('inventory', JSON.stringify(inventory));
 let inventory = JSON.parse(localStorage.getItem('inventory')||"[]"), editingId=null, html5QrCode=null, isScannerActive=false;
@@ -302,6 +197,7 @@ function getEmoji(item){
   return '🍽️';
 }
 
+function clearSearch() { $('searchInput').value = ''; filterList(); }
 function showAlert(msg){ $('alertText').innerText=msg; $('alertModal').classList.add('show'); }
 function getDiffDays(item){ const t=new Date(); t.setHours(0,0,0,0); return Math.round((new Date(item.date)-t)/86400000); }
 function getState(d){ return d<-2?'severe':d<0?'mild':d===0?'today':d<=5?'soon':'fresh'; }
@@ -387,6 +283,7 @@ function render(){
 }
 render();
 </script>
-
 </body>
 </html>
+
+  
