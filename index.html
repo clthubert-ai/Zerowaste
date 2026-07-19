@@ -297,7 +297,14 @@ function render(){
     div.className=`item-card ${i.selected?'selected':''}`;
     if(c) div.dataset.state=c;
     div.style.setProperty('--i',idx);
-    div.onclick=()=>{ i.selected=!i.selected; save(); render(); };
+    div.onclick = function() {
+  i.selected = !i.selected; 
+  save(); 
+  // Modifie uniquement la classe de la tuile cliquée au lieu de tout recréer
+  this.classList.toggle('selected', i.selected);
+  // Met à jour les compteurs et les boutons de filtres
+  updateFilterButtonsState(); 
+};
     div.oncontextmenu=e=>{ e.preventDefault(); openEditModal(i); };
     div.innerHTML=`<div class="ring" style="--ring-bg:${getRingBackground(s,d)}"><span class="item-emoji">${getEmoji(i)}</span><span class="loc-badge">${(i.loc||'').trim().split(' ')[0]||'📍'}</span></div><div class="item-name">${i.name}</div><div class="item-status">${getStatusLabel(d)}</div>`;
     lst.appendChild(div);
