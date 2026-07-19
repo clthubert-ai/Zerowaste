@@ -83,7 +83,17 @@
             <div id="deleteList" class="delete-list"></div>
             <div class="modal-btns">
                 <button class="modal-btn btn-cancel" onclick="closeModal('deleteModal')">Annuler</button>
-                <button class="modal-btn btn-del-selected" onclick="confirmDelete()">Supprimer</button>
+                <button class="modal-btn btn-confirm" style="background:#d9534f;" onclick="confirmDelete()">Supprimer</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertModal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Attention</h3>
+            <p id="alertText"></p>
+            <div class="modal-btns">
+                <button class="modal-btn btn-confirm" onclick="closeModal('alertModal')">OK</button>
             </div>
         </div>
     </div>
@@ -139,6 +149,11 @@
             return '🍽️';
         }
 
+        function showAlert(msg) {
+            document.getElementById('alertText').innerText = msg;
+            document.getElementById('alertModal').style.display = 'flex';
+        }
+
         function selectItems(type) {
             const today = new Date(); today.setHours(0,0,0,0);
             const targetItems = inventory.filter(item => {
@@ -179,7 +194,7 @@
         function openRecipeModal() {
             const selected = inventory.filter(i => i.selected);
             if (selected.length === 0) {
-                alert("Veuillez sélectionner au moins un ingrédient pour la recherche.");
+                showAlert("Veuillez sélectionner au moins un ingrédient pour la recherche.");
                 return;
             }
             const query = selected.map(i => i.name).join(' ');
@@ -209,7 +224,7 @@
         function handleBulkDelete() {
             const selected = inventory.filter(i => i.selected);
             if(selected.length === 0) {
-                alert("Veuillez sélectionner au moins un ingrédient à supprimer.");
+                showAlert("Veuillez sélectionner au moins un ingrédient à supprimer.");
                 return;
             }
             const listDiv = document.getElementById('deleteList');
@@ -244,7 +259,6 @@
                 const div = document.createElement('div');
                 div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
                 
-                // Comportement : Clic pour sélectionner, Clic droit/long pour éditer
                 div.onclick = () => {
                     item.selected = !item.selected;
                     localStorage.setItem('inventory', JSON.stringify(inventory));
