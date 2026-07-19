@@ -54,7 +54,8 @@
             <button class="filter-btn" id="filter-expired" onclick="selectItems('expired')">À jeter</button>
         </div>
         <div id="productList"></div>
-    </di    <div id="itemModal" class="modal-overlay">
+    </div>
+        <div id="itemModal" class="modal-overlay">
         <div class="modal-box">
             <h3 id="modalTitle">Aliment</h3>
             <input type="text" id="foodName" class="modal-input" placeholder="Nom de l'aliment">
@@ -184,6 +185,7 @@
                 div.innerHTML = `<div class="visual">${getEmoji(item)}</div><span class="item-name">${item.name}</span><div class="item-meta">${item.loc.split(' ')[0]}</div><div class="item-meta"><strong>${item.date}</strong></div>`;
                 list.appendChild(div);
             });
+            const spacer = document.createElement('div'); spacer.style.gridColumn = "span 3"; spacer.style.height = "100px"; list.appendChild(spacer);
             updateFilterButtonsState();
         }
         function handleBulkDelete() { inventory = inventory.filter(i => !i.selected); localStorage.setItem('inventory', JSON.stringify(inventory)); render(); }
@@ -191,5 +193,3 @@
     </script>
 </body>
 </html>
-v>
-    
