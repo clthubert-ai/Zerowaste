@@ -128,14 +128,27 @@ let inventory = JSON.parse(localStorage.getItem('inventory')||"[]"), editingId=n
 const exactMatches={'banane':'🍌','pomme':'🍎','poire':'🍐','orange':'🍊','citron':'🍋','fraise':'🍓','framboise':'🍓','myrtille':'🫐','cerise':'🍒','peche':'🍑','mangue':'🥭','raisin':'🍇','ananas':'🍍','kiwi':'🥝','melon':'🍈','pasteque':'🍉','abricot':'🍑','prune':'🍑','concombre':'🥒','carotte':'🥕','brocoli':'🥦','oignon':'🧅','ail':'🧄','champignon':'🍄','poivron':'🫑','salade':'🥬','tomate':'🍅','patate':'🥔','pomme de terre':'🥔','haricot':'🫘','epinard':'🍃','courgette':'🥒','aubergine':'🍆','chou':'🥬','asperge':'🥬','poireau':'🥬','radis':'🥗','mais':'🌽','avocat':'🥑','steak':'🥩','gigot':'🥩','jambon':'🍖','chorizo':'🍖','poulet':'🍗','saumon':'🐟','thon':'🐟','crevette':'🍤','saucisse':'🌭','cote de porc':'🥩','cote de boeuf':'🥩','cote de mouton':'🥩','lard':'🥓','bacon':'🥓','oeuf':'🥚','pain':'🍞','baguette':'🥖','croissant':'🥐','brioche':'🍞','biscuit':'🍪','gateau':'🍰','riz':'🍚','pate':'🍝','nouille':'🍜','pizza':'🍕','taco':'🌮','burger':'🍔','sushi':'🍣','lait':'🥛','fromage':'🧀','beurre':'🧈','yaourt':'🥣','creme':'🥛','soupe':'🥣'};
 const categories=[{emoji:'🥩',keys:['viande','boeuf','porc']},{emoji:'🐟',keys:['poisson','saumon']},{emoji:'🧀',keys:['fromage','lait']},{emoji:'🥦',keys:['legume','tomate']},{emoji:'🍎',keys:['fruit']},{emoji:'🌾',keys:['cereale','pain']},{emoji:'🥛',keys:['creme','beurre']},{emoji:'🍲',keys:['soupe']}];
 
-function getEmoji(item){
-  if(item.customEmoji?.trim()) return item.customEmoji;
-  const n=item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
-  if(exactMatches[n]) return exactMatches[n];
-  for(let c of categories) if(c.keys.some(k=>n.includes(k))) return c.emoji;
+function getEmoji(item) {
+  if (item.customEmoji?.trim()) return item.customEmoji;
+
+  // 1. Normalisation de base (ton code original)
+  const n = item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+  
+  // 2. Création de la version singulière : on supprime les 's' en fin de mot
+  const nSingular = n.replace(/s\b/g, "");
+
+  // 3. Vérification dans exactMatches (on teste le mot brut ET le mot singulier)
+  if (exactMatches[n]) return exactMatches[n];
+  if (exactMatches[nSingular]) return exactMatches[nSingular];
+
+  // 4. Vérification dans les catégories (structure initiale conservée)
+  for (let c of categories) {
+    // Si la clé est présente dans le nom original OU dans le nom simplifié, on renvoie l'emoji
+    if (c.keys.some(k => n.includes(k) || nSingular.includes(k))) return c.emoji;
+  }
+
   return '🍽️';
 }
-
 function getDiffDays(item){ const t=new Date(); t.setHours(0,0,0,0); return Math.round((new Date(item.date)-t)/86400000); }
 function getState(d){ return d<-2?'severe':d<0?'mild':d===0?'today':d<=5?'soon':'fresh'; }
 function getStatusLabel(d){ return d<-2?`Périmé ${Math.abs(d)}j`:d===-2?'Avant-hier':d===-1?'Hier':d===0?"Aujourd'hui":d===1?'Demain':`Dans ${d} j`; }
