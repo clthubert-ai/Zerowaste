@@ -15,7 +15,6 @@
         .btn-add { background: #3e7b37; color: white; } 
         .btn-del-selected { background: #d9534f; color: white; }
         .btn-search { background: #7fb069; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
-        .btn-scan { background: #555; color: white; }
         .filter-group { display: flex; gap: 5px; margin-bottom: 15px; }
         .filter-btn { flex: 1; padding: 8px 2px; border-radius: 8px; border: 2px solid #ddd; background: white; cursor: pointer; font-size: 0.7rem; font-weight: bold; color: #555; }
         .filter-btn.active { background: #e8f5e9; border: 2px solid #3e7b37; color: #3e7b37; }
@@ -36,6 +35,7 @@
         .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; }
         .modal-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .btn-cancel { background: #eee; } .btn-confirm { background: #3e7b37; color: white; }
+        .btn-scan { background: #555; color: white; margin-bottom: 10px; width: 100%; padding: 10px; }
         .rating-group { margin: 15px 0; text-align: center; }
         .rating-group label { display: block; font-weight: bold; margin-bottom: 5px; }
         .stars { display: flex; justify-content: center; gap: 10px; cursor: pointer; }
@@ -50,9 +50,6 @@
             <button class="btn-add" onclick="openAddModal()">Ajout</button>
             <button class="btn-del-selected" onclick="handleBulkDelete()">Suppression</button>
         </div>
-        <div class="button-group">
-            <button id="scanBtn" class="btn-scan" onclick="toggleScanner()">Scanner 📷</button>
-        </div>
         <button class="btn-search" onclick="openRecipeModal()">Rechercher des recettes</button>
         <div class="filter-group">
             <button class="filter-btn" id="toggleSelectBtn" onclick="toggleSelectAll()">Tout</button>
@@ -61,7 +58,6 @@
             <button class="filter-btn" id="filter-yesterday" onclick="selectItems('yesterday')">Hier</button>
             <button class="filter-btn" id="filter-expired" onclick="selectItems('expired')">À jeter</button>
         </div>
-        <div id="reader" style="width: 100%; display:none; margin-top:10px;"></div>
         <div id="productList"></div>
     </div>
     <div id="itemModal" class="modal-overlay">
@@ -75,13 +71,15 @@
                 <option value="🧊 Congélateur">🧊 Congélateur</option>
                 <option value="🗄️ Placard">🗄️ Placard</option>
             </select>
+            <button class="modal-btn btn-scan" id="scanBtn" onclick="toggleScanner()">Scanner 📷</button>
+            <div id="reader" style="width: 100%; display:none; margin-bottom:10px;"></div>
             <div class="modal-btns">
                 <button class="modal-btn btn-cancel" onclick="closeModal('itemModal')">Annuler</button>
                 <button class="modal-btn btn-confirm" onclick="saveFood()">Enregistrer</button>
             </div>
         </div>
     </div>
-    <div id="recipeModal" class="modal-overlay">
+        <div id="recipeModal" class="modal-overlay">
         <div class="modal-box">
             <h3>Préférences</h3>
             <div class="rating-group">
@@ -153,12 +151,12 @@
         function toggleScanner() {
             const btn = document.getElementById('scanBtn');
             if(isScannerActive) { if(html5QrCode) html5QrCode.stop(); document.getElementById('reader').style.display = 'none'; btn.innerHTML = "Scanner 📷"; isScannerActive = false; }
-            else { document.getElementById('reader').style.display = 'block'; btn.innerHTML = "Arrêter 📷"; html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, async (decodedText) => { toggleScanner(); openAddModal(); document.getElementById('foodName').value = "Recherche..."; const name = await fetchProductName(decodedText); document.getElementById('foodName').value = name; }); isScannerActive = true; }
+            else { document.getElementById('reader').style.display = 'block'; btn.innerHTML = "Arrêter 📷"; html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, async (decodedText) => { toggleScanner(); document.getElementById('foodName').value = "Recherche..."; const name = await fetchProductName(decodedText); document.getElementById('foodName').value = name; }); isScannerActive = true; }
         }
         function openAddModal() { editingId = null; document.getElementById('modalTitle').innerText = "Nouvel aliment"; document.getElementById('foodName').value = ''; document.getElementById('expiryDate').value = new Date().toISOString().split('T')[0]; document.getElementById('foodEmoji').value = ''; document.getElementById('itemModal').style.display = 'flex'; }
         function openEditModal(id) { const item = inventory.find(i => String(i.id) === String(id)); if(!item) return; editingId = id; document.getElementById('modalTitle').innerText = "Modifier l'aliment"; document.getElementById('foodName').value = item.name; document.getElementById('expiryDate').value = item.date; document.getElementById('foodEmoji').value = item.customEmoji || ''; document.getElementById('storageLocation').value = item.loc; document.getElementById('itemModal').style.display = 'flex'; }
         function saveFood() { const name = document.getElementById('foodName').value; const date = document.getElementById('expiryDate').value; const loc = document.getElementById('storageLocation').value; const customEmoji = document.getElementById('foodEmoji').value; if(!name || !date) return showAlert("Remplissez le nom et la date !"); if (editingId) { const item = inventory.find(i => String(i.id) === String(editingId)); if (item) Object.assign(item, { name, date, loc, customEmoji }); } else { inventory.push({ id: Date.now().toString(), name, date, loc, customEmoji, selected: false }); } localStorage.setItem('inventory', JSON.stringify(inventory)); closeModal('itemModal'); render(); }
-                function toggleSelectAll() { const allSelected = inventory.every(i => i.selected); inventory.forEach(i => i.selected = !allSelected); render(); }
+        function toggleSelectAll() { const allSelected = inventory.every(i => i.selected); inventory.forEach(i => i.selected = !allSelected); render(); }
         function openRecipeModal() { const selected = inventory.filter(i => i.selected); if(selected.length === 0) return showAlert("Cochez au moins un ingrédient !"); document.getElementById('recipeModal').style.display = 'flex'; }
         function runRecipeSearch() { const speedMap = ["express", "30-60 min", "plus d'une heure"]; const easeMap = ["facile", "difficulté moyenne", "difficile"]; const selectedNames = inventory.filter(i => i.selected).map(i => i.name).join(" "); const query = `recettes ${selectedNames} ${speedMap[currentSpeed - 1]} ${easeMap[currentEase - 1]}`; window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank'); closeModal('recipeModal'); }
         function getEmoji(item) {
@@ -172,9 +170,8 @@
         function render() {
             const list = document.getElementById('productList'); list.innerHTML = "";
             inventory.sort((a, b) => new Date(a.date) - new Date(b.date));
-            const today = new Date(); today.setHours(0,0,0,0);
             inventory.forEach((item) => {
-                const expiry = new Date(item.date);
+                const expiry = new Date(item.date); const today = new Date(); today.setHours(0,0,0,0);
                 const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
                 let cssClass = '';
                 if (diffDays < -1) cssClass = 'expired-long';
