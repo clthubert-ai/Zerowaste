@@ -280,7 +280,14 @@
         function handleBulkDelete() {
             const selected = inventory.filter(i => i.selected);
             if (selected.length === 0) return showAlert("Sélectionnez au moins un aliment !");
-            document.getElementById('confirmText').innerText = "Supprimer les éléments sélectionnés ?";
+            
+            let htmlList = "<strong>Supprimer ces éléments ?</strong><ul style='padding-left: 20px; margin-top: 10px; text-align: left;'>";
+            selected.forEach(item => {
+                htmlList += `<li><strong>${item.name}</strong> - ${item.loc} (${item.date})</li>`;
+            });
+            htmlList += "</ul>";
+            
+            document.getElementById('confirmText').innerHTML = htmlList;
             document.getElementById('confirmOk').onclick = () => { 
                 inventory = inventory.filter(i => !i.selected); 
                 localStorage.setItem('inventory', JSON.stringify(inventory)); 
