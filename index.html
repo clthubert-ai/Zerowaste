@@ -200,7 +200,16 @@ const closeModal = id => $(id).classList.remove('show');
 function handleBulkDelete(){ $('deleteModal').classList.add('show'); }
 function confirmDelete(){ inventory=inventory.filter(i=>!i.selected); save(); closeModal('deleteModal'); render(); }
 function toggleScanner(){ /* Logique scanner inchangée */ }
-function filterList(){ /* Logique filtre inchangée */ }
+function filterList(){
+  // On normalise la requête : minuscule + suppression des accents
+  const q = $('searchInput').value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  
+  document.querySelectorAll('.item-card').forEach(c=>{
+    // On normalise le nom de l'aliment de la même manière pour la comparaison
+    const name = c.querySelector('.item-name').innerText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    c.style.display = name.includes(q) ? 'flex' : 'none';
+  });
+}
 function selectItems(t){ /* Logique sélection inchangée */ }
 function toggleSelectAll(){ /* Logique tout sélectionner inchangée */ }
 function updateFilterButtonsState(){ /* Logique boutons inchangée */ }
