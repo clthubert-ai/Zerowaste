@@ -18,8 +18,13 @@
         .btn-scan { background: #555; color: white; }
         .btn-select-all { background: #777; color: white; }
         
+        /* Toggles de filtre */
+        .filter-group { display: flex; gap: 5px; margin-bottom: 15px; }
+        .filter-btn { flex: 1; padding: 8px 2px; border-radius: 8px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 0.7rem; font-weight: bold; color: #555; }
+        .filter-btn.active { background: #3e7b37; color: white; border-color: #3e7b37; }
+
         /* Grille 3 colonnes */
-        #productList { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        #productList { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
         
         .item { 
             background: white; padding: 10px 5px; border-radius: 14px; 
@@ -29,18 +34,14 @@
             position: relative; text-align: center;
         }
         .item.selected { border: 3px solid #3e7b37; background-color: #f0f7ef; }
-        .item.urgent { background-color: #fff3cd; } 
-        .item.expired-yesterday { background-color: #ffcdd2; }
-        .item.expired-today { background-color: #ffcc99; }
-        .item.expired-long { background-color: #c9302c; color: white; }
+        .item.urgent { border: 2px solid #fff3cd; } 
+        .item.expired-yesterday { border: 2px solid #ffcdd2; }
+        .item.expired-today { border: 2px solid #ffcc99; }
+        .item.expired-long { border: 2px solid #c9302c; }
         
         .visual { font-size: 1.8rem; width: 100%; text-align: center; }
         .item-name { font-weight: bold; font-size: 0.75rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 90%; }
         .item-meta { font-size: 0.8rem; }
-        .item.alert { 
-            position: absolute; top: 5px; right: 5px; font-weight: bold; font-size: 0.6rem; 
-            color: red; padding: 2px 4px; border-radius: 5px; background: rgba(255,255,255,0.7);
-        }
         
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; overflow-y: auto; }
         .modal-box { background: white; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; box-sizing: border-box; }
@@ -69,11 +70,19 @@
             <button id="toggleSelectBtn" class="btn-select-all" onclick="toggleSelectAll()">Tout cocher</button>
         </div>
         <button class="btn-search" onclick="openRecipeModal()">Rechercher des recettes</button>
+        
+        <div class="filter-group">
+            <button class="filter-btn" id="filter-urgent" onclick="toggleFilter('urgent')">Bientôt</button>
+            <button class="filter-btn" id="filter-today" onclick="toggleFilter('today')">Ce jour</button>
+            <button class="filter-btn" id="filter-yesterday" onclick="toggleFilter('yesterday')">Hier</button>
+            <button class="filter-btn" id="filter-expired" onclick="toggleFilter('expired')">À jeter</button>
+        </div>
+
         <div id="reader" style="width: 100%; display:none; margin-top:10px;"></div>
         <div id="productList"></div>
     </div>
 
-    <!-- Modals identiques conservés -->
+    <!-- Modals -->
     <div id="itemModal" class="modal-overlay">
         <div class="modal-box">
             <h3 id="modalTitle">Aliment</h3>
@@ -123,11 +132,18 @@
 
     <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
+        let activeFilters = [];
         let editingId = null;
         let html5QrCode = null;
         let isScannerActive = false;
         let currentSpeed = 1;
         let currentEase = 1;
+
+        function toggleFilter(type) {
+            if(activeFilters.includes(type)) activeFilters = activeFilters.filter(f => f !== type);
+            else activeFilters.push(type);
+            render();
+        }
 
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         function showAlert(msg) { document.getElementById('alertText').innerText = msg; document.getElementById('alertModal').style.display = 'flex'; }
@@ -282,21 +298,26 @@
             inventory.sort((a, b) => new Date(a.date) - new Date(b.date));
             const today = new Date(); today.setHours(0,0,0,0);
             
+            // Highlight active filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            activeFilters.forEach(f => document.getElementById(`filter-${f}`).classList.add('active'));
+
             const btn = document.getElementById('toggleSelectBtn');
             if (btn) btn.innerText = (inventory.length > 0 && inventory.every(i => i.selected)) ? "Tout décocher" : "Tout cocher";
             
             inventory.forEach((item) => {
                 const expiry = new Date(item.date);
                 const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
-                let cssClass = '', alertText = '';
+                let cssClass = '', type = '';
                 
-                // Nouveaux libellés d'alerte
-                if (diffDays < -1) { cssClass = 'expired-long'; alertText = 'à jeter'; }
-                else if (diffDays === -1) { cssClass = 'expired-yesterday'; alertText = 'hier'; }
-                else if (diffDays === 0) { cssClass = 'expired-today'; alertText = 'ce jour'; }
-                else if (diffDays <= 2) { cssClass = 'urgent'; alertText = 'bientôt'; }
+                if (diffDays < -1) { cssClass = 'expired-long'; type = 'expired'; }
+                else if (diffDays === -1) { cssClass = 'expired-yesterday'; type = 'yesterday'; }
+                else if (diffDays === 0) { cssClass = 'expired-today'; type = 'today'; }
+                else if (diffDays <= 2) { cssClass = 'urgent'; type = 'urgent'; }
                 
-                // Extraction icône stockage (récupère le premier emoji de la chaîne)
+                 // Filtre
+                if (activeFilters.length > 0 && !activeFilters.includes(type)) return;
+
                 const storageIcon = item.loc ? item.loc.split(' ')[0] : '';
                 
                 const div = document.createElement('div');
@@ -306,7 +327,6 @@
                 div.oncontextmenu = (e) => { e.preventDefault(); openEditModal(item.id); };
                 
                 div.innerHTML = `
-                    ${alertText ? `<div class="item alert">${alertText}</div>` : ''}
                     <div class="visual">${getEmoji(item)}</div>
                     <span class="item-name">${item.name || "Inconnu"}</span>
                     <span class="item-meta">${storageIcon}</span>
