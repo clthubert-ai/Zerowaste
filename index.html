@@ -33,7 +33,8 @@
         .item-name { font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .item-meta { font-size: 0.75rem; color: #666; }
         .item.expired-long .item-meta { color: #ffe5e5; }
-        .item.alert { flex-shrink: 0; font-weight: bold; font-size: 0.75rem; text-align: right; margin-left: 5px; }
+        /* Texte en rouge ici */
+        .item.alert { flex-shrink: 0; font-weight: bold; font-size: 0.75rem; text-align: right; margin-left: 5px; color: red; }
         
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; overflow-y: auto; }
         .modal-box { background: white; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; box-sizing: border-box; }
@@ -306,6 +307,13 @@
             });
             htmlList += "</ul>";
             
+            document.getElementById('confirmText').innerHTML = htmlList;
+            document.getElementById('confirmOk').onclick = () => { 
+                inventory = inventory.filter(i => !i.selected); 
+                localStorage.setItem('inventory', JSON.stringify(inventory)); 
+                render(); 
+                closeModal('confirmModal'); 
+            };
             document.getElementById('confirmModal').style.display = 'flex';
         }
 
