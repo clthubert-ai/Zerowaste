@@ -379,7 +379,7 @@ function render(){
     if(c) div.dataset.state=c; div.style.setProperty('--i',idx);
     div.onclick = function() { i.selected = !i.selected; save(); this.classList.toggle('selected', i.selected); updateFilterButtonsState(); };
     div.oncontextmenu=e=>{ e.preventDefault(); openEditModal(i); };
-    div.innerHTML=`<div class="ring" style="--ring-bg:${getRingBackground(s,d)}"><span class="item-emoji">${getEmoji(i)}</span><span class="loc-badge">${(i.loc||'').trim().split(' ')[0]||'📍'}</span></div><div class="item-name">${i.name} ${i.qty ? `<small style="display:block; font-size:0.55rem; color:var(--mist); opacity:0.8">${i.qty}${i.unit}</small>` : ''}</div><div class="item-status">${getStatusLabel(d)}</div>`;
+    div.innerHTML=`<div class="ring" style="--ring-bg:${getRingBackground(s,d)}"><span class="item-emoji">${getEmoji(i)}</span><span class="loc-badge">${(i.loc||'').trim().split(' ')[0]||'📍'}</span></div><div class="item-name">${i.name}  ${i.qty ? `<small style="display:block; font-size:0.55rem; color:var(--mist); opacity:0.8">${i.qty}${i.unit}</small>` : ''}</div><div class="item-status">${getStatusLabel(d)}</div>`;
     lst.appendChild(div);
   });
   const sp=document.createElement('div'); sp.style.cssText="grid-column:1/-1;height:70px"; lst.appendChild(sp);
