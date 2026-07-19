@@ -17,7 +17,7 @@
         .btn-search { background: #7fb069; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
         .btn-scan { background: #555; color: white; }
         .btn-select-all { background: #777; color: white; }
-        .item { background: white; padding: 12px 15px; margin-bottom: 10px; border-radius: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 2px solid transparent; transition: all 0.2s ease; cursor: pointer; }
+        .item { background: white; padding: 12px 15px; margin-bottom: 10px; border-radius: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 2px solid transparent; transition: all 0.2s ease; cursor: pointer; user-select: none; }
         .item.selected { border: 2px solid #3e7b37; background-color: #f0f7ef; }
         .item.urgent { background-color: #fff3cd; } 
         .item.expired-yesterday { background-color: #ffcc99; } 
@@ -113,6 +113,7 @@
         let isScannerActive = false;
         let currentSpeed = 1;
         let currentEase = 1;
+        let pressTimer;
 
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         function showAlert(msg) { document.getElementById('alertText').innerText = msg; document.getElementById('alertModal').style.display = 'flex'; }
@@ -166,6 +167,16 @@
             document.getElementById('foodName').value = '';
             document.getElementById('expiryDate').value = '';
             document.getElementById('foodEmoji').value = '';
+            document.getElementById('itemModal').style.display = 'flex';
+        }
+
+        function editItem(item) {
+            editingId = item.id;
+            document.getElementById('modalTitle').innerText = "Modifier l'aliment";
+            document.getElementById('foodName').value = item.name;
+            document.getElementById('expiryDate').value = item.date;
+            document.getElementById('foodEmoji').value = item.customEmoji || '';
+            document.getElementById('storageLocation').value = item.loc;
             document.getElementById('itemModal').style.display = 'flex';
         }
 
@@ -272,7 +283,17 @@
                 
                 const div = document.createElement('div');
                 div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
+                
+                // Clic simple pour sélectionner
                 div.onclick = () => { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); };
+                
+                // Appui long pour modifier
+                div.onmousedown = () => pressTimer = setTimeout(() => editItem(item), 700);
+                div.onmouseup = () => clearTimeout(pressTimer);
+                div.onmouseleave = () => clearTimeout(pressTimer);
+                div.ontouchstart = () => pressTimer = setTimeout(() => editItem(item), 700);
+                div.ontouchend = () => clearTimeout(pressTimer);
+
                 div.innerHTML = `<div class="visual">${getEmoji(item)}</div><div class="item-info"><span class="item-name">${item.name}</span><span class="item-meta">${item.date} • ${item.loc}</span></div><div class="item-alert">${alertText}</div>`;
                 list.appendChild(div);
             });
@@ -289,16 +310,4 @@
             htmlList += "</ul>";
             
             document.getElementById('confirmText').innerHTML = htmlList;
-            document.getElementById('confirmOk').onclick = () => { 
-                inventory = inventory.filter(i => !i.selected); 
-                localStorage.setItem('inventory', JSON.stringify(inventory)); 
-                render(); 
-                closeModal('confirmModal'); 
-            };
-            document.getElementById('confirmModal').style.display = 'flex';
-        }
-
-        render();
-    </script>
-</body>
-</html>
+            document.getEleme
