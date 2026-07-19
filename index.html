@@ -33,7 +33,7 @@
         .item-name { font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .item-meta { font-size: 0.75rem; color: #666; }
         .item.expired-long .item-meta { color: #ffe5e5; }
-        .item-alert { flex-shrink: 0; font-weight: bold; font-size: 0.75rem; text-align: right; margin-left: 5px; }
+        .item.alert { flex-shrink: 0; font-weight: bold; font-size: 0.75rem; text-align: right; margin-left: 5px; }
         
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; overflow-y: auto; }
         .modal-box { background: white; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; box-sizing: border-box; }
@@ -71,7 +71,7 @@
         <div class="modal-box">
             <h3 id="modalTitle">Aliment</h3>
             <input type="text" id="foodName" class="modal-input" placeholder="Nom de l'aliment">
-            <input type="text" onfocus="this.type='date'" onblur="this.type='text'" id="expiryDate" class="modal-input" placeholder="Indiquer date de péremption">
+            <input type="text" onfocus="(this.type='date')" onblur="(this.type='text')" id="expiryDate" class="modal-input" placeholder="Indiquer date de péremption">
             <input type="text" id="foodEmoji" class="modal-input" placeholder="Emoji personnalisé">
             <select id="storageLocation" class="modal-input">
                 <option value="❄️ Réfrigérateur">❄️ Réfrigérateur</option>
@@ -168,9 +168,8 @@
             editingId = null;
             document.getElementById('modalTitle').innerText = "Nouvel aliment";
             document.getElementById('foodName').value = '';
-            const dateInput = document.getElementById('expiryDate');
-            dateInput.value = '';
-            dateInput.type = 'text'; 
+            document.getElementById('expiryDate').value = '';
+            document.getElementById('expiryDate').type = 'text'; 
             document.getElementById('foodEmoji').value = '';
             document.getElementById('itemModal').style.display = 'flex';
         }
@@ -181,9 +180,8 @@
             editingId = id;
             document.getElementById('modalTitle').innerText = "Modifier l'aliment";
             document.getElementById('foodName').value = item.name;
-            const dateInput = document.getElementById('expiryDate');
-            dateInput.value = item.date;
-            dateInput.type = 'date'; 
+            document.getElementById('expiryDate').value = item.date;
+            document.getElementById('expiryDate').type = 'date';
             document.getElementById('foodEmoji').value = item.customEmoji || '';
             document.getElementById('storageLocation').value = item.loc;
             document.getElementById('itemModal').style.display = 'flex';
@@ -254,8 +252,10 @@
                 'brioche': '🍞', 'brioches': '🍞', 'biscuit': '🍪', 'biscuits': '🍪', 'gateau': '🍰', 'gateaux': '🍰',
                 'riz': '🍚', 'pate': '🍝', 'pates': '🍝', 'nouille': '🍜', 'nouilles': '🍜', 'pizza': '🍕',
                 'pizzas': '🍕', 'taco': '🌮', 'tacos': '🌮', 'burger': '🍔', 'burgers': '🍔', 'sushi': '🍣',
-                'sushis': '🍣', 'lait': '🥛', 'fromage': '🧀', 'fromages': '🧀', 'beurre': '🧈', 'yaourt': '🥣', 
-                'yaourts': '🥣', 'creme': '🥛', 'cremes': '🥛', 'soupe': '🥣', 'soupes': '🥣'
+                'sushis': '🍣',
+                'lait': '🥛', 'fromage': '🧀', 'fromages': '🧀', 'beurre': '🧈', 'yaourt': '🥣', 'yaourts': '🥣',
+                'creme': '🥛', 'cremes': '🥛',
+                'soupe': '🥣', 'soupes': '🥣'
             };
             if (exactMatches[n]) return exactMatches[n];
             const categories = [
@@ -295,7 +295,7 @@
                 div.onclick = () => { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); };
                 div.oncontextmenu = (e) => { e.preventDefault(); openEditModal(item.id); };
                 
-                div.innerHTML = `<div class="visual">${getEmoji(item)}</div><div class="item-info"><span class="item-name">${item.name || "Inconnu"}</span><span class="item-meta">${item.date || ""} • ${item.loc || ""}</span></div><div class="item-alert">${alertText}</div>`;
+                div.innerHTML = `<div class="visual">${getEmoji(item)}</div><div class="item-info"><span class="item-name">${item.name || "Inconnu"}</span><span class="item-meta">${item.date || ""} • ${item.loc || ""}</span></div><div class="item.alert">${alertText}</div>`;
                 list.appendChild(div);
             });
         }
@@ -311,4 +311,4 @@
             htmlList += "</ul>";
             
             document.getElementById('confirmText').innerHTML = htmlList;
-            document.getElementById('confirmOk').onc
+            document.getElementById('confirm
