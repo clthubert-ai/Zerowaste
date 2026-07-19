@@ -19,14 +19,14 @@
         .filter-btn { flex: 1; padding: 8px 2px; border-radius: 8px; border: 2px solid #ddd; background: white; cursor: pointer; font-size: 0.65rem; font-weight: bold; color: #555; }
         .filter-btn.active { background: #e8f5e9; border: 2px solid #3e7b37; color: #3e7b37; }
         #productList { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; overflow-y: auto; flex: 1; min-height: 0; align-content: start; padding-bottom: 30px; }
-        .item { background: white; padding: 4px 2px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 2px solid transparent; transition: all 0.2s ease; cursor: pointer; height: 70px; position: relative; text-align: center; overflow: hidden; }
+        .item { background: white; padding: 4px 2px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 2px solid transparent; transition: all 0.2s ease; cursor: pointer; height: 75px; position: relative; text-align: center; overflow: hidden; }
         .item.selected { border: 3px solid #3e7b37; background-color: #f0f7ef; }
         .item.urgent { background-color: #fff3cd; } 
         .item.expired-yesterday { background-color: #ffcdd2; }
         .item.expired-today { background-color: #ffcc99; }
         .item.expired-long { background-color: #c9302c; color: white; }
-        .visual { font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 3px; line-height: 1; }
-        .loc-text { font-size: 0.5rem; font-weight: bold; text-transform: uppercase; }
+        .visual { font-size: 1rem; line-height: 1; display: flex; align-items: center; gap: 3px; }
+        .loc-name { font-size: 0.55rem; font-weight: bold; }
         .item-name { font-weight: bold; font-size: 0.65rem; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.1; margin: 2px 0; }
         .item-meta { font-size: 0.6rem; line-height: 1; margin: 1px 0; }
         .item.expired-long .item-meta { color: #ffe5e5; }
@@ -57,7 +57,8 @@
         </div>
         <div id="productList"></div>
     </div>
-    
+    <!-- (Le reste du HTML des modales est inchangé) -->
+
     <div id="itemModal" class="modal-overlay">
         <div class="modal-box">
             <h3 id="modalTitle">Aliment</h3>
@@ -77,10 +78,8 @@
             </div>
         </div>
     </div>
-    <!-- (Le reste des modales...) -->
 
-
-        <div id="deleteModal" class="modal-overlay">
+    <div id="deleteModal" class="modal-overlay">
         <div class="modal-box">
             <h3>Supprimer les éléments ?</h3>
             <div id="deleteList" class="delete-list"></div>
@@ -219,9 +218,10 @@
                 div.onclick = () => { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); };
                 div.oncontextmenu = (e) => { e.preventDefault(); openEditModal(item); };
 
-                // Affichage avec le lieu à côté de l'emoji
-                const locText = item.loc.split(' ').slice(1).join(' ');
-                div.innerHTML = `<div class="visual">${getEmoji(item)} <span class="loc-text">${locText}</span></div><span class="item-name">${item.name}</span><div class="item-meta"><strong>${item.date}</strong></div>`;
+                // Extraction du nom du lieu (partie après l'icône)
+                const locName = item.loc.replace(item.loc.split(' ')[0], '').trim();
+
+                div.innerHTML = `<div class="visual">${item.loc.split(' ')[0]} <span class="loc-name">${locName}</span></div><span class="item-name">${item.name}</span><div class="item-meta"><strong>${item.date}</strong></div>`;
                 list.appendChild(div);
             });
             const spacer = document.createElement('div'); spacer.style.gridColumn = "span 3"; spacer.style.height = "100px"; list.appendChild(spacer);
@@ -231,3 +231,4 @@
     </script>
 </body>
 </html>
+
