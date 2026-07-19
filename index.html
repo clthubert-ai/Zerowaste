@@ -20,27 +20,35 @@
         
         .filter-group { display: flex; gap: 5px; margin-bottom: 15px; }
         .filter-btn { flex: 1; padding: 8px 2px; border-radius: 8px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 0.7rem; font-weight: bold; color: #555; }
+        .filter-btn.active { background: #3e7b37; color: white; border-color: #3e7b37; }
 
-        #productList { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        /* Grille avec largeur fixe min pour les tuiles */
+        #productList { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
         
         .item { 
-            background: white; padding: 10px 5px; border-radius: 14px; 
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            background: white; padding: 10px; border-radius: 14px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-            border: 2px solid transparent; transition: all 0.2s ease; cursor: pointer; height: 110px;
+            border: 2px solid transparent; transition: all 0.2s ease; cursor: pointer; height: 140px;
             position: relative; text-align: center;
         }
         .item.selected { border: 3px solid #3e7b37; background-color: #f0f7ef; }
         
-        /* Couleurs rétablies */
+        /* Couleurs */
         .item.urgent { background-color: #fff3cd; } 
         .item.expired-yesterday { background-color: #ffcdd2; }
         .item.expired-today { background-color: #ffcc99; }
         .item.expired-long { background-color: #c9302c; color: white; }
         
-        .visual { font-size: 1.8rem; width: 100%; text-align: center; }
-        .item-name { font-weight: bold; font-size: 0.75rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 90%; }
-        .item-meta { font-size: 0.8rem; }
+        .visual { font-size: 1.5rem; margin-bottom: 5px; }
+        /* Gestion 2 lignes max */
+        .item-name { 
+            font-weight: bold; font-size: 0.8rem; display: -webkit-box; 
+            -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; 
+            height: 2.6em; margin-bottom: 5px; line-height: 1.2;
+        }
+        .item-meta { font-size: 0.7rem; color: #555; }
+        .item.expired-long .item-meta { color: #ffe5e5; }
         
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; overflow-y: auto; }
         .modal-box { background: white; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; box-sizing: border-box; }
@@ -71,10 +79,10 @@
         <button class="btn-search" onclick="openRecipeModal()">Rechercher des recettes</button>
         
         <div class="filter-group">
-            <button class="filter-btn" onclick="selectItems('urgent')">Bientôt</button>
-            <button class="filter-btn" onclick="selectItems('today')">Ce jour</button>
-            <button class="filter-btn" onclick="selectItems('yesterday')">Hier</button>
-            <button class="filter-btn" onclick="selectItems('expired')">À jeter</button>
+            <button class="filter-btn" id="filter-urgent" onclick="selectItems('urgent')">Bientôt</button>
+            <button class="filter-btn" id="filter-today" onclick="selectItems('today')">Ce jour</button>
+            <button class="filter-btn" id="filter-yesterday" onclick="selectItems('yesterday')">Hier</button>
+            <button class="filter-btn" id="filter-expired" onclick="selectItems('expired')">À jeter</button>
         </div>
 
         <div id="reader" style="width: 100%; display:none; margin-top:10px;"></div>
@@ -137,7 +145,6 @@
         let currentSpeed = 1;
         let currentEase = 1;
 
-        // Nouvelle logique de sélection
         function selectItems(type) {
             const today = new Date(); today.setHours(0,0,0,0);
             inventory.forEach(item => {
@@ -318,8 +325,6 @@
                 else if (diffDays === 0) cssClass = 'expired-today';
                 else if (diffDays <= 2) cssClass = 'urgent';
                 
-                const storageIcon = item.loc ? item.loc.split(' ')[0] : '';
-                
                 const div = document.createElement('div');
                 div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
                 
@@ -329,7 +334,8 @@
                 div.innerHTML = `
                     <div class="visual">${getEmoji(item)}</div>
                     <span class="item-name">${item.name || "Inconnu"}</span>
-                    <span class="item-meta">${storageIcon}</span>
+                    <div class="item-meta">${item.loc}</div>
+                    <div class="item-meta"><strong>${item.date}</strong></div>
                 `;
                 list.appendChild(div);
             });
