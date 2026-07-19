@@ -18,23 +18,29 @@
         .btn-scan { background: #555; color: white; }
         .btn-select-all { background: #777; color: white; }
         
+        /* Grille 3 colonnes */
+        #productList { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        
         .item { 
-            background: white; padding: 8px 15px; margin-bottom: 10px; border-radius: 14px; 
-            display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-            border: 2px solid transparent; transition: all 0.2s ease; cursor: pointer; 
+            background: white; padding: 10px 5px; border-radius: 14px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+            border: 2px solid transparent; transition: all 0.2s ease; cursor: pointer; height: 110px;
+            position: relative; text-align: center;
         }
         .item.selected { border: 3px solid #3e7b37; background-color: #f0f7ef; }
         .item.urgent { background-color: #fff3cd; } 
         .item.expired-yesterday { background-color: #ffcdd2; }
-        .item.expired-today { background-color: #ffcc99; } /* Nouvelle classe dédiée au jour J */
+        .item.expired-today { background-color: #ffcc99; }
         .item.expired-long { background-color: #c9302c; color: white; }
         
-        .visual { font-size: 1.6rem; width: 40px; text-align: center; flex-shrink: 0; }
-        .item-info { flex-grow: 1; min-width: 0; }
-        .item-name { font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .item-meta { font-size: 0.75rem; color: #666; }
-        .item.expired-long .item-meta { color: #ffe5e5; }
-        .item.alert { flex-shrink: 0; font-weight: bold; font-size: 0.75rem; text-align: right; margin-left: 5px; color: red; }
+        .visual { font-size: 1.8rem; width: 100%; text-align: center; }
+        .item-name { font-weight: bold; font-size: 0.75rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 90%; }
+        .item-meta { font-size: 0.8rem; }
+        .item.alert { 
+            position: absolute; top: 5px; right: 5px; font-weight: bold; font-size: 0.6rem; 
+            color: red; padding: 2px 4px; border-radius: 5px; background: rgba(255,255,255,0.7);
+        }
         
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; overflow-y: auto; }
         .modal-box { background: white; padding: 20px; border-radius: 20px; width: 90%; max-width: 400px; box-sizing: border-box; }
@@ -64,9 +70,10 @@
         </div>
         <button class="btn-search" onclick="openRecipeModal()">Rechercher des recettes</button>
         <div id="reader" style="width: 100%; display:none; margin-top:10px;"></div>
-        <div id="productList" style="margin-top: 20px;"></div>
+        <div id="productList"></div>
     </div>
 
+    <!-- Modals identiques conservés -->
     <div id="itemModal" class="modal-overlay">
         <div class="modal-box">
             <h3 id="modalTitle">Aliment</h3>
@@ -282,10 +289,15 @@
                 const expiry = new Date(item.date);
                 const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
                 let cssClass = '', alertText = '';
-                if (diffDays < -1) { cssClass = 'expired-long'; alertText = 'Périmé ' + Math.abs(diffDays) + 'j ❌'; }
-                else if (diffDays === -1) { cssClass = 'expired-yesterday'; alertText = 'Périmé 1j ⚠️'; }
-                else if (diffDays === 0) { cssClass = 'expired-today'; alertText = 'Périme aujourd\'hui ⚠️'; }
-                else if (diffDays <= 2) { cssClass = 'urgent'; alertText = 'Date proche ⏳'; }
+                
+                // Nouveaux libellés d'alerte
+                if (diffDays < -1) { cssClass = 'expired-long'; alertText = 'à jeter'; }
+                else if (diffDays === -1) { cssClass = 'expired-yesterday'; alertText = 'hier'; }
+                else if (diffDays === 0) { cssClass = 'expired-today'; alertText = 'ce jour'; }
+                else if (diffDays <= 2) { cssClass = 'urgent'; alertText = 'bientôt'; }
+                
+                // Extraction icône stockage (récupère le premier emoji de la chaîne)
+                const storageIcon = item.loc ? item.loc.split(' ')[0] : '';
                 
                 const div = document.createElement('div');
                 div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
@@ -293,7 +305,12 @@
                 div.onclick = () => { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); };
                 div.oncontextmenu = (e) => { e.preventDefault(); openEditModal(item.id); };
                 
-                div.innerHTML = `<div class="visual">${getEmoji(item)}</div><div class="item-info"><span class="item-name">${item.name || "Inconnu"}</span><span class="item-meta">${item.date || ""} • ${item.loc || ""}</span></div><div class="item alert">${alertText}</div>`;
+                div.innerHTML = `
+                    ${alertText ? `<div class="item alert">${alertText}</div>` : ''}
+                    <div class="visual">${getEmoji(item)}</div>
+                    <span class="item-name">${item.name || "Inconnu"}</span>
+                    <span class="item-meta">${storageIcon}</span>
+                `;
                 list.appendChild(div);
             });
         }
