@@ -218,7 +218,7 @@
             const speedMap = ["express", "30-60 min", "plus d'une heure"];
             const easeMap = ["facile", "difficulté moyenne", "difficile"];
             const selectedNames = inventory.filter(i => i.selected).map(i => i.name).join(" ");
-            const query = `recette anti-gaspi ${selectedNames} ${speedMap[currentSpeed - 1]} ${easeMap[currentEase - 1]}`;
+            const query = `recettes ${selectedNames} ${speedMap[currentSpeed - 1]} ${easeMap[currentEase - 1]}`;
             window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
             closeModal('recipeModal');
         }
