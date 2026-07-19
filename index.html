@@ -30,6 +30,9 @@ header{display:flex;align-items:center;justify-content:space-between;flex-shrink
 .btn-search{background:var(--surface-raised);color:var(--paper);width:100%;padding:13px;border-radius:var(--radius-sm);font-weight:600;font-size:.87rem;margin-bottom:12px;flex-shrink:0;border:1px solid var(--hairline);position:relative;overflow:hidden}
 .btn-search::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent,rgba(111,207,99,.12),transparent);transform:translateX(-100%)}
 .btn-search:active::after{transition:transform .5s ease;transform:translateX(100%)}
+/* Style moteur de recherche */
+.search-input{width:100%;padding:12px 14px;border:1.5px solid var(--hairline);border-radius:var(--radius-sm);background:var(--surface);color:var(--paper);font-family:'Inter',sans-serif;font-size:0.87rem;margin-bottom:14px;outline:none}
+.search-input:focus{border-color:var(--leaf)}
 .filter-group{display:flex;gap:6px;margin-bottom:14px;flex-shrink:0;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .filter-group::-webkit-scrollbar{display:none}
 .filter-btn{flex:0 0 auto;padding:7px 12px;border-radius:100px;border:1px solid var(--hairline);background:var(--surface);cursor:pointer;font-size:.68rem;font-weight:600;color:var(--mist);white-space:nowrap;transition:all .15s ease;font-family:'Inter',sans-serif}
@@ -55,7 +58,6 @@ header{display:flex;align-items:center;justify-content:space-between;flex-shrink
 .item-emoji{font-size:1.05rem;z-index:1}
 .loc-badge{position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;background:var(--surface-raised);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.55rem;border:1.5px solid var(--surface);z-index:1}
 .item-name{font-weight:700;font-size:.68rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.2;margin:0 0 2px}
-.item-qty{font-size:0.6rem;color:var(--mist);margin:0 0 4px}
 .item-status{font-family:'IBM Plex Mono',monospace;font-size:.56rem;color:var(--mist);font-weight:600;letter-spacing:.2px}
 .empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--mist)}
 .empty-state .emoji{font-size:2.2rem;display:block;margin-bottom:10px}
@@ -101,6 +103,7 @@ select.modal-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
     </button>
   </div>
   <button class="btn-search" onclick="openRecipeModal()">🍳 Trouver une recette avec ma sélection</button>
+  <input type="text" id="searchInput" class="search-input" placeholder="🔍 Rechercher un aliment..." oninput="filterList()">
   <div class="filter-group">
     <button class="filter-btn" id="toggleSelectBtn" onclick="toggleSelectAll()">Tout</button>
     <button class="filter-btn" id="filter-urgent" onclick="selectItems('urgent')">Bientôt</button>
@@ -111,16 +114,11 @@ select.modal-input{appearance:none;background-image:url("data:image/svg+xml,%3Cs
   <div id="productList"></div>
 </div>
 
-  <div id="itemModal" class="modal-overlay">
+<div id="itemModal" class="modal-overlay">
   <div class="modal-box">
     <h3 id="modalTitle">Nouvel aliment</h3>
     <div class="field-label">Nom de l'aliment</div>
     <input type="text" id="foodName" class="modal-input" placeholder="Ex : Tomates">
-    <div class="field-label">Quantité et unité</div>
-    <div style="display:flex; gap:8px;">
-        <input type="number" id="foodQty" class="modal-input" placeholder="Qté" value="1" style="flex:1">
-        <input type="text" id="foodUnit" class="modal-input" placeholder="Ex: g, kg, pcs" style="flex:2">
-    </div>
     <div class="field-label">Date limite</div>
     <input type="date" id="expiryDate" class="modal-input">
     <div class="field-label">Emplacement</div>
@@ -203,13 +201,28 @@ function getRingBackground(s,d){
   return `conic-gradient(var(--mist-dim) 0 100%)`;
 }
 
+function updateSelectionUI(){
+  inventory.forEach(i=>{
+    const el=$(`item-${i.id}`);
+    if(el) el.classList.toggle('selected', i.selected);
+  });
+}
+
+function filterList(){
+  const q=$('searchInput').value.toLowerCase();
+  document.querySelectorAll('.item-card').forEach(c=>{
+    const name=c.querySelector('.item-name').innerText.toLowerCase();
+    c.style.display=name.includes(q)?'flex':'none';
+  });
+}
+
 function selectItems(type){
   const tg=inventory.filter(i=>{
     const d=getDiffDays(i);
     return type==='expired'?d<-2:type==='yesterday'?d<0&&d>=-2:type==='today'?d===0:type==='urgent'?d>=1&&d<=5:false;
   });
   const allSel=tg.length>0 && tg.every(i=>i.selected);
-  tg.forEach(i=>i.selected=!allSel); save(); render();
+  tg.forEach(i=>i.selected=!allSel); save(); updateSelectionUI(); updateFilterButtonsState();
 }
 
 function updateFilterButtonsState(){
@@ -257,7 +270,6 @@ function toggleScanner(){
 function openAddModal(){
   editingId=null; $('modalTitle').innerText="Nouvel aliment";
   $('foodName').value=''; $('expiryDate').value=new Date().toISOString().split('T')[0];
-  $('foodQty').value='1'; $('foodUnit').value='';
   $('foodEmoji').value=''; $('storageLocation').value='❄️ Réfrigérateur';
   $('itemModal').classList.add('show');
 }
@@ -265,7 +277,6 @@ function openAddModal(){
 function openEditModal(i){
   editingId=i.id; $('modalTitle').innerText="Modifier l'aliment";
   $('foodName').value=i.name; $('expiryDate').value=i.date;
-  $('foodQty').value=i.qty||'1'; $('foodUnit').value=i.unit||'';
   $('foodEmoji').value=i.customEmoji||''; $('storageLocation').value=i.loc;
   $('itemModal').classList.add('show');
 }
@@ -280,16 +291,16 @@ function handleBulkDelete(){
 function confirmDelete(){ inventory=inventory.filter(i=>!i.selected); save(); closeModal('deleteModal'); render(); }
 
 function saveFood(){
-  const n=$('foodName').value, d=$('expiryDate').value, l=$('storageLocation').value, e=$('foodEmoji').value, qty=$('foodQty').value, unit=$('foodUnit').value;
+  const n=$('foodName').value, d=$('expiryDate').value, l=$('storageLocation').value, e=$('foodEmoji').value;
   if(!n||!d) return showAlert("Merci de renseigner au moins le nom et la date limite.");
-  if(editingId){ const i=inventory.find(i=>i.id==editingId); if(i) Object.assign(i,{name:n,date:d,loc:l,customEmoji:e,qty:qty,unit:unit}); }
-  else inventory.push({id:Date.now().toString(),name:n,date:d,loc:l,customEmoji:e,qty:qty,unit:unit,selected:false});
+  if(editingId){ const i=inventory.find(i=>i.id==editingId); if(i) Object.assign(i,{name:n,date:d,loc:l,customEmoji:e}); }
+  else inventory.push({id:Date.now().toString(),name:n,date:d,loc:l,customEmoji:e,selected:false});
   save(); closeModal('itemModal'); render();
 }
 
 function toggleSelectAll(){
   const a=inventory.length>0 && inventory.every(i=>i.selected);
-  inventory.forEach(i=>i.selected=!a); save(); render();
+  inventory.forEach(i=>i.selected=!a); save(); updateSelectionUI(); updateFilterButtonsState();
 }
 
 function render(){
@@ -302,6 +313,7 @@ function render(){
   inventory.forEach((i,idx)=>{
     const d=getDiffDays(i), s=getState(d), c=s==='soon'?'':s;
     const div=document.createElement('div');
+    div.id=`item-${i.id}`;
     div.className=`item-card ${i.selected?'selected':''}`;
     if(c) div.dataset.state=c;
     div.style.setProperty('--i',idx);
@@ -312,11 +324,12 @@ function render(){
       updateFilterButtonsState(); 
     };
     div.oncontextmenu=e=>{ e.preventDefault(); openEditModal(i); };
-    div.innerHTML=`<div class="ring" style="--ring-bg:${getRingBackground(s,d)}"><span class="item-emoji">${getEmoji(i)}</span><span class="loc-badge">${(i.loc||'').trim().split(' ')[0]||'📍'}</span></div><div class="item-name">${i.name}</div><div class="item-qty">${i.qty || ''} ${i.unit || ''}</div><div class="item-status">${getStatusLabel(d)}</div>`;
+    div.innerHTML=`<div class="ring" style="--ring-bg:${getRingBackground(s,d)}"><span class="item-emoji">${getEmoji(i)}</span><span class="loc-badge">${(i.loc||'').trim().split(' ')[0]||'📍'}</span></div><div class="item-name">${i.name}</div><div class="item-status">${getStatusLabel(d)}</div>`;
     lst.appendChild(div);
   });
   const sp=document.createElement('div'); sp.style.cssText="grid-column:1/-1;height:70px"; lst.appendChild(sp);
   updateFilterButtonsState();
+  filterList();
 }
 render();
 </script>
