@@ -227,9 +227,48 @@
 
         function getEmoji(item) {
             if (item.customEmoji && item.customEmoji.trim() !== '') return item.customEmoji;
+
             const n = item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-            const exactMatches = { 'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐', 'orange': '🍊', 'oranges': '🍊', 'citron': '🍋', 'citrons': '🍋', 'fraise': '🍓', 'fraises': '🍓', 'framboise': '🍓', 'framboises': '🍓', 'myrtille': '🫐', 'myrtilles': '🫐', 'cerise': '🍒', 'cerises': '🍒', 'peche': '🍑', 'peches': '🍑', 'mangue': '🥭', 'mangues': '🥭', 'raisin': '🍇', 'raisins': '🍇', 'ananas': '🍍', 'kiwi': '🥝', 'kiwis': '🥝', 'melon': '🍈', 'melons': '🍈', 'pasteque': '🍉', 'pasteques': '🍉', 'abricot': '🍑', 'abricots': '🍑', 'prune': '🍑', 'prunes': '🍑', 'concombre': '🥒', 'concombres': '🥒', 'carotte': '🥕', 'carottes': '🥕', 'brocoli': '🥦', 'brocolis': '🥦', 'oignon': '🧅', 'oignons': '🧅', 'ail': '🧄', 'champignon': '🍄', 'champignons': '🍄', 'poivron': '🫑', 'poivrons': '🫑', 'salade': '🥬', 'tomate': '🍅', 'tomates': '🍅', 'patate': '🥔', 'patates': '🥔', 'pomme de terre': '🥔', 'pommes de terre': '🥔', 'haricot': '🫘', 'haricots': '🫘', 'epinard': '🍃', 'epinards': '🍃', 'courgette': '🥒', 'courgettes': '🥒', 'aubergine': '🍆', 'aubergines': '🍆', 'chou': '🥬', 'choux': '🥬', 'asperge': '🥬', 'asperges': '🥬', 'poireau': '🥬', 'poireaux': '🥬', 'radis': '🥗', 'mais': '🌽', 'avocat': '🥑', 'avocats': '🥑', 'steak': '🥩', 'steaks': '🥩', 'gigot': '🥩', 'jambon': '🍖', 'chorizo': '🍖', 'poulet': '🍗', 'poulets': '🍗', 'saumon': '🐟', 'saumons': '🐟', 'thon': '🐟', 'thons': '🐟', 'crevette': '🍤', 'crevettes': '🍤', 'saucisse': '🌭', 'saucisses': '🌭', 'cote de porc': '🥩', 'cotes de porc': '🥩', 'cote de boeuf': '🥩', 'cotes de boeuf': '🥩', 'cote de mouton': '🥩', 'cotes de mouton': '🥩', 'lard': '🥓', 'bacon': '🥓', 'oeuf': '🥚', 'oeufs': '🥚', 'œuf': '🥚', 'œufs': '🥚', 'poisson': '🐟', 'poissons': '🐟', 'pain': '🍞', 'baguette': '🥖', 'baguettes': '🥖', 'croissant': '🥐', 'croissants': '🥐', 'brioche': '🍞', 'brioches': '🍞', 'biscuit': '🍪', 'biscuits': '🍪', 'gateau': '🍰', 'gateaux': '🍰', 'riz': '🍚', 'pate': '🍝', 'pates': '🍝', 'nouille': '🍜', 'nouilles': '🍜', 'pizza': '🍕', 'pizzas': '🍕', 'taco': '🌮', 'tacos': '🌮', 'burger': '🍔', 'burgers': '🍔', 'sushi': '🍣', 'sushis': '🍣', 'lait': '🥛', 'fromage': '🧀', 'fromages': '🧀', 'beurre': '🧈', 'yaourt': '🥣', 'yaourts': '🥣', 'creme': '🥛', 'cremes': '🥛', 'soupe': '🥣', 'soupes': '🥣' };
+            const exactMatches = {
+                'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐',
+                'orange': '🍊', 'oranges': '🍊', 'citron': '🍋', 'citrons': '🍋', 'fraise': '🍓', 'fraises': '🍓',
+                'framboise': '🍓', 'framboises': '🍓', 'myrtille': '🫐', 'myrtilles': '🫐', 'cerise': '🍒', 'cerises': '🍒',
+                'peche': '🍑', 'peches': '🍑', 'mangue': '🥭', 'mangues': '🥭', 'raisin': '🍇', 'raisins': '🍇',
+                'ananas': '🍍', 'kiwi': '🥝', 'kiwis': '🥝', 'melon': '🍈', 'melons': '🍈', 'pasteque': '🍉',
+                'pasteques': '🍉', 'abricot': '🍑', 'abricots': '🍑', 'prune': '🍑', 'prunes': '🍑',
+                'concombre': '🥒', 'concombres': '🥒', 'carotte': '🥕', 'carottes': '🥕', 'brocoli': '🥦', 'brocolis': '🥦',
+                'oignon': '🧅', 'oignons': '🧅', 'ail': '🧄', 'champignon': '🍄', 'champignons': '🍄', 'poivron': '🫑',
+                'poivrons': '🫑', 'salade': '🥬', 'tomate': '🍅', 'tomates': '🍅', 'patate': '🥔', 'patates': '🥔',
+                'pomme de terre': '🥔', 'pommes de terre': '🥔', 'haricot': '🫘', 'haricots': '🫘', 'epinard': '🍃',
+                'epinards': '🍃', 'courgette': '🥒', 'courgettes': '🥒', 'aubergine': '🍆', 'aubergines': '🍆',
+                'chou': '🥬', 'choux': '🥬', 'asperge': '🥬', 'asperges': '🥬', 'poireau': '🥬', 'poireaux': '🥬',
+                'radis': '🥗', 'mais': '🌽', 'avocat': '🥑', 'avocats': '🥑',
+                'steak': '🥩', 'steaks': '🥩', 'gigot': '🥩', 'jambon': '🍖', 'chorizo': '🍖', 'poulet': '🍗', 'poulets': '🍗',
+                'saumon': '🐟', 'saumons': '🐟', 'thon': '🐟', 'thons': '🐟', 'crevette': '🍤', 'crevettes': '🍤',
+                'saucisse': '🌭', 'saucisses': '🌭', 'cote de porc': '🥩', 'cotes de porc': '🥩', 'cote de boeuf': '🥩',
+                'cotes de boeuf': '🥩', 'cote de mouton': '🥩', 'cotes de mouton': '🥩', 'lard': '🥓', 'bacon': '🥓',
+                'oeuf': '🥚', 'oeufs': '🥚', 'œuf': '🥚', 'œufs': '🥚', 'poisson': '🐟', 'poissons': '🐟',
+                'pain': '🍞', 'baguette': '🥖', 'baguettes': '🥖', 'croissant': '🥐', 'croissants': '🥐',
+                'brioche': '🍞', 'brioches': '🍞', 'biscuit': '🍪', 'biscuits': '🍪', 'gateau': '🍰', 'gateaux': '🍰',
+                'riz': '🍚', 'pate': '🍝', 'pates': '🍝', 'nouille': '🍜', 'nouilles': '🍜', 'pizza': '🍕',
+                'pizzas': '🍕', 'taco': '🌮', 'tacos': '🌮', 'burger': '🍔', 'burgers': '🍔', 'sushi': '🍣',
+                'sushis': '🍣',
+                'lait': '🥛', 'fromage': '🧀', 'fromages': '🧀', 'beurre': '🧈', 'yaourt': '🥣', 'yaourts': '🥣',
+                'creme': '🥛', 'cremes': '🥛',
+                'soupe': '🥣', 'soupes': '🥣'
+            };
             if (exactMatches[n]) return exactMatches[n];
+            const categories = [
+                { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'dinde', 'canard', 'volaille', 'saucisse', 'charcuterie', 'escalope'] },
+                { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette', 'dorade', 'bar', 'sardine', 'sole', 'merlu', 'colin'] },
+                { emoji: '🧀', keys: ['fromage', 'comte', 'cancoillotte', 'emmental', 'gruyere', 'camembert', 'brie', 'bleu', 'roquefort', 'vache qui rit', 'chevre', 'morbier', 'abondance', 'ricotta', 'mozzarella'] },
+                { emoji: '🥦', keys: ['legume', 'tomate', 'carotte', 'courgette', 'brocoli', 'oignon', 'ail', 'champignon', 'poivron', 'aubergine', 'patate', 'pomme de terre', 'salade', 'haricot', 'epinard', 'chou', 'asperge', 'celeri', 'navet', 'radis', 'artichaut', 'betterave', 'fenouil', 'citrouille', 'potiron', 'topinambour'] },
+                { emoji: '🍎', keys: ['fruit', 'abricot', 'prune', 'figue', 'melon', 'pasteque', 'pamplemousse', 'clementine', 'mandarine', 'grenade', 'goyave', 'litchi', 'nectarine', 'mirabelle'] },
+                { emoji: '🌾', keys: ['cereale', 'brioche', 'biscuit', 'galette', 'semoule', 'farine', 'riz', 'pate', 'nouille', 'ble', 'avoine', 'mais', 'quinoa', 'boulgour', 'pain', 'pain de mie'] },
+                { emoji: '🥛', keys: ['creme', 'beurre', 'brie', 'camembert', 'emmental', 'laitage', 'yaourt', 'lait', 'fromage blanc'] },
+                { emoji: '🍲', keys: ['potage', 'veloute', 'bouillon', 'soupe'] }
+            ];
+            for (let cat of categories) { if (cat.keys.some(key => n.includes(key))) return cat.emoji; }
             return '🍽️';
         }
 
