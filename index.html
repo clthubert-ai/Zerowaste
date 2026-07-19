@@ -18,12 +18,9 @@
         .btn-scan { background: #555; color: white; }
         .btn-select-all { background: #777; color: white; }
         
-        /* Toggles de filtre */
         .filter-group { display: flex; gap: 5px; margin-bottom: 15px; }
         .filter-btn { flex: 1; padding: 8px 2px; border-radius: 8px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 0.7rem; font-weight: bold; color: #555; }
-        .filter-btn.active { background: #3e7b37; color: white; border-color: #3e7b37; }
 
-        /* Grille 3 colonnes */
         #productList { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
         
         .item { 
@@ -34,10 +31,12 @@
             position: relative; text-align: center;
         }
         .item.selected { border: 3px solid #3e7b37; background-color: #f0f7ef; }
-        .item.urgent { border: 2px solid #fff3cd; } 
-        .item.expired-yesterday { border: 2px solid #ffcdd2; }
-        .item.expired-today { border: 2px solid #ffcc99; }
-        .item.expired-long { border: 2px solid #c9302c; }
+        
+        /* Couleurs rétablies */
+        .item.urgent { background-color: #fff3cd; } 
+        .item.expired-yesterday { background-color: #ffcdd2; }
+        .item.expired-today { background-color: #ffcc99; }
+        .item.expired-long { background-color: #c9302c; color: white; }
         
         .visual { font-size: 1.8rem; width: 100%; text-align: center; }
         .item-name { font-weight: bold; font-size: 0.75rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 90%; }
@@ -72,10 +71,10 @@
         <button class="btn-search" onclick="openRecipeModal()">Rechercher des recettes</button>
         
         <div class="filter-group">
-            <button class="filter-btn" id="filter-urgent" onclick="toggleFilter('urgent')">Bientôt</button>
-            <button class="filter-btn" id="filter-today" onclick="toggleFilter('today')">Ce jour</button>
-            <button class="filter-btn" id="filter-yesterday" onclick="toggleFilter('yesterday')">Hier</button>
-            <button class="filter-btn" id="filter-expired" onclick="toggleFilter('expired')">À jeter</button>
+            <button class="filter-btn" onclick="selectItems('urgent')">Bientôt</button>
+            <button class="filter-btn" onclick="selectItems('today')">Ce jour</button>
+            <button class="filter-btn" onclick="selectItems('yesterday')">Hier</button>
+            <button class="filter-btn" onclick="selectItems('expired')">À jeter</button>
         </div>
 
         <div id="reader" style="width: 100%; display:none; margin-top:10px;"></div>
@@ -132,16 +131,24 @@
 
     <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
-        let activeFilters = [];
         let editingId = null;
         let html5QrCode = null;
         let isScannerActive = false;
         let currentSpeed = 1;
         let currentEase = 1;
 
-        function toggleFilter(type) {
-            if(activeFilters.includes(type)) activeFilters = activeFilters.filter(f => f !== type);
-            else activeFilters.push(type);
+        // Nouvelle logique de sélection
+        function selectItems(type) {
+            const today = new Date(); today.setHours(0,0,0,0);
+            inventory.forEach(item => {
+                const expiry = new Date(item.date);
+                const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
+                if (type === 'expired' && diffDays < -1) item.selected = true;
+                else if (type === 'yesterday' && diffDays === -1) item.selected = true;
+                else if (type === 'today' && diffDays === 0) item.selected = true;
+                else if (type === 'urgent' && diffDays >= 1 && diffDays <= 2) item.selected = true;
+            });
+            localStorage.setItem('inventory', JSON.stringify(inventory));
             render();
         }
 
@@ -298,26 +305,19 @@
             inventory.sort((a, b) => new Date(a.date) - new Date(b.date));
             const today = new Date(); today.setHours(0,0,0,0);
             
-            // Highlight active filter buttons
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            activeFilters.forEach(f => document.getElementById(`filter-${f}`).classList.add('active'));
-
             const btn = document.getElementById('toggleSelectBtn');
             if (btn) btn.innerText = (inventory.length > 0 && inventory.every(i => i.selected)) ? "Tout décocher" : "Tout cocher";
             
             inventory.forEach((item) => {
                 const expiry = new Date(item.date);
                 const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
-                let cssClass = '', type = '';
+                let cssClass = '';
                 
-                if (diffDays < -1) { cssClass = 'expired-long'; type = 'expired'; }
-                else if (diffDays === -1) { cssClass = 'expired-yesterday'; type = 'yesterday'; }
-                else if (diffDays === 0) { cssClass = 'expired-today'; type = 'today'; }
-                else if (diffDays <= 2) { cssClass = 'urgent'; type = 'urgent'; }
+                if (diffDays < -1) cssClass = 'expired-long';
+                else if (diffDays === -1) cssClass = 'expired-yesterday';
+                else if (diffDays === 0) cssClass = 'expired-today';
+                else if (diffDays <= 2) cssClass = 'urgent';
                 
-                 // Filtre
-                if (activeFilters.length > 0 && !activeFilters.includes(type)) return;
-
                 const storageIcon = item.loc ? item.loc.split(' ')[0] : '';
                 
                 const div = document.createElement('div');
