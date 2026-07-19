@@ -251,9 +251,7 @@
                 const div = document.createElement('div');
                 div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
                 
-                // Clic simple = sélection
                 div.onclick = () => { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); };
-                // Clic droit = édition (plus stable que le "long press")
                 div.oncontextmenu = (e) => { e.preventDefault(); openEditModal(item.id); };
                 
                 div.innerHTML = `<div class="visual">${getEmoji(item)}</div><div class="item-info"><span class="item-name">${item.name || "Inconnu"}</span><span class="item-meta">${item.date || ""} • ${item.loc || ""}</span></div><div class="item-alert">${alertText}</div>`;
@@ -266,7 +264,9 @@
             if (selected.length === 0) return showAlert("Sélectionnez au moins un aliment !");
             
             let htmlList = "<strong>Supprimer ces éléments ?</strong><ul style='padding-left: 20px; margin-top: 10px; text-align: left;'>";
-            selected.forEach(item => { htmlList += `<li><strong>${item.name}</strong> - ${item.loc}</li>`; });
+            selected.forEach(item => { 
+                htmlList += `<li><strong>${item.name}</strong> - ${item.loc} (${item.date})</li>`; 
+            });
             htmlList += "</ul>";
             
             document.getElementById('confirmText').innerHTML = htmlList;
