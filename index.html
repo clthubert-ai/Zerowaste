@@ -15,6 +15,7 @@
         .btn-add { background: #3e7b37; color: white; } 
         .btn-del-selected { background: #d9534f; color: white; }
         .btn-search { background: #7fb069; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 10px; flex-shrink: 0; }
+        .btn-scan { background: #555; color: white; }
         .filter-group { display: flex; gap: 5px; margin-bottom: 15px; flex-shrink: 0; }
         .filter-btn { flex: 1; padding: 8px 2px; border-radius: 8px; border: 2px solid #ddd; background: white; cursor: pointer; font-size: 0.65rem; font-weight: bold; color: #555; }
         .filter-btn.active { background: #e8f5e9; border: 2px solid #3e7b37; color: #3e7b37; }
@@ -35,7 +36,6 @@
         .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; }
         .modal-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .btn-cancel { background: #eee; } .btn-confirm { background: #3e7b37; color: white; }
-        .btn-scan { background: #555; color: white; margin-bottom: 10px; width: 100%; padding: 10px; }
         .delete-list { max-height: 200px; overflow-y: auto; margin: 10px 0; text-align: left; font-size: 0.85rem; }
     </style>
 </head>
@@ -46,7 +46,11 @@
             <button class="btn-add" onclick="openAddModal()">Ajout</button>
             <button class="btn-del-selected" onclick="handleBulkDelete()">Suppression</button>
         </div>
+        <div class="button-group">
+            <button id="scanBtn" class="btn-scan" onclick="toggleScanner()">Scanner 📷</button>
+        </div>
         <button class="btn-search" onclick="openRecipeModal()">Rechercher des recettes</button>
+        
         <div class="filter-group">
             <button class="filter-btn" id="toggleSelectBtn" onclick="toggleSelectAll()">Tout</button>
             <button class="filter-btn" id="filter-urgent" onclick="selectItems('urgent')">Bientôt</button>
@@ -54,6 +58,7 @@
             <button class="filter-btn" id="filter-yesterday" onclick="selectItems('yesterday')">Périmé léger</button>
             <button class="filter-btn" id="filter-expired" onclick="selectItems('expired')">À jeter</button>
         </div>
+        <div id="reader" style="width: 100%; display:none; margin-bottom:10px;"></div>
         <div id="productList"></div>
     </div>
     
@@ -68,8 +73,6 @@
                 <option value="🧊 Congélateur">🧊 Congélateur</option>
                 <option value="🗄️ Placard">🗄️ Placard</option>
             </select>
-            <button class="modal-btn btn-scan" id="scanBtn" onclick="toggleScanner()">Scanner 📷</button>
-            <div id="reader" style="width: 100%; display:none; margin-bottom:10px;"></div>
             <div class="modal-btns">
                 <button class="modal-btn btn-cancel" onclick="closeModal('itemModal')">Annuler</button>
                 <button class="modal-btn btn-confirm" onclick="saveFood()">Enregistrer</button>
@@ -97,7 +100,6 @@
             </div>
         </div>
     </div>
-
 
         <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
