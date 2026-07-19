@@ -16,7 +16,6 @@
         .btn-del-selected { background: #d9534f; color: white; }
         .btn-search { background: #7fb069; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
         .btn-scan { background: #555; color: white; }
-        .btn-select-all { background: #777; color: white; }
         
         .filter-group { display: flex; gap: 5px; margin-bottom: 15px; }
         .filter-btn { flex: 1; padding: 8px 2px; border-radius: 8px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 0.7rem; font-weight: bold; color: #555; }
@@ -73,11 +72,11 @@
         </div>
         <div class="button-group">
             <button id="scanBtn" class="btn-scan" onclick="toggleScanner()">Scanner 📷</button>
-            <button id="toggleSelectBtn" class="btn-select-all" onclick="toggleSelectAll()">Tout cocher</button>
         </div>
         <button class="btn-search" onclick="openRecipeModal()">Rechercher des recettes</button>
         
         <div class="filter-group">
+            <button class="filter-btn" id="toggleSelectBtn" onclick="toggleSelectAll()">Tout</button>
             <button class="filter-btn" id="filter-urgent" onclick="selectItems('urgent')">Bientôt</button>
             <button class="filter-btn" id="filter-today" onclick="selectItems('today')">Ce jour</button>
             <button class="filter-btn" id="filter-yesterday" onclick="selectItems('yesterday')">Hier</button>
@@ -312,7 +311,7 @@
             const today = new Date(); today.setHours(0,0,0,0);
             
             const btn = document.getElementById('toggleSelectBtn');
-            if (btn) btn.innerText = (inventory.length > 0 && inventory.every(i => i.selected)) ? "Tout décocher" : "Tout cocher";
+            if (btn) btn.innerText = (inventory.length > 0 && inventory.every(i => i.selected)) ? "Tout" : "Tout";
             
             inventory.forEach((item) => {
                 const expiry = new Date(item.date);
