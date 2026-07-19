@@ -18,7 +18,7 @@
         .filter-group { display: flex; gap: 5px; margin-bottom: 15px; flex-shrink: 0; }
         .filter-btn { flex: 1; padding: 8px 2px; border-radius: 8px; border: 2px solid #ddd; background: white; cursor: pointer; font-size: 0.65rem; font-weight: bold; color: #555; }
         .filter-btn.active { background: #e8f5e9; border: 2px solid #3e7b37; color: #3e7b37; }
-        #productList { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; overflow-y: auto; flex: 1; min-height: 0; align-content: start; }
+        #productList { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; overflow-y: auto; flex: 1; min-height: 0; align-content: start; padding-bottom: 30px; }
         .item { background: white; padding: 4px 2px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 2px solid transparent; transition: all 0.2s ease; cursor: pointer; height: 95px; position: relative; text-align: center; overflow: hidden; }
         .item.selected { border: 3px solid #3e7b37; background-color: #f0f7ef; }
         .item.urgent { background-color: #fff3cd; } 
@@ -54,8 +54,7 @@
             <button class="filter-btn" id="filter-expired" onclick="selectItems('expired')">À jeter</button>
         </div>
         <div id="productList"></div>
-    </div>
-        <div id="itemModal" class="modal-overlay">
+    </di    <div id="itemModal" class="modal-overlay">
         <div class="modal-box">
             <h3 id="modalTitle">Aliment</h3>
             <input type="text" id="foodName" class="modal-input" placeholder="Nom de l'aliment">
@@ -192,3 +191,5 @@
     </script>
 </body>
 </html>
+v>
+    
