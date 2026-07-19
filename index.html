@@ -87,10 +87,10 @@
             </div>
         </div>
     </div>
-        <script>
+
+    <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
         let editingId = null; let html5QrCode = null; let isScannerActive = false;
-        let pressTimer;
         
         function getEmoji(item) {
             if (item.customEmoji && item.customEmoji.trim() !== '') return item.customEmoji;
@@ -219,10 +219,6 @@
             inventory.sort((a, b) => new Date(a.date) - new Date(b.date));
             const today = new Date(); today.setHours(0,0,0,0);
             
-            let moved = false;
-            let startX, startY;
-            let isEditing = false; // Flag pour différencier clic et modification
-
             inventory.forEach((item) => {
                 const expiry = new Date(item.date);
                 const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
@@ -235,27 +231,44 @@
                 const div = document.createElement('div');
                 div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
                 
-                // Mousedown/Start
-                div.onmousedown = (e) => { 
-                    moved = false; isEditing = false; startX = e.clientX; startY = e.clientY;
-                    pressTimer = setTimeout(() => { isEditing = true; openEditModal(item); }, 600); 
-                };
-                div.ontouchstart = (e) => { 
-                    moved = false; isEditing = false; startX = e.touches[0].clientX; startY = e.touches[0].clientY;
-                    pressTimer = setTimeout(() => { isEditing = true; openEditModal(item); }, 600); 
+                // Variables locales pour la gestion du clic par élément
+                let startX, startY;
+                let isMoving = false;
+                let editTimer;
+
+                const onStart = (e) => {
+                    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+                    isMoving = false;
+                    editTimer = setTimeout(() => {
+                        if (!isMoving) openEditModal(item);
+                    }, 500);
                 };
 
-                // Move (scroll detection)
-                div.onmousemove = (e) => { if (Math.abs(e.clientX - startX) > 10 || Math.abs(e.clientY - startY) > 10) moved = true; };
-                div.ontouchmove = (e) => { if (Math.abs(e.touches[0].clientX - startX) > 10 || Math.abs(e.touches[0].clientY - startY) > 10) moved = true; };
-
-                // Mouseup/End (Sélection)
-                const handleSelection = () => {
-                    clearTimeout(pressTimer);
-                    if(!isEditing && !moved) { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); }
+                const onMove = (e) => {
+                    const currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    const currentY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+                    if (Math.abs(currentX - startX) > 10 || Math.abs(currentY - startY) > 10) {
+                        isMoving = true;
+                        clearTimeout(editTimer);
+                    }
                 };
-                div.onmouseup = handleSelection;
-                div.ontouchend = handleSelection;
+
+                const onEnd = (e) => {
+                    clearTimeout(editTimer);
+                    if (!isMoving) {
+                        item.selected = !item.selected;
+                        localStorage.setItem('inventory', JSON.stringify(inventory));
+                        render();
+                    }
+                };
+
+                div.addEventListener('mousedown', onStart);
+                div.addEventListener('mousemove', onMove);
+                div.addEventListener('mouseup', onEnd);
+                div.addEventListener('touchstart', onStart);
+                div.addEventListener('touchmove', onMove);
+                div.addEventListener('touchend', onEnd);
 
                 div.innerHTML = `<div class="visual">${getEmoji(item)}</div><span class="item-name">${item.name}</span><div class="item-meta">${item.loc.split(' ')[0]}</div><div class="item-meta"><strong>${item.date}</strong></div>`;
                 list.appendChild(div);
