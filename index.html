@@ -6,19 +6,19 @@
     <title>Zero Gachi</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; }
-        .container { max-width: 500px; margin: 0 auto; padding: 15px; }
-        header { background: transparent; padding: 0; margin-bottom: 15px; border-radius: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow: hidden; display: flex; justify-content: center; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #fdfbf7; margin: 0; padding: 0; color: #2c3e50; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .container { flex: 1; display: flex; flex-direction: column; overflow: hidden; max-width: 500px; margin: 0 auto; padding: 15px; box-sizing: border-box; }
+        header { background: transparent; padding: 0; margin-bottom: 15px; border-radius: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow: hidden; display: flex; justify-content: center; flex-shrink: 0; }
         .header-logo { width: 100%; height: auto; display: block; }
-        .button-group { display: flex; gap: 10px; margin-bottom: 10px; }
+        .button-group { display: flex; gap: 10px; margin-bottom: 10px; flex-shrink: 0; }
         .button-group button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
         .btn-add { background: #3e7b37; color: white; } 
         .btn-del-selected { background: #d9534f; color: white; }
-        .btn-search { background: #7fb069; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 10px; }
-        .filter-group { display: flex; gap: 5px; margin-bottom: 15px; }
+        .btn-search { background: #7fb069; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 10px; flex-shrink: 0; }
+        .filter-group { display: flex; gap: 5px; margin-bottom: 15px; flex-shrink: 0; }
         .filter-btn { flex: 1; padding: 8px 2px; border-radius: 8px; border: 2px solid #ddd; background: white; cursor: pointer; font-size: 0.7rem; font-weight: bold; color: #555; }
         .filter-btn.active { background: #e8f5e9; border: 2px solid #3e7b37; color: #3e7b37; }
-        #productList { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 10px; }
+        #productList { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; overflow-y: auto; align-content: start; }
         .item { background: white; padding: 4px 2px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 2px solid transparent; transition: all 0.2s ease; cursor: pointer; height: 95px; position: relative; text-align: center; overflow: hidden; }
         .item.selected { border: 3px solid #3e7b37; background-color: #f0f7ef; }
         .item.urgent { background-color: #fff3cd; } 
@@ -36,11 +36,6 @@
         .modal-btn { padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
         .btn-cancel { background: #eee; } .btn-confirm { background: #3e7b37; color: white; }
         .btn-scan { background: #555; color: white; margin-bottom: 10px; width: 100%; padding: 10px; }
-        .rating-group { margin: 15px 0; text-align: center; }
-        .rating-group label { display: block; font-weight: bold; margin-bottom: 5px; }
-        .stars { display: flex; justify-content: center; gap: 10px; cursor: pointer; }
-        .star { font-size: 2rem; color: #ddd; transition: color 0.2s; }
-        .star.active { color: #f1c40f; }
     </style>
 </head>
 <body>
@@ -60,7 +55,7 @@
         </div>
         <div id="productList"></div>
     </div>
-    <div id="itemModal" class="modal-overlay">
+        <div id="itemModal" class="modal-overlay">
         <div class="modal-box">
             <h3 id="modalTitle">Aliment</h3>
             <input type="text" id="foodName" class="modal-input" placeholder="Nom de l'aliment">
@@ -79,46 +74,18 @@
             </div>
         </div>
     </div>
-        <div id="recipeModal" class="modal-overlay">
-        <div class="modal-box">
-            <h3>Préférences</h3>
-            <div class="rating-group">
-                <label>Temps de préparation</label>
-                <div class="stars" id="speedStars">
-                    <span class="star" onclick="setRating('speed', 1)">★</span>
-                    <span class="star" onclick="setRating('speed', 2)">★</span>
-                    <span class="star" onclick="setRating('speed', 3)">★</span>
-                </div>
-            </div>
-            <div class="rating-group">
-                <label>Difficulté</label>
-                <div class="stars" id="easeStars">
-                    <span class="star" onclick="setRating('ease', 1)">★</span>
-                    <span class="star" onclick="setRating('ease', 2)">★</span>
-                    <span class="star" onclick="setRating('ease', 3)">★</span>
-                </div>
-            </div>
-            <div class="modal-btns">
-                <button class="modal-btn btn-cancel" onclick="closeModal('recipeModal')">Annuler</button>
-                <button class="modal-btn btn-confirm" onclick="runRecipeSearch()">Rechercher</button>
-            </div>
-        </div>
-    </div>
-    <div id="confirmModal" class="modal-overlay"><div class="modal-box"><div id="confirmText"></div><div class="modal-btns"><button class="modal-btn btn-cancel" onclick="closeModal('confirmModal')">Annuler</button><button class="modal-btn btn-confirm" id="confirmOk">OK</button></div></div></div>
-    <div id="alertModal" class="modal-overlay"><div class="modal-box"><div id="alertText"></div><div class="modal-btns" style="justify-content:center;"><button class="modal-btn btn-confirm" onclick="closeModal('alertModal')">OK</button></div></div></div>
     <script>
         let inventory = JSON.parse(localStorage.getItem('inventory') || "[]");
         let editingId = null; let html5QrCode = null; let isScannerActive = false;
-        let currentSpeed = 1; let currentEase = 1;
         function selectItems(type) {
             const today = new Date(); today.setHours(0,0,0,0);
             const targetItems = inventory.filter(item => {
                 const expiry = new Date(item.date);
                 const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
-                if (type === 'expired') return diffDays < -1;
-                if (type === 'yesterday') return diffDays === -1;
+                if (type === 'expired') return diffDays < -2;
+                if (type === 'yesterday') return diffDays === -1 || diffDays === -2;
                 if (type === 'today') return diffDays === 0;
-                if (type === 'urgent') return diffDays >= 1 && diffDays <= 2;
+                if (type === 'urgent') return diffDays >= 1 && diffDays <= 5;
                 return false;
             });
             const allSelected = targetItems.length > 0 && targetItems.every(i => i.selected);
@@ -133,10 +100,10 @@
                 const matches = inventory.filter(item => {
                     const expiry = new Date(item.date);
                     const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
-                    if (type === 'expired') return diffDays < -1;
-                    if (type === 'yesterday') return diffDays === -1;
+                    if (type === 'expired') return diffDays < -2;
+                    if (type === 'yesterday') return diffDays === -1 || diffDays === -2;
                     if (type === 'today') return diffDays === 0;
-                    if (type === 'urgent') return diffDays >= 1 && diffDays <= 2;
+                    if (type === 'urgent') return diffDays >= 1 && diffDays <= 5;
                     return false;
                 });
                 btn.classList.toggle('active', matches.length > 0 && matches.every(i => i.selected));
@@ -144,9 +111,6 @@
             document.getElementById('toggleSelectBtn').classList.toggle('active', inventory.length > 0 && inventory.every(i => i.selected));
         }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        function showAlert(msg) { document.getElementById('alertText').innerText = msg; document.getElementById('alertModal').style.display = 'flex'; }
-        function setRating(type, val) { if(type === 'speed') { currentSpeed = val; updateStars('speedStars', val); } else { currentEase = val; updateStars('easeStars', val); } }
-        function updateStars(containerId, val) { document.querySelectorAll(`#${containerId} .star`).forEach((s, i) => s.classList.toggle('active', i < val)); }
         async function fetchProductName(barcode) { try { const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}.json`); const data = await res.json(); return data.status === 1 ? (data.product.product_name_fr || data.product.product_name) : "Produit inconnu"; } catch(e) { return "Erreur API"; } }
         function toggleScanner() {
             const btn = document.getElementById('scanBtn');
@@ -154,50 +118,30 @@
             else { document.getElementById('reader').style.display = 'block'; btn.innerHTML = "Arrêter 📷"; html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, async (decodedText) => { toggleScanner(); document.getElementById('foodName').value = "Recherche..."; const name = await fetchProductName(decodedText); document.getElementById('foodName').value = name; }); isScannerActive = true; }
         }
         function openAddModal() { editingId = null; document.getElementById('modalTitle').innerText = "Nouvel aliment"; document.getElementById('foodName').value = ''; document.getElementById('expiryDate').value = new Date().toISOString().split('T')[0]; document.getElementById('foodEmoji').value = ''; document.getElementById('itemModal').style.display = 'flex'; }
-        function openEditModal(id) { const item = inventory.find(i => String(i.id) === String(id)); if(!item) return; editingId = id; document.getElementById('modalTitle').innerText = "Modifier l'aliment"; document.getElementById('foodName').value = item.name; document.getElementById('expiryDate').value = item.date; document.getElementById('foodEmoji').value = item.customEmoji || ''; document.getElementById('storageLocation').value = item.loc; document.getElementById('itemModal').style.display = 'flex'; }
-        function saveFood() { const name = document.getElementById('foodName').value; const date = document.getElementById('expiryDate').value; const loc = document.getElementById('storageLocation').value; const customEmoji = document.getElementById('foodEmoji').value; if(!name || !date) return showAlert("Remplissez le nom et la date !"); if (editingId) { const item = inventory.find(i => String(i.id) === String(editingId)); if (item) Object.assign(item, { name, date, loc, customEmoji }); } else { inventory.push({ id: Date.now().toString(), name, date, loc, customEmoji, selected: false }); } localStorage.setItem('inventory', JSON.stringify(inventory)); closeModal('itemModal'); render(); }
+        function saveFood() { const name = document.getElementById('foodName').value; const date = document.getElementById('expiryDate').value; const loc = document.getElementById('storageLocation').value; const customEmoji = document.getElementById('foodEmoji').value; if(!name || !date) return; if (editingId) { const item = inventory.find(i => String(i.id) === String(editingId)); if (item) Object.assign(item, { name, date, loc, customEmoji }); } else { inventory.push({ id: Date.now().toString(), name, date, loc, customEmoji, selected: false }); } localStorage.setItem('inventory', JSON.stringify(inventory)); closeModal('itemModal'); render(); }
         function toggleSelectAll() { const allSelected = inventory.every(i => i.selected); inventory.forEach(i => i.selected = !allSelected); render(); }
-        function openRecipeModal() { const selected = inventory.filter(i => i.selected); if(selected.length === 0) return showAlert("Cochez au moins un ingrédient !"); document.getElementById('recipeModal').style.display = 'flex'; }
-        function runRecipeSearch() { const speedMap = ["express", "30-60 min", "plus d'une heure"]; const easeMap = ["facile", "difficulté moyenne", "difficile"]; const selectedNames = inventory.filter(i => i.selected).map(i => i.name).join(" "); const query = `recettes ${selectedNames} ${speedMap[currentSpeed - 1]} ${easeMap[currentEase - 1]}`; window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank'); closeModal('recipeModal'); }
-        function getEmoji(item) {
-            if (item.customEmoji && item.customEmoji.trim() !== '') return item.customEmoji;
-            const n = item.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-            const exactMatches = { 'banane': '🍌', 'bananes': '🍌', 'pomme': '🍎', 'pommes': '🍎', 'poire': '🍐', 'poires': '🍐', 'orange': '🍊', 'oranges': '🍊', 'citron': '🍋', 'citrons': '🍋', 'fraise': '🍓', 'fraises': '🍓', 'framboise': '🍓', 'framboises': '🍓', 'myrtille': '🫐', 'myrtilles': '🫐', 'cerise': '🍒', 'cerises': '🍒', 'peche': '🍑', 'peches': '🍑', 'mangue': '🥭', 'mangues': '🥭', 'raisin': '🍇', 'raisins': '🍇', 'ananas': '🍍', 'kiwi': '🥝', 'kiwis': '🥝', 'melon': '🍈', 'melons': '🍈', 'pasteque': '🍉', 'pasteques': '🍉', 'abricot': '🍑', 'abricots': '🍑', 'prune': '🍑', 'prunes': '🍑', 'concombre': '🥒', 'concombres': '🥒', 'carotte': '🥕', 'carottes': '🥕', 'brocoli': '🥦', 'brocolis': '🥦', 'oignon': '🧅', 'oignons': '🧅', 'ail': '🧄', 'champignon': '🍄', 'champignons': '🍄', 'poivron': '🫑', 'poivrons': '🫑', 'salade': '🥬', 'tomate': '🍅', 'tomates': '🍅', 'patate': '🥔', 'patates': '🥔', 'pomme de terre': '🥔', 'pommes de terre': '🥔', 'haricot': '🫘', 'haricots': '🫘', 'epinard': '🍃', 'epinards': '🍃', 'courgette': '🥒', 'courgettes': '🥒', 'aubergine': '🍆', 'aubergines': '🍆', 'chou': '🥬', 'choux': '🥬', 'asperge': '🥬', 'asperges': '🥬', 'poireau': '🥬', 'poireaux': '🥬', 'radis': '🥗', 'mais': '🌽', 'avocat': '🥑', 'avocats': '🥑', 'steak': '🥩', 'steaks': '🥩', 'gigot': '🥩', 'jambon': '🍖', 'chorizo': '🍖', 'poulet': '🍗', 'poulets': '🍗', 'saumon': '🐟', 'saumons': '🐟', 'thon': '🐟', 'thons': '🐟', 'crevette': '🍤', 'crevettes': '🍤', 'saucisse': '🌭', 'saucisses': '🌭', 'cote de porc': '🥩', 'cotes de porc': '🥩', 'cote de boeuf': '🥩', 'cotes de boeuf': '🥩', 'cote de mouton': '🥩', 'cotes de mouton': '🥩', 'lard': '🥓', 'bacon': '🥓', 'oeuf': '🥚', 'oeufs': '🥚', 'œuf': '🥚', 'œufs': '🥚', 'poisson': '🐟', 'poissons': '🐟', 'pain': '🍞', 'baguette': '🥖', 'baguettes': '🥖', 'croissant': '🥐', 'croissants': '🥐', 'brioche': '🍞', 'brioches': '🍞', 'biscuit': '🍪', 'biscuits': '🍪', 'gateau': '🍰', 'gateaux': '🍰', 'riz': '🍚', 'pate': '🍝', 'pates': '🍝', 'nouille': '🍜', 'nouilles': '🍜', 'pizza': '🍕', 'pizzas': '🍕', 'taco': '🌮', 'tacos': '🌮', 'burger': '🍔', 'burgers': '🍔', 'sushi': '🍣', 'sushis': '🍣', 'lait': '🥛', 'fromage': '🧀', 'fromages': '🧀', 'beurre': '🧈', 'yaourt': '🥣', 'yaourts': '🥣', 'creme': '🥛', 'cremes': '🥛', 'soupe': '🥣', 'soupes': '🥣' };
-            if (exactMatches[n]) return exactMatches[n];
-            const categories = [ { emoji: '🥩', keys: ['viande', 'boeuf', 'porc', 'agneau', 'dinde', 'canard', 'volaille', 'saucisse', 'charcuterie', 'escalope'] }, { emoji: '🐟', keys: ['poisson', 'saumon', 'thon', 'cabillaud', 'crevette', 'dorade', 'bar', 'sardine', 'sole', 'merlu', 'colin'] }, { emoji: '🧀', keys: ['fromage', 'comte', 'cancoillotte', 'emmental', 'gruyere', 'camembert', 'brie', 'bleu', 'roquefort', 'vache qui rit', 'chevre', 'morbier', 'abondance', 'ricotta', 'mozzarella'] }, { emoji: '🥦', keys: ['legume', 'tomate', 'carotte', 'courgette', 'brocoli', 'oignon', 'ail', 'champignon', 'poivron', 'aubergine', 'patate', 'pomme de terre', 'salade', 'haricot', 'epinard', 'chou', 'asperge', 'celeri', 'navet', 'radis', 'artichaut', 'betterave', 'fenouil', 'citrouille', 'potiron', 'topinambour'] }, { emoji: '🍎', keys: ['fruit', 'abricot', 'prune', 'figue', 'melon', 'pasteque', 'pamplemousse', 'clementine', 'mandarine', 'grenade', 'goyave', 'litchi', 'nectarine', 'mirabelle'] }, { emoji: '🌾', keys: ['cereale', 'brioche', 'biscuit', 'galette', 'semoule', 'farine', 'riz', 'pate', 'nouille', 'ble', 'avoine', 'mais', 'quinoa', 'boulgour', 'pain', 'pain de mie'] }, { emoji: '🥛', keys: ['creme', 'beurre', 'brie', 'camembert', 'emmental', 'laitage', 'yaourt', 'lait', 'fromage blanc'] }, { emoji: '🍲', keys: ['potage', 'veloute', 'bouillon', 'soupe'] } ];
-            for (let cat of categories) { if (cat.keys.some(key => n.includes(key))) return cat.emoji; } return '🍽️';
-        }
         function render() {
             const list = document.getElementById('productList'); list.innerHTML = "";
             inventory.sort((a, b) => new Date(a.date) - new Date(b.date));
+            const today = new Date(); today.setHours(0,0,0,0);
             inventory.forEach((item) => {
-                const expiry = new Date(item.date); const today = new Date(); today.setHours(0,0,0,0);
+                const expiry = new Date(item.date);
                 const diffDays = Math.round((expiry - today) / (1000 * 60 * 60 * 24));
                 let cssClass = '';
-                if (diffDays < -1) cssClass = 'expired-long';
-                else if (diffDays === -1) cssClass = 'expired-yesterday';
+                if (diffDays < -2) cssClass = 'expired-long';
+                else if (diffDays === -1 || diffDays === -2) cssClass = 'expired-yesterday';
                 else if (diffDays === 0) cssClass = 'expired-today';
-                else if (diffDays <= 2) cssClass = 'urgent';
+                else if (diffDays >= 1 && diffDays <= 5) cssClass = 'urgent';
                 const div = document.createElement('div');
                 div.className = `item ${cssClass} ${item.selected ? 'selected' : ''}`;
                 div.onclick = () => { item.selected = !item.selected; localStorage.setItem('inventory', JSON.stringify(inventory)); render(); };
-                div.oncontextmenu = (e) => { e.preventDefault(); openEditModal(item.id); };
-                div.innerHTML = `<div class="visual">${getEmoji(item)}</div><span class="item-name">${item.name || "Inconnu"}</span><div class="item-meta">${item.loc ? item.loc.split(' ')[0] : ''}</div><div class="item-meta"><strong>${item.date}</strong></div>`;
+                div.innerHTML = `<div class="visual">${item.customEmoji || '🍽️'}</div><span class="item-name">${item.name}</span><div class="item-meta">${item.loc.split(' ')[0]}</div><div class="item-meta"><strong>${item.date}</strong></div>`;
                 list.appendChild(div);
             });
             updateFilterButtonsState();
         }
-        function handleBulkDelete() {
-            const selected = inventory.filter(i => i.selected);
-            if (selected.length === 0) return showAlert("Sélectionnez au moins un aliment !");
-            let htmlList = "<strong>Supprimer ces éléments ?</strong><ul style='padding-left: 20px; margin-top: 10px; text-align: left;'>";
-            selected.forEach(item => { htmlList += `<li><strong>${item.name}</strong> - ${item.loc} (${item.date})</li>`; });
-            htmlList += "</ul>";
-            document.getElementById('confirmText').innerHTML = htmlList;
-            document.getElementById('confirmOk').onclick = () => { inventory = inventory.filter(i => !i.selected); localStorage.setItem('inventory', JSON.stringify(inventory)); render(); closeModal('confirmModal'); };
-            document.getElementById('confirmModal').style.display = 'flex';
-        }
-        updateStars('speedStars', 1); updateStars('easeStars', 1); render();
+        function handleBulkDelete() { inventory = inventory.filter(i => !i.selected); localStorage.setItem('inventory', JSON.stringify(inventory)); render(); }
+        render();
     </script>
 </body>
 </html>
