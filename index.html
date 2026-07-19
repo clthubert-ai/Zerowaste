@@ -22,32 +22,31 @@
         .filter-btn { flex: 1; padding: 8px 2px; border-radius: 8px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 0.7rem; font-weight: bold; color: #555; }
         .filter-btn.active { background: #3e7b37; color: white; border-color: #3e7b37; }
 
-        /* Grille avec largeur fixe min pour les tuiles */
-        #productList { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 10px; }
+        /* Grille : 3 colonnes forcées */
+        #productList { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 10px; }
         
+        /* Tuiles : Rectangle arrondi avec espace réduit */
         .item { 
-            background: white; padding: 10px; border-radius: 14px; 
-            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-            border: 2px solid transparent; transition: all 0.2s ease; cursor: pointer; height: 140px;
-            position: relative; text-align: center;
+            background: white; padding: 4px 2px; border-radius: 10px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+            border: 2px solid transparent; transition: all 0.2s ease; cursor: pointer; height: 95px;
+            position: relative; text-align: center; overflow: hidden;
         }
         .item.selected { border: 3px solid #3e7b37; background-color: #f0f7ef; }
         
-        /* Couleurs */
         .item.urgent { background-color: #fff3cd; } 
         .item.expired-yesterday { background-color: #ffcdd2; }
         .item.expired-today { background-color: #ffcc99; }
         .item.expired-long { background-color: #c9302c; color: white; }
         
-        .visual { font-size: 1.5rem; margin-bottom: 5px; }
-        /* Gestion 2 lignes max */
+        .visual { font-size: 1.2rem; line-height: 1; }
         .item-name { 
-            font-weight: bold; font-size: 0.8rem; display: -webkit-box; 
+            font-weight: bold; font-size: 0.65rem; display: -webkit-box; 
             -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; 
-            height: 2.6em; margin-bottom: 5px; line-height: 1.2;
+            line-height: 1.1; margin: 2px 0;
         }
-        .item-meta { font-size: 0.7rem; color: #555; }
+        .item-meta { font-size: 0.6rem; line-height: 1; margin: 1px 0; }
         .item.expired-long .item-meta { color: #ffe5e5; }
         
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; overflow-y: auto; }
@@ -334,7 +333,7 @@
                 div.innerHTML = `
                     <div class="visual">${getEmoji(item)}</div>
                     <span class="item-name">${item.name || "Inconnu"}</span>
-                    <div class="item-meta">${item.loc}</div>
+                    <div class="item-meta">${item.loc ? item.loc.split(' ')[0] : ''}</div>
                     <div class="item-meta"><strong>${item.date}</strong></div>
                 `;
                 list.appendChild(div);
